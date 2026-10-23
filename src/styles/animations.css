@@ -1,0 +1,153 @@
+/* Spellbound Motion System — Phase 1 */
+
+/* Mist Drift */
+@keyframes mistDriftLeft {
+  0% { transform: translateX(0) scaleY(1); opacity: 0.35; }
+  50% { transform: translateX(-40px) scaleY(1.08); opacity: 0.55; }
+  100% { transform: translateX(0) scaleY(1); opacity: 0.35; }
+}
+
+@keyframes mistDriftRight {
+  0% { transform: translateX(0) scaleY(1); opacity: 0.45; }
+  50% { transform: translateX(50px) scaleY(0.95); opacity: 0.65; }
+  100% { transform: translateX(0) scaleY(1); opacity: 0.45; }
+}
+
+/* Floating Particles (Stardust & Embers) */
+@keyframes floatParticle {
+  0% {
+    transform: translateY(0) translateX(0) scale(0.8);
+    opacity: 0;
+  }
+  20% {
+    opacity: 0.85;
+  }
+  80% {
+    opacity: 0.85;
+  }
+  100% {
+    transform: translateY(-90px) translateX(25px) scale(1.1);
+    opacity: 0;
+  }
+}
+
+@keyframes floatParticleDrift {
+  0% {
+    transform: translateY(0) translateX(0) scale(0.9);
+    opacity: 0.1;
+  }
+  50% {
+    transform: translateY(-45px) translateX(-18px) scale(1.2);
+    opacity: 0.9;
+  }
+  100% {
+    transform: translateY(-110px) translateX(15px) scale(0.6);
+    opacity: 0;
+  }
+}
+
+/* Candle & Castle Window Pulse */
+@keyframes windowGlow {
+  0%, 100% {
+    opacity: 0.82;
+    filter: drop-shadow(0 0 3px rgba(254, 219, 137, 0.6));
+  }
+  30% {
+    opacity: 0.98;
+    filter: drop-shadow(0 0 7px rgba(254, 219, 137, 0.9));
+  }
+  70% {
+    opacity: 0.75;
+    filter: drop-shadow(0 0 2px rgba(254, 219, 137, 0.45));
+  }
+}
+
+@keyframes candleFlicker {
+  0%, 100% { opacity: 0.85; transform: scale(1); }
+  25% { opacity: 1; transform: scale(1.05) translateY(-1px); }
+  50% { opacity: 0.78; transform: scale(0.97); }
+  75% { opacity: 0.95; transform: scale(1.02); }
+}
+
+/* Astrolabe & Seal Rotation */
+@keyframes celestialSpin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+@keyframes counterSpin {
+  from { transform: rotate(360deg); }
+  to { transform: rotate(0deg); }
+}
+
+/* Gold Shimmer & Illumination */
+@keyframes goldShimmer {
+  0% { background-position: -200% 0; }
+  100% { background-position: 200% 0; }
+}
+
+@keyframes runeGlowPulse {
+  0%, 100% {
+    box-shadow: 0 0 8px rgba(214, 180, 106, 0.25), inset 0 0 8px rgba(214, 180, 106, 0.15);
+    border-color: rgba(214, 180, 106, 0.4);
+  }
+  50% {
+    box-shadow: 0 0 16px rgba(214, 180, 106, 0.5), inset 0 0 12px rgba(214, 180, 106, 0.3);
+    border-color: rgba(214, 180, 106, 0.8);
+  }
+}
+
+/* Staggered Content Entrances */
+@keyframes fadeInUp {
+  from {
+    opacity: 0;
+    transform: translateY(18px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes fadeInScale {
+  from {
+    opacity: 0;
+    transform: scale(0.96);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+@keyframes pulseDiscreet {
+  0%, 100% { transform: translateY(0); opacity: 0.6; }
+  50% { transform: translateY(6px); opacity: 1; }
+}
+
+/* Utility animation classes */
+.anim-fade-in-up {
+  animation: fadeInUp var(--transition-slow) ease-out forwards;
+}
+
+.anim-stagger-1 { animation-delay: 100ms; }
+.anim-stagger-2 { animation-delay: 200ms; }
+.anim-stagger-3 { animation-delay: 300ms; }
+.anim-stagger-4 { animation-delay: 400ms; }
+.anim-stagger-5 { animation-delay: 500ms; }
+
+.anim-window-pulse {
+  animation: windowGlow 4s ease-in-out infinite;
+}
+
+.anim-candle-pulse {
+  animation: candleFlicker 2.8s ease-in-out infinite;
+}
+
+.anim-spin-slow {
+  animation: celestialSpin 60s linear infinite;
+}
+
+.anim-spin-reverse {
+  animation: counterSpin 45s linear infinite;
+}

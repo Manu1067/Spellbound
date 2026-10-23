@@ -1,0 +1,63 @@
+/* Houses & Events Styles */
+
+.houses-container {
+  display: flex;
+  flex-direction: column;
+  gap: 2.2rem;
+}
+
+.hourglasses-stage {
+  background: radial-gradient(circle at 50% 50%, #151D35 0%, #080C18 100%);
+  border: 2px solid var(--antique-gold);
+  border-radius: var(--radius-lg);
+  padding: 2.2rem;
+  box-shadow: 0 10px 40px rgba(0, 0, 0, 0.7);
+}
+
+.hourglass-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+  gap: 1.5rem;
+  margin: 2rem 0;
+}
+
+.hourglass-column {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.8rem;
+}
+
+.hourglass-cylinder {
+  width: 70px;
+  height: 240px;
+  border-radius: 35px;
+  border: 3px solid rgba(214, 180, 106, 0.4);
+  background: rgba(11, 16, 32, 0.8);
+  position: relative;
+  overflow: hidden;
+  box-shadow: inset 0 0 20px rgba(0, 0, 0, 0.9), 0 0 15px rgba(214, 180, 106, 0.15);
+}
+
+.hourglass-jewels-fill {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  transition: height 0.8s cubic-bezier(0.16, 1, 0.3, 1);
+  box-shadow: 0 0 20px currentColor;
+}
+
+.house-banner-card {
+  border-radius: var(--radius-lg);
+  padding: 1.6rem;
+  border: 1px solid var(--antique-gold-border);
+  position: relative;
+  overflow: hidden;
+  transition: var(--transition-normal);
+}
+
+.house-banner-card:hover {
+  transform: translateY(-4px);
+  box-shadow: var(--shadow-floating);
+}

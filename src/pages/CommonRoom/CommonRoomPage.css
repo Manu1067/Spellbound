@@ -1,0 +1,57 @@
+/* Common Room Styles */
+
+.common-room-container {
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+}
+
+.hearth-banner {
+  background: radial-gradient(circle at 80% 50%, rgba(212, 140, 69, 0.25) 0%, rgba(21, 29, 53, 0.85) 70%, #0B1020 100%);
+  border: 1px solid rgba(212, 140, 69, 0.4);
+  border-radius: var(--radius-lg);
+  padding: 2rem;
+  position: relative;
+  overflow: hidden;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.6);
+}
+
+.notice-board-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 1.5rem;
+}
+
+.parchment-sticky-note {
+  background: linear-gradient(135deg, #EFE3C7 0%, #D8C39B 100%);
+  color: #211A13;
+  border-radius: var(--radius-sm);
+  padding: 1.2rem;
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.5);
+  position: relative;
+  transition: transform var(--transition-normal);
+  transform: rotate(-1deg);
+}
+
+.parchment-sticky-note:nth-child(even) {
+  transform: rotate(1.5deg);
+}
+
+.parchment-sticky-note:hover {
+  transform: scale(1.03) rotate(0deg);
+  box-shadow: 0 12px 28px rgba(0, 0, 0, 0.7);
+  z-index: 5;
+}
+
+.pin-tack {
+  position: absolute;
+  top: 8px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 12px;
+  height: 12px;
+  background: #AA8438;
+  border-radius: 50%;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.6);
+  border: 1px solid #FDF4DD;
+}

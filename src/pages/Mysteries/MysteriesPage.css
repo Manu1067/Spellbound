@@ -1,0 +1,43 @@
+/* Department of Mysteries Styles */
+
+.mysteries-container {
+  display: flex;
+  flex-direction: column;
+  gap: 2.2rem;
+}
+
+.vault-atmosphere {
+  background: radial-gradient(circle at 50% 40%, #1D1526 0%, #0A0812 70%, #050409 100%);
+  border: 2px solid #8E445B;
+  border-radius: var(--radius-lg);
+  padding: 2.2rem;
+  box-shadow: 0 10px 50px rgba(0, 0, 0, 0.8), 0 0 25px rgba(109, 51, 69, 0.35);
+  position: relative;
+  overflow: hidden;
+}
+
+.astrolabe-dial-box {
+  background: rgba(11, 16, 32, 0.7);
+  border: 1px solid var(--antique-gold-border);
+  border-radius: var(--radius-md);
+  padding: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+}
+
+.constellation-card {
+  padding: 1rem;
+  border-radius: var(--radius-sm);
+  background: rgba(21, 29, 53, 0.5);
+  border: 1px solid rgba(214, 180, 106, 0.15);
+  cursor: pointer;
+  transition: var(--transition-fast);
+}
+
+.constellation-card:hover, .constellation-card.active {
+  border-color: var(--antique-gold);
+  background: rgba(214, 180, 106, 0.12);
+  box-shadow: 0 0 12px rgba(214, 180, 106, 0.25);
+}

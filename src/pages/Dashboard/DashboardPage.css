@@ -1,0 +1,131 @@
+/* Dashboard Styles */
+
+.dashboard-container {
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+}
+
+/* Welcome Header Banner */
+.welcome-banner {
+  background: linear-gradient(135deg, rgba(21, 29, 53, 0.9) 0%, rgba(11, 16, 32, 0.95) 100%);
+  border: 1px solid var(--antique-gold-border);
+  border-radius: var(--radius-lg);
+  padding: 2rem;
+  position: relative;
+  overflow: hidden;
+  box-shadow: var(--shadow-card);
+}
+
+.welcome-banner::after {
+  content: '';
+  position: absolute;
+  top: -50%;
+  right: -20%;
+  width: 500px;
+  height: 500px;
+  background: radial-gradient(circle, rgba(214, 180, 106, 0.08) 0%, transparent 70%);
+  pointer-events: none;
+}
+
+.welcome-title {
+  font-family: var(--font-display);
+  font-size: clamp(1.6rem, 2.8vw, 2.3rem);
+  color: var(--ivory);
+  margin-bottom: 0.5rem;
+}
+
+.welcome-subtitle {
+  font-family: var(--font-literary);
+  font-size: 1.12rem;
+  color: var(--parchment);
+  max-width: 650px;
+  line-height: 1.6;
+}
+
+/* Grid Layout */
+.dashboard-grid-main {
+  display: grid;
+  grid-template-columns: 2fr 1fr;
+  gap: 2rem;
+}
+
+/* Daily Challenge Card */
+.challenge-card {
+  background: linear-gradient(135deg, rgba(33, 46, 82, 0.4) 0%, rgba(21, 29, 53, 0.8) 100%);
+  border-left: 4px solid var(--antique-gold);
+}
+
+/* Schedule List */
+.schedule-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0.85rem 1rem;
+  border-radius: var(--radius-sm);
+  background: rgba(11, 16, 32, 0.5);
+  border: 1px solid rgba(214, 180, 106, 0.1);
+  transition: var(--transition-fast);
+}
+
+.schedule-item:hover {
+  background: rgba(214, 180, 106, 0.08);
+  border-color: rgba(214, 180, 106, 0.3);
+}
+
+/* House Points Leaderboard */
+.house-bar-row {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  margin-bottom: 1rem;
+}
+
+.house-progress-track {
+  height: 8px;
+  background: rgba(11, 16, 32, 0.6);
+  border-radius: var(--radius-round);
+  overflow: hidden;
+  border: 1px solid rgba(214, 180, 106, 0.15);
+}
+
+.house-progress-fill {
+  height: 100%;
+  border-radius: var(--radius-round);
+  transition: width 1s ease-in-out;
+}
+
+/* Shortcuts Row */
+.shortcuts-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(135px, 1fr));
+  gap: 1rem;
+}
+
+.shortcut-tile {
+  background: rgba(21, 29, 53, 0.6);
+  border: 1px solid var(--antique-gold-border);
+  border-radius: var(--radius-md);
+  padding: 1rem 0.8rem;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.6rem;
+  text-decoration: none;
+  color: var(--ivory);
+  transition: var(--transition-normal);
+}
+
+.shortcut-tile:hover {
+  transform: translateY(-3px);
+  border-color: var(--antique-gold-border-bright);
+  background: rgba(214, 180, 106, 0.1);
+  box-shadow: 0 4px 15px rgba(214, 180, 106, 0.2);
+}
+
+@media (max-width: 1024px) {
+  .dashboard-grid-main {
+    grid-template-columns: 1fr;
+  }
+}

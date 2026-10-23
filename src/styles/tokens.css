@@ -1,0 +1,74 @@
+/* Spellbound Design Tokens — Phase 1 */
+
+:root {
+  /* Brand Core Colors (Mandatory Specification) */
+  --midnight: #0B1020;
+  --deep-blue: #151D35;
+  --antique-gold: #D6B46A;
+  --parchment: #E9D9B7;
+  --emerald: #315C4A;
+  --burgundy: #6D3345;
+  --ivory: #F6F0E4;
+
+  /* Atmospheric Nuances & Highlights */
+  --midnight-translucent: rgba(11, 16, 32, 0.85);
+  --deep-blue-translucent: rgba(21, 29, 53, 0.78);
+  --deep-blue-card: rgba(25, 35, 64, 0.65);
+  --deep-blue-hover: rgba(33, 46, 82, 0.85);
+  
+  --antique-gold-bright: #F4D38B;
+  --antique-gold-dark: #9F7E36;
+  --antique-gold-glow: rgba(214, 180, 106, 0.28);
+  --antique-gold-border: rgba(214, 180, 106, 0.25);
+  --antique-gold-border-bright: rgba(214, 180, 106, 0.65);
+
+  --parchment-muted: rgba(233, 217, 183, 0.7);
+  --parchment-faint: rgba(233, 217, 183, 0.15);
+  --parchment-border: rgba(233, 217, 183, 0.22);
+  
+  --emerald-light: #447B63;
+  --emerald-glow: rgba(49, 92, 74, 0.4);
+
+  --burgundy-light: #8E445B;
+  --burgundy-glow: rgba(109, 51, 69, 0.4);
+
+  --sapphire: #1C3B6E;
+  --sapphire-light: #2D589E;
+  
+  --amber: #B87333;
+  --amber-light: #D48C45;
+
+  /* Typography Stack */
+  --font-display: 'Cinzel', serif;
+  --font-decorative: 'Cinzel Decorative', 'Cinzel', serif;
+  --font-literary: 'Cormorant Garamond', serif;
+  --font-sans: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
+
+  /* Radii & Geometry */
+  --radius-sm: 4px;
+  --radius-md: 8px;
+  --radius-lg: 14px;
+  --radius-xl: 20px;
+  --radius-round: 9999px;
+
+  /* Transitions */
+  --transition-fast: 150ms cubic-bezier(0.2, 0, 0, 1);
+  --transition-normal: 260ms cubic-bezier(0.2, 0.8, 0.2, 1);
+  --transition-slow: 450ms cubic-bezier(0.16, 1, 0.3, 1);
+  --transition-magical: 600ms cubic-bezier(0.25, 1, 0.5, 1);
+
+  /* Shadows & Illuminations */
+  --shadow-subtle: 0 4px 12px rgba(0, 0, 0, 0.35);
+  --shadow-card: 0 8px 30px rgba(0, 0, 0, 0.45), 0 0 1px rgba(214, 180, 106, 0.2);
+  --shadow-floating: 0 16px 48px rgba(0, 0, 0, 0.65), 0 0 20px rgba(214, 180, 106, 0.25);
+  --glow-gold: 0 0 15px rgba(214, 180, 106, 0.35);
+  --glow-gold-intense: 0 0 25px rgba(214, 180, 106, 0.55);
+
+  /* Z-Index Hierarchy */
+  --z-bg: 0;
+  --z-base: 1;
+  --z-overlay: 10;
+  --z-nav: 50;
+  --z-modal: 100;
+  --z-toast: 150;
+}

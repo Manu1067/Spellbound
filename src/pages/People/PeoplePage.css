@@ -1,0 +1,40 @@
+/* People of the Wizarding World Styles */
+
+.people-container {
+  display: flex;
+  flex-direction: column;
+  gap: 2rem;
+}
+
+.portrait-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+  gap: 1.8rem;
+}
+
+.portrait-card {
+  background: linear-gradient(180deg, rgba(21, 29, 53, 0.85) 0%, rgba(11, 16, 32, 0.95) 100%);
+  border: 1.5px solid var(--antique-gold-border);
+  border-radius: var(--radius-lg);
+  padding: 1.5rem;
+  transition: var(--transition-normal);
+  position: relative;
+  overflow: hidden;
+}
+
+.portrait-card:hover {
+  transform: translateY(-4px);
+  border-color: var(--antique-gold-bright);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5), 0 0 15px rgba(214, 180, 106, 0.25);
+}
+
+.portrait-frame {
+  width: 90px;
+  height: 90px;
+  border-radius: 50%;
+  border: 2px solid var(--antique-gold);
+  padding: 4px;
+  background: radial-gradient(circle, rgba(214, 180, 106, 0.2) 0%, rgba(11, 16, 32, 0.8) 100%);
+  box-shadow: 0 0 15px rgba(214, 180, 106, 0.3);
+  margin-bottom: 1rem;
+}
