@@ -92,6 +92,8 @@ export default function HousesEventsPage() {
   const [sortingAnswers, setSortingAnswers] = useState({});
   const [sortingResult, setSortingResult] = useState(null);
   const [isSubmittingSorting, setIsSubmittingSorting] = useState(false);
+  const [sortingStage, setSortingStage] = useState("form"); // 'form' | 'deliberating' | 'revealed'
+  const [celebrateParticles, setCelebrateParticles] = useState([]);
 
   // Event RSVP Action State
   const [rsvpLoadingId, setRsvpLoadingId] = useState(null);
@@ -152,7 +154,7 @@ export default function HousesEventsPage() {
     }
   };
 
-  // Submit Sorting Quiz Answers
+  // Submit Sorting Quiz Answers with Staged Reveal Flow
   const handleSubmitSortingQuiz = async (e) => {
     e.preventDefault();
     if (Object.keys(sortingAnswers).length < SORTING_QUIZ_QUESTIONS.length) {
@@ -160,11 +162,12 @@ export default function HousesEventsPage() {
       return;
     }
 
+    setSortingStage("deliberating");
     setIsSubmittingSorting(true);
+
+    let result;
     try {
-      const result = await submitSortingQuiz(sortingAnswers);
-      setSortingResult(result);
-      setFeedbackToast(`🎩 The Sorting Hat has spoken: Welcome to ${result.assignedHouse.name}!`);
+      result = await submitSortingQuiz(sortingAnswers);
     } catch (err) {
       // Fallback local transparent scoring
       const scores = { ravencrest: 0, gryphonhart: 0, shadowvale: 0, emberwyrm: 0 };
@@ -176,17 +179,56 @@ export default function HousesEventsPage() {
       });
       const topHouseKey = Object.keys(scores).reduce((a, b) => (scores[a] > scores[b] ? a : b));
       const targetHouse = houses.find((h) => h.id === topHouseKey) || houses[0];
-      setSortingResult({
+      result = {
         assignedHouse: targetHouse,
         scores,
         transparentScoringMethod: "Deterministic tally: each question directly increments house affinity by 1 point. Highest score assigns house.",
-      });
-      setFeedbackToast(`🎩 Sorted into ${targetHouse.name}!`);
-    } finally {
-      setIsSubmittingSorting(false);
-      setTimeout(() => setFeedbackToast(""), 6000);
+      };
     }
+
+    setSortingResult(result);
+
+    // Stage 1: Hat Deliberation & Suspense (1.4 seconds)
+    setTimeout(() => {
+      setSortingStage("revealed");
+      setIsSubmittingSorting(false);
+      setFeedbackToast(`🎩 The Sorting Hat has spoken: Welcome to ${result.assignedHouse.name}!`);
+
+      // Check reduced motion
+      const prefersReduced =
+        typeof window !== "undefined" &&
+        window.matchMedia &&
+        window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+      if (!prefersReduced) {
+        // Stage 3: Short, restrained celebratory particle effect (24 particles)
+        const primaryColor = result.assignedHouse.crestColor || "#D6B46A";
+        const accentColor = result.assignedHouse.accentColor || "#F4D38B";
+        const colors = [primaryColor, accentColor, "#F4D38B", "#FFFFFF"];
+
+        const particles = Array.from({ length: 24 }, (_, i) => {
+          const angle = (i / 24) * 2 * Math.PI + (Math.random() * 0.3 - 0.15);
+          const dist = 65 + Math.random() * 85;
+          return {
+            id: `cp-${i}`,
+            dx: `${Math.cos(angle) * dist}px`,
+            dy: `${Math.sin(angle) * dist}px`,
+            color: colors[i % colors.length],
+            size: `${4 + Math.random() * 4}px`,
+            duration: `${1.3 + Math.random() * 0.7}s`,
+            delay: `${Math.random() * 0.15}s`,
+          };
+        });
+        setCelebrateParticles(particles);
+
+        // Auto-cleanup particles after 2.5s to free graphical resources
+        setTimeout(() => {
+          setCelebrateParticles([]);
+        }, 2500);
+      }
+    }, 1400);
   };
+
 
   // Toggle Event Registration
   const handleToggleEventRsvp = async (eventId) => {
@@ -568,7 +610,7 @@ export default function HousesEventsPage() {
             </p>
           </div>
 
-          {!sortingResult ? (
+          {sortingStage === "form" && (
             <form onSubmit={handleSubmitSortingQuiz} style={{ display: "flex", flexDirection: "column", gap: "1.5rem" }}>
               {SORTING_QUIZ_QUESTIONS.map((q, qIdx) => (
                 <div key={q.id} style={{ padding: "1.2rem", background: "rgba(11, 16, 32, 0.6)", borderRadius: "var(--radius-md)", border: "1px solid var(--antique-gold-border)" }}>
@@ -610,42 +652,218 @@ export default function HousesEventsPage() {
 
               <div style={{ display: "flex", justifyContent: "center", marginTop: "1rem" }}>
                 <MagicalButton type="submit" variant="primary" size="lg" disabled={isSubmittingSorting}>
-                  {isSubmittingSorting ? "Consulting Sorting Hat..." : "Place Hat & Reveal House"}
+                  Place Hat & Begin Sorting Ceremony
                 </MagicalButton>
               </div>
             </form>
-          ) : (
-            /* Sorting Ceremony Result */
-            <div className="anim-scale-in" style={{ textAlign: "center", padding: "1.5rem" }}>
+          )}
+
+          {/* Stage 1: Deliberating & Suspense */}
+          {sortingStage === "deliberating" && (
+            <div
+              className="anim-hat-deliberating"
+              style={{
+                textAlign: "center",
+                padding: "3.5rem 1.5rem",
+                display: "flex",
+                flexDirection: "column",
+                alignItems: "center",
+                gap: "1.2rem",
+              }}
+            >
               <div
                 style={{
-                  width: "70px",
-                  height: "70px",
+                  width: "90px",
+                  height: "90px",
                   borderRadius: "50%",
-                  background: `${sortingResult.assignedHouse.crestColor || "var(--antique-gold)"}33`,
-                  border: `2px solid ${sortingResult.assignedHouse.crestColor || "var(--antique-gold)"}`,
-                  margin: "0 auto 1rem",
+                  background: "radial-gradient(circle, rgba(214, 180, 106, 0.25) 0%, rgba(11, 16, 32, 0.8) 70%)",
+                  border: "2px solid var(--antique-gold)",
                   display: "flex",
                   alignItems: "center",
                   justifyContent: "center",
-                  color: sortingResult.assignedHouse.crestColor || "var(--antique-gold)",
+                  position: "relative",
+                  boxShadow: "0 0 30px rgba(214, 180, 106, 0.4)",
                 }}
               >
-                <Shield size={36} />
+                <div
+                  className="astrolabe-ring-outer"
+                  style={{
+                    position: "absolute",
+                    inset: "-8px",
+                    borderRadius: "50%",
+                    border: "1px dashed var(--antique-gold-bright)",
+                    opacity: 0.7,
+                  }}
+                />
+                <Sparkles size={40} color="var(--antique-gold-bright)" className="anim-candle-pulse" />
               </div>
 
-              <span className="badge-gold" style={{ fontSize: "0.8rem", marginBottom: "0.6rem" }}>
-                Assigned House
+              <span className="badge-gold" style={{ fontSize: "0.78rem" }}>
+                The Sorting Hat is Deliberating...
               </span>
-              <h2 style={{ fontSize: "2rem", color: "var(--ivory)", fontFamily: "var(--font-display)", marginBottom: "0.4rem" }}>
+
+              <p
+                style={{
+                  fontFamily: "var(--font-literary)",
+                  fontStyle: "italic",
+                  fontSize: "1.25rem",
+                  color: "var(--parchment)",
+                  maxWidth: "520px",
+                  lineHeight: 1.5,
+                }}
+              >
+                "Ah, yes... what do we have here? Deep intellect, keen instinct, and fierce resolve... Where shall your true potential flourish?"
+              </p>
+            </div>
+          )}
+
+          {/* Stage 2 & 3: Staged Emblem Reveal & Celebratory Particle Effect */}
+          {sortingStage === "revealed" && sortingResult && (
+            <div
+              className="anim-crest-unfurl"
+              style={{
+                textAlign: "center",
+                padding: "2rem 1.5rem",
+                position: "relative",
+                overflow: "hidden",
+              }}
+              role="status"
+              aria-live="polite"
+            >
+              {/* Restrained Celebratory Particle Effect Burst */}
+              <div
+                style={{
+                  position: "absolute",
+                  top: "22%",
+                  left: "50%",
+                  width: "1px",
+                  height: "1px",
+                  pointerEvents: "none",
+                  zIndex: 10,
+                }}
+              >
+                {celebrateParticles.map((p) => (
+                  <span
+                    key={p.id}
+                    style={{
+                      position: "absolute",
+                      width: p.size,
+                      height: p.size,
+                      borderRadius: "50%",
+                      backgroundColor: p.color,
+                      boxShadow: `0 0 10px 2px ${p.color}`,
+                      "--dx": p.dx,
+                      "--dy": p.dy,
+                      animation: `celebrateParticleBurst ${p.duration} cubic-bezier(0.16, 1, 0.3, 1) ${p.delay} forwards`,
+                    }}
+                  />
+                ))}
+              </div>
+
+              {/* Staged House Crest Emblem */}
+              <div
+                style={{
+                  width: "110px",
+                  height: "110px",
+                  borderRadius: "50%",
+                  background: `radial-gradient(circle, ${sortingResult.assignedHouse.crestColor || "#151D35"} 0%, #0B1020 90%)`,
+                  border: `3px solid ${sortingResult.assignedHouse.accentColor || "var(--antique-gold)"}`,
+                  margin: "0 auto 1.2rem",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  position: "relative",
+                  boxShadow: `0 0 35px ${sortingResult.assignedHouse.crestColor || "rgba(214, 180, 106, 0.5)"}, 0 0 60px rgba(0,0,0,0.8)`,
+                }}
+              >
+                <div
+                  style={{
+                    position: "absolute",
+                    inset: "-10px",
+                    borderRadius: "50%",
+                    border: `1px solid ${sortingResult.assignedHouse.accentColor || "var(--antique-gold)"}`,
+                    opacity: 0.5,
+                    animation: "celestialSpin 30s linear infinite",
+                  }}
+                />
+                <Shield size={54} color={sortingResult.assignedHouse.accentColor || "var(--antique-gold)"} />
+              </div>
+
+              <span
+                className="badge-gold"
+                style={{
+                  fontSize: "0.82rem",
+                  marginBottom: "0.6rem",
+                  borderColor: sortingResult.assignedHouse.accentColor || "var(--antique-gold)",
+                }}
+              >
+                Assigned House Ceremony
+              </span>
+
+              <h2
+                style={{
+                  fontSize: "2.4rem",
+                  color: "var(--ivory)",
+                  fontFamily: "var(--font-display)",
+                  marginBottom: "0.3rem",
+                  letterSpacing: "0.06em",
+                  textShadow: `0 0 25px ${sortingResult.assignedHouse.crestColor || "rgba(214, 180, 106, 0.6)"}`,
+                }}
+              >
                 {sortingResult.assignedHouse.name}
               </h2>
-              <p style={{ fontStyle: "italic", fontFamily: "var(--font-literary)", color: "var(--antique-gold-bright)", fontSize: "1.1rem", marginBottom: "1.2rem" }}>
+
+              <p
+                style={{
+                  fontStyle: "italic",
+                  fontFamily: "var(--font-literary)",
+                  color: "var(--antique-gold-bright)",
+                  fontSize: "1.2rem",
+                  marginBottom: "1.4rem",
+                }}
+              >
                 "{sortingResult.assignedHouse.motto}"
               </p>
 
+              {/* House Attributes */}
+              <div
+                style={{
+                  display: "flex",
+                  justifyContent: "center",
+                  gap: "0.6rem",
+                  flexWrap: "wrap",
+                  marginBottom: "1.6rem",
+                }}
+              >
+                {sortingResult.assignedHouse.values?.map((val, idx) => (
+                  <span
+                    key={idx}
+                    style={{
+                      fontSize: "0.74rem",
+                      fontFamily: "var(--font-display)",
+                      padding: "0.25rem 0.7rem",
+                      borderRadius: "var(--radius-round)",
+                      background: "rgba(21, 29, 53, 0.7)",
+                      border: "1px solid rgba(214, 180, 106, 0.25)",
+                      color: "var(--parchment)",
+                    }}
+                  >
+                    ✦ {val}
+                  </span>
+                ))}
+              </div>
+
               {/* Transparent Score Breakdown */}
-              <div style={{ maxWidth: "460px", margin: "0 auto 1.5rem", padding: "1rem", background: "rgba(11, 16, 32, 0.7)", borderRadius: "var(--radius-md)", border: "1px solid var(--antique-gold-border)" }}>
+              <div
+                style={{
+                  maxWidth: "480px",
+                  margin: "0 auto 1.5rem",
+                  padding: "1rem",
+                  background: "rgba(11, 16, 32, 0.75)",
+                  borderRadius: "var(--radius-md)",
+                  border: "1px solid var(--antique-gold-border)",
+                }}
+              >
                 <h4 style={{ fontSize: "0.78rem", color: "var(--antique-gold)", textTransform: "uppercase", marginBottom: "0.6rem" }}>
                   Transparent Scoring Breakdown
                 </h4>
@@ -657,13 +875,22 @@ export default function HousesEventsPage() {
                 </div>
               </div>
 
-              <MagicalButton onClick={() => setSortingResult(null)} variant="secondary" size="sm">
+              <MagicalButton
+                onClick={() => {
+                  setSortingResult(null);
+                  setSortingStage("form");
+                  setCelebrateParticles([]);
+                }}
+                variant="secondary"
+                size="sm"
+              >
                 Retake Sorting Quiz
               </MagicalButton>
             </div>
           )}
         </div>
       )}
+
 
       {/* Tab 3: Campus Events Calendar */}
       {activeTab === "events" && (

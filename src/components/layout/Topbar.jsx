@@ -278,7 +278,7 @@ export default function Topbar({ onToggleMobile, onToggleSidebar, isSidebarColla
                   style={{ position: "fixed", inset: 0, zIndex: "var(--z-modal)" }}
                 />
                 <div
-                  className="magical-card ornate-corners"
+                  className="magical-card ornate-corners anim-dropdown-enter"
                   style={{
                     position: "absolute",
                     top: "100%",

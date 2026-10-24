@@ -28,6 +28,7 @@ import {
 } from "../../services/api";
 import { currentUser } from "../../data/mockData";
 import MagicalButton from "../../components/ui/MagicalButton";
+import AcademicSuccessAnimation from "../../components/magical/AcademicSuccessAnimation";
 import "./AcademicsPage.css";
 
 const RARITIES = ["All Rarities", "Common", "Rare Grimoire", "Ancient Foliant", "Restricted"];
@@ -39,6 +40,9 @@ export default function AcademicsPage() {
   const [ingredients, setIngredients] = useState([]);
   const [progress, setProgress] = useState(null);
   const [loading, setLoading] = useState(true);
+
+  // Magical Achievement Success Banner State
+  const [activeAchievement, setActiveAchievement] = useState(null);
 
   // Potion Lab State
   const [selectedIngredients, setSelectedIngredients] = useState([]);
@@ -127,6 +131,15 @@ export default function AcademicsPage() {
       const result = await apiBrewPotion(payload);
       setBrewingResult(result);
 
+      if (result && (result.outcome === "Success" || result.potionName)) {
+        setActiveAchievement({
+          title: `Elixir Distilled: ${result.potionName}`,
+          subtitle: `Cauldron formulation completed with steady potency (${result.potency || 15}). Inscribed into Student Journal.`,
+          points: 15,
+          type: "potion",
+        });
+      }
+
       // Refresh progress to reflect new potion brew in journal
       const updatedProgress = await fetchStudentAcademicProgress(currentUser.id).catch(() => null);
       if (updatedProgress) setProgress(updatedProgress);
@@ -135,15 +148,25 @@ export default function AcademicsPage() {
       // Fallback local deterministic outcome
       const totalPotency = selectedIngredients.reduce((s, i) => s + (i.potency || 5), 0);
       const totalStability = selectedIngredients.reduce((s, i) => s + (i.stability || 2), 0);
-      setBrewingResult({
-        potionName: totalStability > 2 ? "Draught of Luminescence" : "Volatile Alchemical Slag",
-        outcome: totalStability > 2 ? "Success" : "Unstable",
+      const isSuccess = totalStability > 2;
+      const fallbackResult = {
+        potionName: isSuccess ? "Draught of Luminescence" : "Volatile Alchemical Slag",
+        outcome: isSuccess ? "Success" : "Unstable",
         potency: totalPotency,
         stability: totalStability,
-        potionColor: totalStability > 2 ? "#4E8A71" : "#7A5BA3",
+        potionColor: isSuccess ? "#4E8A71" : "#7A5BA3",
         description: "Enchanted distillation completed under steady cauldron flame.",
         disclaimer: "Academy Alchemical Notice: This is a fictional wizarding simulation based on arcane lore. It does not contain or represent real-world chemical formulas.",
-      });
+      };
+      setBrewingResult(fallbackResult);
+      if (isSuccess) {
+        setActiveAchievement({
+          title: `Elixir Distilled: ${fallbackResult.potionName}`,
+          subtitle: `Cauldron formulation stabilized with harmonious potency. Recorded in Alchemical Log.`,
+          points: 15,
+          type: "potion",
+        });
+      }
     } finally {
       setIsBrewing(false);
     }
@@ -177,6 +200,12 @@ export default function AcademicsPage() {
       setQuizResult(result);
       if (result.passed) {
         setQuizFeedbackToast(`✨ Examination passed with ${result.scorePercent}%! +${result.pointsAwarded} House Points awarded to Ravencrest!`);
+        setActiveAchievement({
+          title: `Curriculum Milestone Passed!`,
+          subtitle: `Achieved ${result.scorePercent}% mastery on ${activeQuizCourse.title || activeQuizCourse.name} exam. Recorded in Academy Ledger.`,
+          points: result.pointsAwarded || 25,
+          type: "quiz",
+        });
       } else {
         setQuizFeedbackToast(`Examination completed: ${result.scorePercent}%. Score 70% or higher to earn House Points.`);
       }
@@ -200,6 +229,11 @@ export default function AcademicsPage() {
 
   return (
     <div className="academics-container anim-fade-in-up">
+      {/* Brief Magical Academic Achievement Success Animation */}
+      <AcademicSuccessAnimation
+        achievement={activeAchievement}
+        onClose={() => setActiveAchievement(null)}
+      />
       {/* Return Path & Header */}
       <div>
         <Link

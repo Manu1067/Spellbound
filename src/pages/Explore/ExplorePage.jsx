@@ -196,6 +196,23 @@ export default function ExplorePage() {
     return computeDijkstra(startLocationId, destinationId, locations, pathways);
   }, [startLocationId, destinationId, locations, pathways]);
 
+  // SVG Path description for animated traveler marker along active route
+  const routePathD = useMemo(() => {
+    if (!navigationRoute || !navigationRoute.nodes || navigationRoute.nodes.length < 2) return "";
+    const points = navigationRoute.nodes
+      .map((nodeId) => {
+        const loc = locations.find((l) => l.id === nodeId);
+        if (!loc) return null;
+        return {
+          x: (loc.coords.x / 100) * 1000,
+          y: (loc.coords.y / 100) * 600,
+        };
+      })
+      .filter(Boolean);
+    if (points.length < 2) return "";
+    return `M ${points[0].x} ${points[0].y} ` + points.slice(1).map((p) => `L ${p.x} ${p.y}`).join(" ");
+  }, [navigationRoute, locations]);
+
   // Filtered locations for search
   const filteredLocations = useMemo(() => {
     if (!searchQuery.trim()) return locations;
@@ -450,6 +467,15 @@ export default function ExplorePage() {
                     <stop offset="50%" stopColor="#F4D38B" />
                     <stop offset="100%" stopColor="#79C2A4" />
                   </linearGradient>
+                  <radialGradient id="travelerAura" cx="50%" cy="50%" r="50%">
+                    <stop offset="0%" stopColor="#F4D38B" stopOpacity="0.9" />
+                    <stop offset="50%" stopColor="#79C2A4" stopOpacity="0.45" />
+                    <stop offset="100%" stopColor="#0B1020" stopOpacity="0" />
+                  </radialGradient>
+                  <radialGradient id="wardAura" cx="50%" cy="50%" r="50%">
+                    <stop offset="0%" stopColor="#E24A6F" stopOpacity="0.75" />
+                    <stop offset="100%" stopColor="#1C1611" stopOpacity="0" />
+                  </radialGradient>
                 </defs>
 
                 {/* Parchment Base Texture */}
@@ -488,40 +514,68 @@ export default function ExplorePage() {
                   const y1 = (fromLoc.coords.y / 100) * 600;
                   const x2 = (toLoc.coords.x / 100) * 1000;
                   const y2 = (toLoc.coords.y / 100) * 600;
+                  const midX = (x1 + x2) / 2;
+                  const midY = (y1 + y2) / 2;
 
                   const inRoute = isEdgeInRoute(edge);
                   const isLocked = !edge.isUnlocked;
+                  const isToggling = togglingPathwayId === edge.id;
+                  const edgeLen = Math.round(Math.hypot(x2 - x1, y2 - y1));
 
                   if (isLocked) {
                     return (
-                      <g key={edge.id}>
+                      <g key={edge.id} className="locked-pathway-group">
+                        {/* Shimmering barrier line */}
                         <line
                           x1={x1}
                           y1={y1}
                           x2={x2}
                           y2={y2}
                           stroke="#E24A6F"
-                          strokeWidth="2"
-                          strokeDasharray="4 6"
-                          opacity="0.6"
+                          strokeWidth="2.5"
+                          strokeDasharray="6 4"
+                          className="anim-ward-pulsing"
+                        />
+                        {/* Arcane ward rune symbols at midpoint */}
+                        <g transform={`translate(${midX}, ${midY})`}>
+                          <circle cx="0" cy="0" r="11" fill="#1C1611" stroke="#E24A6F" strokeWidth="1.5" />
+                          <circle cx="0" cy="0" r="14" fill="none" stroke="#E24A6F" strokeWidth="0.8" strokeDasharray="2 3" className="anim-spin-slow" />
+                          <text x="0" y="3" fill="#E24A6F" fontSize="8" fontFamily="Cinzel" fontWeight="bold" textAnchor="middle">
+                            ᚦ
+                          </text>
+                        </g>
+                        <rect
+                          x={midX - 24}
+                          y={midY - 21}
+                          width="48"
+                          height="13"
+                          rx="3"
+                          fill="#150E12"
+                          stroke="#E24A6F"
+                          strokeWidth="0.8"
                         />
                         <text
-                          x={(x1 + x2) / 2}
-                          y={(y1 + y2) / 2 - 4}
-                          fill="#E24A6F"
-                          fontSize="9"
+                          x={midX}
+                          y={midY - 11}
+                          fill="#FFA6BF"
+                          fontSize="8"
                           fontFamily="Cinzel"
+                          fontWeight="bold"
                           textAnchor="middle"
+                          letterSpacing="1"
                         >
                           WARDED
                         </text>
+                        {isToggling && (
+                          <circle cx={midX} cy={midY} r="22" fill="none" stroke="#F4D38B" strokeWidth="2" className="anim-window-pulse" />
+                        )}
                       </g>
                     );
                   }
 
                   if (inRoute) {
                     return (
-                      <g key={edge.id}>
+                      <g key={edge.id} className="active-route-edge">
                         {/* Glow halo for active route */}
                         <line
                           x1={x1}
@@ -530,8 +584,9 @@ export default function ExplorePage() {
                           y2={y2}
                           stroke="#79C2A4"
                           strokeWidth="7"
-                          opacity="0.4"
+                          opacity="0.45"
                         />
+                        {/* Animated route drawing line */}
                         <line
                           x1={x1}
                           y1={y1}
@@ -539,22 +594,26 @@ export default function ExplorePage() {
                           y2={y2}
                           stroke="url(#pathActive)"
                           strokeWidth="3.5"
-                          className="anim-pulsing-path"
+                          className="anim-route-drawing anim-pulsing-path"
+                          style={{
+                            strokeDasharray: `${edgeLen}`,
+                            strokeDashoffset: 0,
+                          }}
                         />
                         {/* Distance Badge on Edge */}
                         <rect
-                          x={(x1 + x2) / 2 - 18}
-                          y={(y1 + y2) / 2 - 9}
+                          x={midX - 18}
+                          y={midY - 9}
                           width="36"
                           height="16"
                           rx="4"
                           fill="#0B1020"
                           stroke="#D6B46A"
-                          strokeWidth="1"
+                          strokeWidth="1.2"
                         />
                         <text
-                          x={(x1 + x2) / 2}
-                          y={(y1 + y2) / 2 + 3}
+                          x={midX}
+                          y={midY + 3}
                           fill="#F4D38B"
                           fontSize="9"
                           fontFamily="Cinzel"
@@ -584,6 +643,25 @@ export default function ExplorePage() {
                   );
                 })}
 
+                {/* Animated Traveler Scout Marker Moving Along Active Route */}
+                {routePathD && (
+                  <g className="traveler-marker-group" pointerEvents="none">
+                    <animateMotion
+                      dur={`${Math.max(3.2, (navigationRoute.nodes?.length || 2) * 1.5)}s`}
+                      repeatCount="indefinite"
+                      rotate="auto"
+                      path={routePathD}
+                    />
+                    {/* Ethereal golden aura pulse */}
+                    <circle cx="0" cy="0" r="16" fill="url(#travelerAura)" opacity="0.8" />
+                    {/* Core scout beacon */}
+                    <circle cx="0" cy="0" r="6" fill="#F4D38B" stroke="#0B1020" strokeWidth="1.5" />
+                    <circle cx="0" cy="0" r="2.5" fill="#FFFFFF" />
+                    {/* Directional wisp spark */}
+                    <polygon points="9,0 -2,-3.5 0,0 -2,3.5" fill="#D6B46A" />
+                  </g>
+                )}
+
                 {/* Compass Rose */}
                 <g transform="translate(900, 90)">
                   <circle cx="0" cy="0" r="36" stroke="rgba(214, 180, 106, 0.3)" strokeWidth="1" fill="none" />
@@ -591,7 +669,7 @@ export default function ExplorePage() {
                   <text x="-4" y="-38" fill="#D6B46A" fontSize="11" fontFamily="Cinzel" fontWeight="bold">N</text>
                 </g>
 
-                {/* Hotspot Location Pins */}
+                {/* Hotspot Location Pins with High-Contrast Readable Labels */}
                 {locations.map((loc) => {
                   const px = (loc.coords.x / 100) * 1000;
                   const py = (loc.coords.y / 100) * 600;
@@ -602,16 +680,29 @@ export default function ExplorePage() {
 
                   let pinColor = "#1A233A";
                   let strokeColor = "#F4D38B";
+                  let badgeFill = "#0B1020";
+                  let badgeStroke = "rgba(214, 180, 106, 0.4)";
+                  let badgeText = loc.name;
+
                   if (isStart) {
                     pinColor = "#D6B46A";
                     strokeColor = "#F6F0E4";
+                    badgeFill = "#1E1A11";
+                    badgeStroke = "#D6B46A";
+                    badgeText = `ORIGIN: ${loc.name}`;
                   } else if (isDest) {
                     pinColor = "#315C4A";
                     strokeColor = "#79C2A4";
+                    badgeFill = "#112019";
+                    badgeStroke = "#79C2A4";
+                    badgeText = `DESTINATION: ${loc.name}`;
                   } else if (inRoute) {
                     pinColor = "#273859";
                     strokeColor = "#79C2A4";
+                    badgeStroke = "#79C2A4";
                   }
+
+                  const labelWidth = Math.max(70, badgeText.length * 7.5 + 14);
 
                   return (
                     <g
@@ -620,7 +711,7 @@ export default function ExplorePage() {
                       className="map-poi-pin"
                       onClick={() => handleSelectLocation(loc)}
                     >
-                      {/* Pulsing ring if selected or destination */}
+                      {/* Pulsing ring if selected, origin, or destination */}
                       {(isSelected || isDest || isStart) && (
                         <circle
                           cx="0"
@@ -654,22 +745,36 @@ export default function ExplorePage() {
                         {isStart ? "S" : isDest ? "D" : loc.name.charAt(0)}
                       </text>
 
-                      {/* Label Tag */}
-                      <text
-                        x="0"
-                        y="-20"
-                        fill="#F6F0E4"
-                        fontSize="11"
-                        fontFamily="Cinzel"
-                        fontWeight="600"
-                        textAnchor="middle"
-                        style={{ textShadow: "0 2px 6px rgba(0,0,0,0.95)" }}
-                      >
-                        {loc.name}
-                      </text>
+                      {/* High-Contrast Readable Label Badge */}
+                      <g transform="translate(0, -22)" pointerEvents="none">
+                        <rect
+                          x={-labelWidth / 2}
+                          y="-10"
+                          width={labelWidth}
+                          height="18"
+                          rx="4"
+                          fill={badgeFill}
+                          stroke={badgeStroke}
+                          strokeWidth={isStart || isDest ? "1.5" : "1"}
+                          opacity="0.94"
+                        />
+                        <text
+                          x="0"
+                          y="3"
+                          fill={isStart ? "#F4D38B" : isDest ? "#79C2A4" : "#F6F0E4"}
+                          fontSize={isStart || isDest ? "10" : "9.5"}
+                          fontFamily="Cinzel"
+                          fontWeight={isStart || isDest ? "bold" : "600"}
+                          textAnchor="middle"
+                          letterSpacing="0.4"
+                        >
+                          {badgeText}
+                        </text>
+                      </g>
                     </g>
                   );
                 })}
+
               </svg>
             </div>
 

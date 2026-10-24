@@ -65,12 +65,13 @@
   border-radius: var(--radius-sm);
   background: rgba(11, 16, 32, 0.5);
   border: 1px solid rgba(214, 180, 106, 0.1);
-  transition: var(--transition-fast);
+  transition: transform var(--transition-fast), background-color var(--transition-fast), border-color var(--transition-fast);
 }
 
 .schedule-item:hover {
   background: rgba(214, 180, 106, 0.08);
-  border-color: rgba(214, 180, 106, 0.3);
+  border-color: rgba(214, 180, 106, 0.35);
+  transform: translateX(4px);
 }
 
 /* House Points Leaderboard */
@@ -79,6 +80,11 @@
   flex-direction: column;
   gap: 0.4rem;
   margin-bottom: 1rem;
+  transition: transform var(--transition-fast);
+}
+
+.house-bar-row:hover {
+  transform: translateX(3px);
 }
 
 .house-progress-track {
@@ -87,12 +93,25 @@
   border-radius: var(--radius-round);
   overflow: hidden;
   border: 1px solid rgba(214, 180, 106, 0.15);
+  position: relative;
 }
 
 .house-progress-fill {
   height: 100%;
   border-radius: var(--radius-round);
-  transition: width 1s ease-in-out;
+  transition: width 1.2s cubic-bezier(0.16, 1, 0.3, 1);
+  position: relative;
+}
+
+.house-progress-fill::after {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: linear-gradient(90deg, transparent 0%, rgba(255, 255, 255, 0.25) 50%, transparent 100%);
+  animation: goldShimmer 2.5s infinite;
 }
 
 /* Shortcuts Row */
@@ -114,14 +133,25 @@
   gap: 0.6rem;
   text-decoration: none;
   color: var(--ivory);
-  transition: var(--transition-normal);
+  transition: transform var(--transition-normal), border-color var(--transition-normal), box-shadow var(--transition-normal), background-color var(--transition-normal);
+  position: relative;
+  overflow: hidden;
 }
 
 .shortcut-tile:hover {
-  transform: translateY(-3px);
+  transform: translateY(-4px) scale(1.02);
   border-color: var(--antique-gold-border-bright);
-  background: rgba(214, 180, 106, 0.1);
-  box-shadow: 0 4px 15px rgba(214, 180, 106, 0.2);
+  background: rgba(214, 180, 106, 0.12);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5), 0 0 16px rgba(214, 180, 106, 0.25);
+}
+
+.shortcut-tile:hover > div:first-child {
+  transform: scale(1.12);
+  box-shadow: 0 0 12px rgba(214, 180, 106, 0.4);
+}
+
+.shortcut-tile > div:first-child {
+  transition: transform var(--transition-fast), box-shadow var(--transition-fast);
 }
 
 @media (max-width: 1024px) {
@@ -129,3 +159,4 @@
     grid-template-columns: 1fr;
   }
 }
+

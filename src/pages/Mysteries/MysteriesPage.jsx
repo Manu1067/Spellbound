@@ -104,6 +104,7 @@ export default function MysteriesPage() {
   const [selectedConstellation, setSelectedConstellation] = useState(CONSTELLATIONS[0]);
   const [puzzleStateMap, setPuzzleStateMap] = useState({});
   const [isVerifying, setIsVerifying] = useState(false);
+  const [isCrystalStasis, setIsCrystalStasis] = useState(false);
 
   // Recommendations State
   const [recommendations, setRecommendations] = useState(null);
@@ -331,12 +332,34 @@ export default function MysteriesPage() {
           </div>
         </div>
 
-        {/* Original Animated Celestial Crystal Emblem */}
+        {/* Animated Celestial Crystal Emblem with Orbiting Runes & Stasis Control */}
         <div style={{ position: "relative", zIndex: 3, display: "flex", flexDirection: "column", alignItems: "center" }}>
-          <CelestialCrystalEmblem size={135} />
-          <span style={{ fontSize: "0.72rem", color: "var(--antique-gold)", fontFamily: "var(--font-display)", marginTop: "0.3rem", letterSpacing: "0.06em" }}>
-            Celestial Core Active
-          </span>
+          <CelestialCrystalEmblem
+            size={135}
+            isProcessing={isVerifying || isConsultingScribe}
+            isStasis={isCrystalStasis}
+          />
+          <button
+            onClick={() => setIsCrystalStasis((prev) => !prev)}
+            style={{
+              marginTop: "0.5rem",
+              padding: "0.25rem 0.65rem",
+              borderRadius: "var(--radius-round)",
+              background: isCrystalStasis ? "rgba(109, 51, 69, 0.4)" : "rgba(214, 180, 106, 0.12)",
+              border: `1px solid ${isCrystalStasis ? "#E288A1" : "var(--antique-gold)"}`,
+              color: isCrystalStasis ? "#E288A1" : "var(--antique-gold-bright)",
+              fontSize: "0.7rem",
+              fontFamily: "var(--font-display)",
+              cursor: "pointer",
+              transition: "all var(--transition-fast)",
+              display: "flex",
+              alignItems: "center",
+              gap: "0.35rem",
+            }}
+            title="Toggle celestial crystal rotation & orbital motion"
+          >
+            <span>{isCrystalStasis ? "⏸ Motion: Stasis" : "✦ Motion: Active"}</span>
+          </button>
         </div>
       </div>
 

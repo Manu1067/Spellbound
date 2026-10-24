@@ -97,6 +97,31 @@ export default function Sidebar({ isCollapsed, onToggleCollapse, isMobileOpen, o
               </div>
             )}
           </Link>
+
+          {onToggleCollapse && (
+            <button
+              onClick={onToggleCollapse}
+              style={{
+                marginLeft: "auto",
+                background: "rgba(214, 180, 106, 0.1)",
+                border: "1px solid rgba(214, 180, 106, 0.25)",
+                color: "var(--antique-gold)",
+                width: "28px",
+                height: "28px",
+                borderRadius: "var(--radius-round)",
+                display: isCollapsed ? "none" : "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                cursor: "pointer",
+                transition: "all var(--transition-fast)",
+                transform: isCollapsed ? "rotate(180deg)" : "rotate(0deg)",
+              }}
+              title={isCollapsed ? "Expand Sidebar" : "Collapse Sidebar"}
+              aria-label={isCollapsed ? "Expand Sidebar" : "Collapse Sidebar"}
+            >
+              <ChevronRight size={14} />
+            </button>
+          )}
         </div>
 
         {/* Navigation List */}

@@ -4,6 +4,7 @@ import Sidebar from "../components/layout/Sidebar";
 import Topbar from "../components/layout/Topbar";
 import MobileNav from "../components/layout/MobileNav";
 import ParticleField from "../components/magical/ParticleField";
+import MagicalPageTransition from "../components/magical/MagicalPageTransition";
 
 export default function AcademyLayout() {
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
@@ -61,7 +62,9 @@ export default function AcademyLayout() {
             margin: "0 auto",
           }}
         >
-          <Outlet />
+          <MagicalPageTransition>
+            <Outlet />
+          </MagicalPageTransition>
         </main>
       </div>
 

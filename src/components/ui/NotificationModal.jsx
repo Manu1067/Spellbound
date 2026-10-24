@@ -33,7 +33,7 @@ export default function NotificationModal({ isOpen, onClose }) {
 
       {/* Popover Card */}
       <div
-        className="magical-card ornate-corners"
+        className="magical-card ornate-corners anim-dropdown-enter"
         style={{
           position: "absolute",
           top: "100%",

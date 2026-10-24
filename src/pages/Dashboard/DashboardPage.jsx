@@ -270,7 +270,7 @@ export default function DashboardPage() {
         {/* Left Column: Schedule & Featured Challenge */}
         <div style={{ display: "flex", flexDirection: "column", gap: "2rem" }}>
           {/* Daily Challenge Card */}
-          <div className="magical-card challenge-card ornate-corners">
+          <div className="magical-card challenge-card ornate-corners magical-card-interactive anim-fade-in-up anim-stagger-2">
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: "0.8rem" }}>
               <div style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
                 <Zap size={18} color="var(--antique-gold)" />
@@ -315,7 +315,7 @@ export default function DashboardPage() {
           </div>
 
           {/* Today's Schedule */}
-          <div className="magical-card ornate-corners">
+          <div className="magical-card ornate-corners magical-card-interactive anim-fade-in-up anim-stagger-3">
             <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "1.2rem" }}>
               <div style={{ display: "flex", alignItems: "center", gap: "0.6rem" }}>
                 <Clock size={18} color="var(--antique-gold)" />
@@ -384,7 +384,7 @@ export default function DashboardPage() {
           </div>
 
           {/* Upcoming Campus Gatherings with Direct Cartography Route Link */}
-          <div className="magical-card ornate-corners">
+          <div className="magical-card ornate-corners magical-card-interactive anim-fade-in-up anim-stagger-4">
             <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "1.2rem" }}>
               <div style={{ display: "flex", alignItems: "center", gap: "0.6rem" }}>
                 <Calendar size={18} color="var(--antique-gold)" />
@@ -456,7 +456,7 @@ export default function DashboardPage() {
         {/* Right Column: House Cup Leaderboard & Academic Progress */}
         <div style={{ display: "flex", flexDirection: "column", gap: "2rem" }}>
           {/* House Cup Points Preview */}
-          <div className="magical-card ornate-corners">
+          <div className="magical-card ornate-corners magical-card-interactive anim-fade-in-up anim-stagger-2">
             <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "1.2rem" }}>
               <div style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
                 <Award size={18} color="var(--antique-gold)" />
@@ -506,7 +506,7 @@ export default function DashboardPage() {
           </div>
 
           {/* Academic Learning Progress (Live from Quizzes & Potions) */}
-          <div className="magical-card ornate-corners">
+          <div className="magical-card ornate-corners magical-card-interactive anim-fade-in-up anim-stagger-3">
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "1rem" }}>
               <h3 style={{ fontSize: "1.1rem", color: "var(--ivory)" }}>
                 Academic Mastery & Verified Records
@@ -535,7 +535,7 @@ export default function DashboardPage() {
           </div>
 
           {/* Recent Campus Activity from Great Hall Ledger */}
-          <div className="magical-card ornate-corners">
+          <div className="magical-card ornate-corners magical-card-interactive anim-fade-in-up anim-stagger-4">
             <h3 style={{ fontSize: "1.1rem", marginBottom: "0.8rem", color: "var(--ivory)" }}>
               Great Hall Points Activity
             </h3>
