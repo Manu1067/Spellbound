@@ -141,8 +141,8 @@ export default function ExplorePage() {
   const [error, setError] = useState(null);
 
   // Navigation State
-  const [startLocationId, setStartLocationId] = useState("loc-courtyard");
-  const [destinationId, setDestinationId] = useState(destParam || "loc-astronomy");
+  const [startLocationId, setStartLocationId] = useState(fallbackLocations[0]?.id || "loc-1");
+  const [destinationId, setDestinationId] = useState(destParam || fallbackLocations[2]?.id || "loc-3");
   const [selectedLocation, setSelectedLocation] = useState(null);
 
   // Interactive Map State
@@ -170,14 +170,24 @@ export default function ExplorePage() {
     loadCampusData();
   }, []);
 
-  // Update destination if URL query param changes
+  // Update start & destination when locations load or destParam changes
   useEffect(() => {
-    if (destParam && locations.some((l) => l.id === destParam)) {
-      setDestinationId(destParam);
-      const loc = locations.find((l) => l.id === destParam);
-      if (loc) setSelectedLocation(loc);
-    } else if (locations.length > 0 && !selectedLocation) {
-      setSelectedLocation(locations[0]);
+    if (locations && locations.length > 0) {
+      if (!locations.some((l) => l.id === startLocationId)) {
+        setStartLocationId(locations[0].id);
+      }
+      if (destParam && locations.some((l) => l.id === destParam)) {
+        setDestinationId(destParam);
+        const loc = locations.find((l) => l.id === destParam);
+        if (loc) setSelectedLocation(loc);
+      } else if (!locations.some((l) => l.id === destinationId)) {
+        const dest = locations[2] ? locations[2].id : (locations[1]?.id || locations[0].id);
+        setDestinationId(dest);
+      }
+      if (!selectedLocation) {
+        const found = locations.find((l) => l.id === destParam) || locations[0];
+        setSelectedLocation(found);
+      }
     }
   }, [destParam, locations]);
 

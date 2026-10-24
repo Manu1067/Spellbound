@@ -130,16 +130,24 @@ export const initializeDatabase = ({ reset = false } = {}) => {
       );
     }
 
-    // 7. Learning Resources
+        // 7. Learning Resources
     const insertResource = db.prepare(`
       INSERT OR IGNORE INTO learning_resources (
-        id, course_code, title, resource_type, author, rarity, content_snippet
-      ) VALUES (?, ?, ?, ?, ?, ?, ?)
+        id, course_code, title, resource_type, author, rarity, content_snippet,
+        subject, topic, difficulty, study_notes, chamber, citation, is_approved
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     `);
     for (const r of seedData.learningResources) {
       insertResource.run(
         r.id, r.course_code, r.title, r.resource_type,
-        r.author, r.rarity, r.content_snippet
+        r.author, r.rarity, r.content_snippet,
+        r.subject || 'Arcane Curricula',
+        r.topic || 'General Theory',
+        r.difficulty || 'Adept',
+        r.study_notes || r.content_snippet,
+        r.chamber || 'Grand Scriptoria',
+        r.citation || ('Grand Library Archives, Cat. #' + r.id),
+        r.is_approved !== undefined ? r.is_approved : 1
       );
     }
 

@@ -9,7 +9,7 @@ export const checkHealth = () => {
     status: 'ok',
     academy: 'Spellbound Wizarding Academy',
     version: '1.0.0',
-    phase: '2A',
+    phase: '2B/2C',
     database: result && result.alive === 1 ? 'connected' : 'error',
     uptime: Math.floor(process.uptime()),
     timestamp: new Date().toISOString()

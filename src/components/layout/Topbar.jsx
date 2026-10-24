@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useLocation, Link } from "react-router-dom";
 import {
   Search,
@@ -9,8 +9,11 @@ import {
   ChevronRight,
   Shield,
   LogOut,
+  User,
+  Activity,
 } from "lucide-react";
-import { currentUser, sevenDepartments } from "../../data/mockData";
+import { currentUser as fallbackUser, sevenDepartments } from "../../data/mockData";
+import { fetchSystemHealth, fetchCurrentStudent } from "../../services/api";
 import NotificationModal from "../ui/NotificationModal";
 import QuickSearchModal from "../ui/QuickSearchModal";
 
@@ -19,6 +22,8 @@ export default function Topbar({ onToggleMobile, onToggleSidebar, isSidebarColla
   const [isNotifOpen, setIsNotifOpen] = useState(false);
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [isProfileOpen, setIsProfileOpen] = useState(false);
+  const [systemHealth, setSystemHealth] = useState(null);
+  const [userProfile, setUserProfile] = useState(fallbackUser);
 
   // Derive current page title from path
   const currentDept = sevenDepartments.find((d) => d.slug === location.pathname);
@@ -28,6 +33,23 @@ export default function Topbar({ onToggleMobile, onToggleSidebar, isSidebarColla
       : currentDept
       ? currentDept.title
       : "Spellbound Realm";
+
+  useEffect(() => {
+    // Check system health & student dossier
+    const checkStatus = async () => {
+      try {
+        const [health, student] = await Promise.all([
+          fetchSystemHealth().catch(() => null),
+          fetchCurrentStudent().catch(() => null),
+        ]);
+        if (health) setSystemHealth(health);
+        if (student) setUserProfile(student);
+      } catch (err) {
+        console.warn("Topbar status check:", err);
+      }
+    };
+    checkStatus();
+  }, [location.pathname]);
 
   return (
     <>
@@ -86,7 +108,39 @@ export default function Topbar({ onToggleMobile, onToggleSidebar, isSidebarColla
         </div>
 
         {/* Center / Right Controls */}
-        <div style={{ display: "flex", alignItems: "center", gap: "1.2rem" }}>
+        <div style={{ display: "flex", alignItems: "center", gap: "1rem" }}>
+          {/* Visible Development Health Indicator */}
+          {systemHealth && (
+            <div
+              className="health-indicator-pill"
+              style={{
+                display: "flex",
+                alignItems: "center",
+                gap: "0.35rem",
+                fontSize: "0.72rem",
+                color: systemHealth.database === "connected" ? "#79C2A4" : "#E288A1",
+                background: systemHealth.database === "connected" ? "rgba(49, 92, 74, 0.2)" : "rgba(109, 51, 69, 0.2)",
+                border: `1px solid ${systemHealth.database === "connected" ? "rgba(121, 194, 164, 0.3)" : "rgba(226, 136, 161, 0.3)"}`,
+                padding: "0.25rem 0.6rem",
+                borderRadius: "var(--radius-round)",
+              }}
+              title={`Phase ${systemHealth.phase || "2C"} · SQLite ${systemHealth.database} · Uptime ${systemHealth.uptime || 0}s`}
+            >
+              <span
+                style={{
+                  width: "6px",
+                  height: "6px",
+                  borderRadius: "50%",
+                  backgroundColor: systemHealth.database === "connected" ? "#79C2A4" : "#E288A1",
+                  boxShadow: `0 0 6px ${systemHealth.database === "connected" ? "#79C2A4" : "#E288A1"}`,
+                }}
+              />
+              <span style={{ fontFamily: "var(--font-sans)", fontWeight: 500 }}>
+                {systemHealth.database === "connected" ? "API Live · SQLite" : "API Offline"}
+              </span>
+            </div>
+          )}
+
           {/* Astral Date Badge (Desktop) */}
           <div
             className="astral-date-badge"
@@ -103,10 +157,10 @@ export default function Topbar({ onToggleMobile, onToggleSidebar, isSidebarColla
             }}
           >
             <Moon size={13} color="var(--antique-gold)" />
-            <span>{currentUser.term}</span>
+            <span>{userProfile.term || fallbackUser.term}</span>
             <span style={{ color: "var(--antique-gold-dark)" }}>•</span>
             <span style={{ fontStyle: "italic", fontFamily: "var(--font-literary)", fontSize: "0.85rem" }}>
-              {currentUser.astralPhase}
+              {userProfile.astralPhase || fallbackUser.astralPhase}
             </span>
           </div>
 
@@ -200,7 +254,7 @@ export default function Topbar({ onToggleMobile, onToggleSidebar, isSidebarColla
                   height: "30px",
                   borderRadius: "50%",
                   border: "1.5px solid var(--antique-gold)",
-                  background: "url('https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=150&q=80') center/cover",
+                  background: `url('${userProfile.avatarUrl || userProfile.avatar_url || "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=150&q=80"}') center/cover`,
                 }}
               />
               <span
@@ -212,7 +266,7 @@ export default function Topbar({ onToggleMobile, onToggleSidebar, isSidebarColla
                 }}
                 className="topbar-student-name"
               >
-                {currentUser.name}
+                {userProfile.name}
               </span>
             </button>
 
@@ -239,15 +293,32 @@ export default function Topbar({ onToggleMobile, onToggleSidebar, isSidebarColla
                 >
                   <div style={{ borderBottom: "1px solid rgba(214, 180, 106, 0.15)", paddingBottom: "0.75rem", marginBottom: "0.75rem" }}>
                     <div style={{ fontFamily: "var(--font-display)", fontWeight: 700, color: "var(--ivory)" }}>
-                      {currentUser.name}
+                      {userProfile.name}
                     </div>
                     <div style={{ fontSize: "0.75rem", color: "var(--antique-gold)" }}>
-                      {currentUser.house} · {currentUser.year}
+                      {userProfile.house} · {userProfile.year}
                     </div>
                     <div style={{ fontSize: "0.72rem", color: "var(--parchment-muted)", marginTop: "0.2rem" }}>
-                      Wand: {currentUser.wand}
+                      Wand: {userProfile.wand}
                     </div>
                   </div>
+
+                  <Link
+                    to="/people"
+                    onClick={() => setIsProfileOpen(false)}
+                    style={{
+                      display: "flex",
+                      alignItems: "center",
+                      gap: "0.5rem",
+                      fontSize: "0.8rem",
+                      color: "var(--parchment)",
+                      padding: "0.4rem 0",
+                      textDecoration: "none",
+                    }}
+                  >
+                    <User size={14} color="var(--antique-gold)" />
+                    <span>View & Edit My Dossier</span>
+                  </Link>
 
                   <Link
                     to="/"

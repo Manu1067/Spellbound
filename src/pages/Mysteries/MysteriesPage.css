@@ -1,32 +1,283 @@
-/* Department of Mysteries Styles */
+/* Department of Mysteries — Dark Celestial Archive Styles */
 
 .mysteries-container {
   display: flex;
   flex-direction: column;
-  gap: 2.2rem;
+  gap: 2rem;
+  position: relative;
 }
 
-.vault-atmosphere {
-  background: radial-gradient(circle at 50% 40%, #1D1526 0%, #0A0812 70%, #050409 100%);
-  border: 2px solid #8E445B;
+/* Atmospheric Celestial Hero Banner */
+.celestial-archive-hero {
+  background: radial-gradient(circle at 50% 30%, #151C33 0%, #0A0D1A 65%, #05070E 100%);
+  border: 1.5px solid var(--antique-gold);
   border-radius: var(--radius-lg);
   padding: 2.2rem;
-  box-shadow: 0 10px 50px rgba(0, 0, 0, 0.8), 0 0 25px rgba(109, 51, 69, 0.35);
+  box-shadow: 0 12px 60px rgba(0, 0, 0, 0.85), 0 0 30px rgba(74, 111, 165, 0.25);
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 2rem;
+  flex-wrap: wrap;
+}
+
+/* Restrained Background Runic Glyph Overlay */
+.celestial-runic-watermark {
+  position: absolute;
+  right: -20px;
+  bottom: -30px;
+  font-family: var(--font-display);
+  font-size: 8rem;
+  font-weight: 900;
+  color: rgba(214, 180, 106, 0.04);
+  letter-spacing: 0.2em;
+  pointer-events: none;
+  user-select: none;
+  z-index: 1;
+}
+
+/* Animated Emblem SVG Animations */
+.astrolabe-ring-outer {
+  transform-origin: 100px 100px;
+  animation: astrolabeSpinClockwise 38s linear infinite;
+}
+
+.astrolabe-ring-middle {
+  transform-origin: 100px 100px;
+  animation: astrolabeSpinCounter 24s linear infinite;
+}
+
+.astrolabe-ring-inner {
+  transform-origin: 100px 100px;
+  animation: astrolabeSpinClockwise 14s ease-in-out infinite alternate;
+}
+
+.crystal-core-float {
+  transform-origin: 100px 100px;
+  animation: crystalFloating 5s ease-in-out infinite alternate;
+}
+
+.crystal-aura-pulse {
+  animation: crystalAuraBreath 4s ease-in-out infinite alternate;
+}
+
+@keyframes astrolabeSpinClockwise {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
+}
+
+@keyframes astrolabeSpinCounter {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(-360deg); }
+}
+
+@keyframes crystalFloating {
+  0% { transform: translateY(0px) scale(1); filter: drop-shadow(0 0 10px rgba(121, 194, 164, 0.4)); }
+  100% { transform: translateY(-4px) scale(1.03); filter: drop-shadow(0 0 20px rgba(214, 180, 106, 0.7)); }
+}
+
+@keyframes crystalAuraBreath {
+  0% { transform: scale(0.92); opacity: 0.5; }
+  100% { transform: scale(1.08); opacity: 0.9; }
+}
+
+/* Prominent Search Bar */
+.archive-search-container {
+  background: rgba(11, 16, 32, 0.85);
+  border: 1.5px solid var(--antique-gold-border);
+  border-radius: var(--radius-md);
+  padding: 0.75rem 1.2rem;
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+  box-shadow: 0 4px 25px rgba(0, 0, 0, 0.5), inset 0 1px 2px rgba(255, 255, 255, 0.05);
+  transition: var(--transition-normal);
+}
+
+.archive-search-container:focus-within {
+  border-color: var(--antique-gold);
+  box-shadow: 0 0 25px rgba(214, 180, 106, 0.35);
+  background: rgba(15, 23, 42, 0.95);
+}
+
+.archive-search-input {
+  flex: 1;
+  background: transparent;
+  border: none;
+  color: var(--ivory);
+  font-size: 1rem;
+  font-family: var(--font-body);
+  outline: none;
+}
+
+.archive-search-input::placeholder {
+  color: var(--parchment-muted);
+  font-size: 0.92rem;
+}
+
+/* Filter Controls Toolbar */
+.archive-filter-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  flex-wrap: wrap;
+  padding: 0.9rem 1.2rem;
+  background: rgba(16, 24, 46, 0.65);
+  border: 1px solid var(--antique-gold-border);
+  border-radius: var(--radius-md);
+  backdrop-filter: blur(8px);
+}
+
+.filter-select {
+  background: rgba(11, 16, 32, 0.85);
+  border: 1px solid var(--antique-gold-border);
+  border-radius: var(--radius-round);
+  padding: 0.4rem 0.9rem;
+  color: var(--ivory);
+  font-size: 0.78rem;
+  font-family: var(--font-display);
+  outline: none;
+  cursor: pointer;
+  transition: var(--transition-fast);
+}
+
+.filter-select:hover, .filter-select:focus {
+  border-color: var(--antique-gold);
+  color: var(--antique-gold-bright);
+}
+
+/* Archival Record Card */
+.archival-record-card {
+  background: linear-gradient(145deg, rgba(17, 24, 46, 0.85) 0%, rgba(10, 14, 28, 0.92) 100%);
+  border: 1px solid var(--antique-gold-border);
+  border-radius: var(--radius-md);
+  padding: 1.4rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  transition: transform var(--transition-normal), box-shadow var(--transition-normal), border-color var(--transition-fast);
   position: relative;
   overflow: hidden;
 }
 
-.astrolabe-dial-box {
-  background: rgba(11, 16, 32, 0.7);
-  border: 1px solid var(--antique-gold-border);
-  border-radius: var(--radius-md);
+.archival-record-card:hover {
+  transform: translateY(-3px);
+  border-color: var(--antique-gold);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.6), 0 0 18px rgba(214, 180, 106, 0.2);
+}
+
+.archival-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+}
+
+.folio-call-number {
+  font-family: var(--font-display);
+  font-size: 0.72rem;
+  color: var(--antique-gold);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.archival-card-title {
+  font-family: var(--font-display);
+  font-size: 1.18rem;
+  color: var(--ivory);
+  line-height: 1.35;
+  margin: 0;
+  transition: color var(--transition-fast);
+}
+
+.archival-record-card:hover .archival-card-title {
+  color: var(--antique-gold-bright);
+}
+
+.archival-card-author {
+  font-size: 0.8rem;
+  color: var(--parchment-muted);
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.archival-card-abstract {
+  font-size: 0.88rem;
+  color: var(--parchment);
+  line-height: 1.5;
+  margin: 0;
+}
+
+/* Expandable Study Notes Drawer */
+.study-notes-drawer {
+  background: rgba(11, 16, 32, 0.75);
+  border-left: 3px solid var(--antique-gold);
+  border-radius: 0 var(--radius-sm) var(--radius-sm) 0;
+  padding: 0.75rem 1rem;
+  font-size: 0.82rem;
+  color: var(--ivory);
+  line-height: 1.5;
+  margin-top: 0.4rem;
+}
+
+.archival-card-footer {
+  margin-top: auto;
+  border-top: 1px solid rgba(214, 180, 106, 0.12);
+  padding-top: 0.75rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 0.6rem;
+  font-size: 0.74rem;
+  color: var(--parchment-muted);
+}
+
+/* Detail Folio Modal */
+.folio-modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(5, 7, 14, 0.85);
+  backdrop-filter: blur(10px);
+  z-index: 1000;
+  display: flex;
+  align-items: center;
+  justify-content: center;
   padding: 1.5rem;
+}
+
+.folio-modal-box {
+  background: radial-gradient(circle at 50% 20%, #151D38 0%, #0B1020 80%);
+  border: 2px solid var(--antique-gold);
+  border-radius: var(--radius-lg);
+  max-width: 680px;
+  width: 100%;
+  max-height: 90vh;
+  overflow-y: auto;
+  padding: 2.2rem;
+  box-shadow: 0 20px 80px rgba(0, 0, 0, 0.9), 0 0 35px rgba(214, 180, 106, 0.3);
+  position: relative;
+}
+
+/* Empty State */
+.empty-archive-state {
+  text-align: center;
+  padding: 3.5rem 1.5rem;
+  background: rgba(16, 24, 46, 0.4);
+  border: 1px dashed var(--antique-gold-border);
+  border-radius: var(--radius-md);
   display: flex;
   flex-direction: column;
   align-items: center;
-  text-align: center;
+  gap: 1rem;
 }
 
+/* Constellation Card Styling */
 .constellation-card {
   padding: 1rem;
   border-radius: var(--radius-sm);
@@ -40,4 +291,30 @@
   border-color: var(--antique-gold);
   background: rgba(214, 180, 106, 0.12);
   box-shadow: 0 0 12px rgba(214, 180, 106, 0.25);
+}
+
+/* Archival Scribe Query Console */
+.scribe-chat-card {
+  background: radial-gradient(circle at 50% 0%, rgba(21, 29, 53, 0.85) 0%, rgba(11, 16, 32, 0.95) 100%);
+  border: 1.5px solid var(--antique-gold);
+  border-radius: var(--radius-lg);
+  padding: 2rem;
+  box-shadow: 0 12px 50px rgba(0, 0, 0, 0.7);
+}
+
+.scribe-suggestion-pill {
+  background: rgba(214, 180, 106, 0.08);
+  border: 1px solid rgba(214, 180, 106, 0.25);
+  border-radius: var(--radius-round);
+  padding: 0.35rem 0.85rem;
+  font-size: 0.76rem;
+  color: var(--parchment);
+  cursor: pointer;
+  transition: var(--transition-fast);
+}
+
+.scribe-suggestion-pill:hover {
+  background: rgba(214, 180, 106, 0.2);
+  border-color: var(--antique-gold);
+  color: var(--antique-gold-bright);
 }

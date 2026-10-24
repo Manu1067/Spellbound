@@ -35,9 +35,39 @@ export const verifyAnswer = (req, res, next) => {
 
 export const getMysteryArchives = (req, res, next) => {
   try {
-    const { chamber, difficulty, search } = req.query;
-    const archives = mysteriesService.getMysteryArchives({ chamber, difficulty, search });
+    const { chamber, difficulty, search, subject, topic, resourceType, rarity } = req.query;
+    const archives = mysteriesService.getMysteryArchives({
+      chamber,
+      difficulty,
+      search,
+      subject,
+      topic,
+      resourceType,
+      rarity
+    });
     return sendSuccess(res, archives, { total: archives.length });
+  } catch (err) {
+    next(err);
+  }
+};
+
+export const getResourceById = (req, res, next) => {
+  try {
+    const { id } = req.params;
+    const resource = mysteriesService.getResourceById(id);
+    if (!resource) {
+      return sendError(res, `Learning resource not found with ID '${id}'`, 'NOT_FOUND', 404);
+    }
+    return sendSuccess(res, resource);
+  } catch (err) {
+    next(err);
+  }
+};
+
+export const getArchiveFilters = (req, res, next) => {
+  try {
+    const filters = mysteriesService.getArchiveFilters();
+    return sendSuccess(res, filters);
   } catch (err) {
     next(err);
   }

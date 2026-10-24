@@ -75,6 +75,10 @@ export async function fetchStudents(params = {}) {
   if (params.subject) query.append('subject', params.subject);
   if (params.skill) query.append('skill', params.skill);
   if (params.search) query.append('search', params.search);
+  if (params.subject && params.subject !== 'All Subjects') query.append('subject', params.subject);
+  if (params.topic && params.topic !== 'All Topics') query.append('topic', params.topic);
+  if (params.resourceType && params.resourceType !== 'All Types') query.append('resourceType', params.resourceType);
+  if (params.rarity && params.rarity !== 'All Rarities') query.append('rarity', params.rarity);
 
   const qs = query.toString() ? `?${query.toString()}` : '';
   return request(`/students${qs}`);
@@ -153,6 +157,10 @@ export async function fetchLearningResources(params = {}) {
   if (params.courseId) query.append('courseId', params.courseId);
   if (params.rarity) query.append('rarity', params.rarity);
   if (params.search) query.append('search', params.search);
+  if (params.subject && params.subject !== 'All Subjects') query.append('subject', params.subject);
+  if (params.topic && params.topic !== 'All Topics') query.append('topic', params.topic);
+  if (params.resourceType && params.resourceType !== 'All Types') query.append('resourceType', params.resourceType);
+  if (params.rarity && params.rarity !== 'All Rarities') query.append('rarity', params.rarity);
 
   const qs = query.toString() ? `?${query.toString()}` : '';
   return request(`/courses/resources${qs}`);
@@ -288,7 +296,7 @@ export async function fetchMysteryPuzzles() {
 export async function verifyMysteryAnswer(puzzleId, answer, studentId = 'student-aris-thorne') {
   return request('/mysteries/verify', {
     method: 'POST',
-    body: { puzzleId, answer, studentId },
+    body: { puzzleId, selectedIndex: answer, studentId },
   });
 }
 
@@ -297,9 +305,21 @@ export async function fetchMysteryArchives(params = {}) {
   if (params.chamber) query.append('chamber', params.chamber);
   if (params.difficulty) query.append('difficulty', params.difficulty);
   if (params.search) query.append('search', params.search);
+  if (params.subject && params.subject !== 'All Subjects') query.append('subject', params.subject);
+  if (params.topic && params.topic !== 'All Topics') query.append('topic', params.topic);
+  if (params.resourceType && params.resourceType !== 'All Types') query.append('resourceType', params.resourceType);
+  if (params.rarity && params.rarity !== 'All Rarities') query.append('rarity', params.rarity);
 
   const qs = query.toString() ? `?${query.toString()}` : '';
   return request(`/mysteries/archives${qs}`);
+}
+
+export async function fetchArchiveFilters() {
+  return request('/mysteries/filters');
+}
+
+export async function fetchMysteryResourceById(id) {
+  return request(`/mysteries/resources/${id}`);
 }
 
 export async function fetchMysteryRecommendations(studentId = 'student-aris-thorne') {

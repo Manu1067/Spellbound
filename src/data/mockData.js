@@ -393,3 +393,107 @@ export const mysteriesRiddles = [
     explanation: "Correct! The Obsidian Hourglass reverses entropy when aligned with the Saturnian eclipse."
   }
 ];
+
+
+export const castlePathways = [
+  {
+    id: "path-1",
+    fromLocationId: "loc-1",
+    toLocationId: "loc-2",
+    name: "Marble Grand Staircase",
+    pathType: "Moving Staircase",
+    distance: 14,
+    isUnlocked: true,
+    description: "Connects the Great Hall to the Grand Library; shifts orientation every half hour."
+  },
+  {
+    id: "path-2",
+    fromLocationId: "loc-2",
+    toLocationId: "loc-3",
+    name: "Spire Winding Spiral",
+    pathType: "Corridor",
+    distance: 12,
+    isUnlocked: true,
+    description: "Ascends 400 stone steps from the Library scriptoria to the starry pinnacle."
+  },
+  {
+    id: "path-3",
+    fromLocationId: "loc-1",
+    toLocationId: "loc-5",
+    name: "Basalt Cellar Descent",
+    pathType: "Corridor",
+    distance: 16,
+    isUnlocked: true,
+    description: "Chilly granite passageway leading to the potion dungeon vaults."
+  },
+  {
+    id: "path-4",
+    fromLocationId: "loc-1",
+    toLocationId: "loc-4",
+    name: "Gorge Suspension Skybridge",
+    pathType: "Skybridge",
+    distance: 22,
+    isUnlocked: true,
+    description: "Arched stone bridge spanning the windy gorge to the Skyspire pitch."
+  },
+  {
+    id: "path-5",
+    fromLocationId: "loc-5",
+    toLocationId: "loc-7",
+    name: "Shadow Runic Vault Passage",
+    pathType: "Secret Passage",
+    distance: 18,
+    isUnlocked: true,
+    description: "Hidden behind a tapestry of the Solstice Serpent, requiring the Chronos Cipher."
+  },
+  {
+    id: "path-6",
+    fromLocationId: "loc-2",
+    toLocationId: "loc-5",
+    name: "Secret Scholars Flue",
+    pathType: "Secret Passage",
+    distance: 15,
+    isUnlocked: true,
+    description: "Concealed spiral chute between the Restricted Archives and Potions Dungeons."
+  },
+  {
+    id: "path-7",
+    fromLocationId: "loc-1",
+    toLocationId: "loc-6",
+    name: "South Cloister Walk",
+    pathType: "Corridor",
+    distance: 14,
+    isUnlocked: true,
+    description: "Covered gothic archway skirting the outer castle walls toward the botanical fringe."
+  },
+  {
+    id: "path-8",
+    fromLocationId: "loc-6",
+    toLocationId: "loc-4",
+    name: "Periphery Forest Bridleway",
+    pathType: "Corridor",
+    distance: 20,
+    isUnlocked: true,
+    description: "Winding gravel path connecting the wild woods fringe directly to the Skyspire arena."
+  },
+  {
+    id: "path-9",
+    fromLocationId: "loc-3",
+    toLocationId: "loc-4",
+    name: "Skyward Aerodrome Viaduct",
+    pathType: "Skybridge",
+    distance: 26,
+    isUnlocked: true,
+    description: "High-altitude stone viaduct connecting the Astronomy Spire to the upper spectator stands."
+  },
+  {
+    id: "path-10",
+    fromLocationId: "loc-6",
+    toLocationId: "loc-5",
+    name: "Root Cellar Conduit",
+    pathType: "Corridor",
+    distance: 17,
+    isUnlocked: true,
+    description: "Subterranean conduit for transporting freshly harvested botanical catalysts to the stills."
+  }
+];

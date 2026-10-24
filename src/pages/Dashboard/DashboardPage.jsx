@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import {
   Sparkles,
@@ -15,12 +15,25 @@ import {
   ArrowRight,
   Award,
   Zap,
+  MapPin,
+  Loader2,
+  Check,
 } from "lucide-react";
 import {
-  currentUser,
-  dailySchedule as initialSchedule,
-  campusEvents as initialEvents,
-  housesData,
+  fetchCurrentStudent,
+  fetchDailySchedule,
+  toggleScheduleStatus as apiToggleSchedule,
+  fetchEvents,
+  toggleEventRsvp as apiToggleEventRsvp,
+  fetchHouses,
+  fetchPointsHistory,
+  fetchStudentAcademicProgress,
+} from "../../services/api";
+import {
+  currentUser as fallbackUser,
+  dailySchedule as fallbackSchedule,
+  campusEvents as fallbackEvents,
+  housesData as fallbackHouses,
   sevenDepartments,
 } from "../../data/mockData";
 import MagicalButton from "../../components/ui/MagicalButton";
@@ -37,44 +50,105 @@ const ICON_MAP = {
 };
 
 export default function DashboardPage() {
-  const [schedule, setSchedule] = useState(initialSchedule);
-  const [events, setEvents] = useState(initialEvents);
-  const [challengeSolved, setChallengeSolved] = useState(false);
-  const [pointsBonus, setPointsBonus] = useState(0);
+  const [student, setStudent] = useState(fallbackUser);
+  const [schedule, setSchedule] = useState(fallbackSchedule);
+  const [events, setEvents] = useState(fallbackEvents);
+  const [houses, setHouses] = useState(fallbackHouses);
+  const [pointsHistory, setPointsHistory] = useState([]);
+  const [academicProgress, setAcademicProgress] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [actionFeedback, setActionFeedback] = useState("");
 
-  const toggleScheduleStatus = (id) => {
-    setSchedule((prev) =>
-      prev.map((item) =>
-        item.id === id
-          ? {
-              ...item,
-              status: item.status === "Completed" ? "Upcoming" : "Completed",
-            }
-          : item
-      )
-    );
+  // Daily Enigma Challenge
+  const [challengeSolved, setChallengeSolved] = useState(false);
+
+  // Load Dashboard Data from API
+  const loadDashboardData = async () => {
+    try {
+      const [studentData, schedData, eventsData, housesDataRes, historyData, progData] =
+        await Promise.all([
+          fetchCurrentStudent().catch(() => fallbackUser),
+          fetchDailySchedule().catch(() => fallbackSchedule),
+          fetchEvents().catch(() => fallbackEvents),
+          fetchHouses().catch(() => fallbackHouses),
+          fetchPointsHistory(5).catch(() => []),
+          fetchStudentAcademicProgress("student-aris-thorne").catch(() => null),
+        ]);
+
+      if (studentData) setStudent(studentData);
+      if (Array.isArray(schedData) && schedData.length > 0) setSchedule(schedData);
+      if (Array.isArray(eventsData) && eventsData.length > 0) setEvents(eventsData);
+      if (Array.isArray(housesDataRes) && housesDataRes.length > 0) setHouses(housesDataRes);
+      if (Array.isArray(historyData)) setPointsHistory(historyData);
+      if (progData) setAcademicProgress(progData);
+    } catch (err) {
+      console.warn("Failed to load dashboard data:", err);
+    } finally {
+      setLoading(false);
+    }
   };
 
-  const toggleEventRsvp = (id) => {
-    setEvents((prev) =>
-      prev.map((e) =>
-        e.id === id
-          ? {
-              ...e,
-              isRsvp: !e.isRsvp,
-              rsvpCount: e.isRsvp ? e.rsvpCount - 1 : e.rsvpCount + 1,
-            }
-          : e
-      )
-    );
+  useEffect(() => {
+    loadDashboardData();
+  }, []);
+
+  // Toggle Schedule Completion via API
+  const handleToggleSchedule = async (id) => {
+    try {
+      const updated = await apiToggleSchedule(id);
+      setSchedule((prev) =>
+        prev.map((item) =>
+          item.id === id ? { ...item, status: updated.status } : item
+        )
+      );
+    } catch (err) {
+      // Local fallback
+      setSchedule((prev) =>
+        prev.map((item) =>
+          item.id === id
+            ? { ...item, status: item.status === "Completed" ? "Upcoming" : "Completed" }
+            : item
+        )
+      );
+    }
+  };
+
+  // Toggle Event RSVP via API
+  const handleToggleEventRsvp = async (eventId) => {
+    try {
+      const updated = await apiToggleEventRsvp(eventId, student.id || "student-aris-thorne");
+      setEvents((prev) =>
+        prev.map((e) =>
+          e.id === eventId
+            ? { ...e, isRsvp: updated.isRsvp, rsvpCount: updated.rsvpCount }
+            : e
+        )
+      );
+
+      if (updated.isRsvp) {
+        setActionFeedback(`✨ Registered for gathering! +${updated.pointsAwarded || 10} House Points added to ${student.house || "Ravencrest"}.`);
+        // Refresh houses to update points
+        const updatedHouses = await fetchHouses().catch(() => null);
+        if (updatedHouses) setHouses(updatedHouses);
+      } else {
+        setActionFeedback(`RSVP cancelled for gathering.`);
+      }
+      setTimeout(() => setActionFeedback(""), 5000);
+    } catch (err) {
+      setActionFeedback(err.message || "Failed to update RSVP");
+      setTimeout(() => setActionFeedback(""), 5000);
+    }
   };
 
   const handleSolveChallenge = () => {
     if (!challengeSolved) {
       setChallengeSolved(true);
-      setPointsBonus(25);
+      setActionFeedback("✨ Runic Dial decoded! +25 House Points recorded in the Great Hall.");
+      setTimeout(() => setActionFeedback(""), 5000);
     }
   };
+
+  const maxHousePoints = Math.max(...houses.map((h) => h.points || 0), 1600);
 
   return (
     <div className="dashboard-container anim-fade-in-up">
@@ -83,15 +157,14 @@ export default function DashboardPage() {
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", flexWrap: "wrap", gap: "1rem" }}>
           <div>
             <div className="badge-gold" style={{ marginBottom: "0.6rem" }}>
-              Academic Term III · Active Adept
+              {student.term || "Academic Term III · Active Adept"}
             </div>
             <h1 className="welcome-title">
-              Welcome back, {currentUser.name}
+              Welcome back, {student.name}
             </h1>
             <p className="welcome-subtitle">
-              Your House of {currentUser.house} currently holds 1st place in the
-              House Cup ledger. Your celestial readings for this evening show
-              favorable astral alignment for Potion Distillation.
+              Your House of {student.house} stands proudly in the Great Hall ledger.
+              Your celestial readings indicate favorable astral vectors across all seven academy departments.
             </p>
           </div>
 
@@ -104,14 +177,35 @@ export default function DashboardPage() {
             }}
           >
             <div className="badge-emerald">
-              House Points: {currentUser.pointsContributed + pointsBonus} pts
+              House Points: {student.pointsContributed || student.points_contributed || 340} pts
             </div>
             <span style={{ fontSize: "0.75rem", color: "var(--parchment-muted)" }}>
-              {currentUser.academicRank}
+              {student.academicRank || student.academic_rank || "4th in Class of 180"}
             </span>
           </div>
         </div>
       </div>
+
+      {/* Action Toast */}
+      {actionFeedback && (
+        <div
+          className="badge-emerald anim-scale-in"
+          style={{
+            padding: "0.85rem 1.2rem",
+            fontSize: "0.88rem",
+            display: "flex",
+            alignItems: "center",
+            gap: "0.6rem",
+            borderRadius: "var(--radius-md)",
+            border: "1px solid #79C2A4",
+            background: "rgba(49, 92, 74, 0.4)",
+            color: "var(--ivory)",
+          }}
+        >
+          <Check size={18} color="#79C2A4" />
+          <span>{actionFeedback}</span>
+        </div>
+      )}
 
       {/* 2. Seven Department Quick Access Tiles */}
       <div>
@@ -241,12 +335,12 @@ export default function DashboardPage() {
                   <div
                     key={item.id}
                     className="schedule-item"
-                    onClick={() => toggleScheduleStatus(item.id)}
+                    onClick={() => handleToggleSchedule(item.id)}
                     style={{ cursor: "pointer" }}
                   >
                     <div style={{ display: "flex", alignItems: "center", gap: "0.9rem" }}>
                       <button
-                        style={{ color: isDone ? "#79C2A4" : "var(--parchment-muted)" }}
+                        style={{ color: isDone ? "#79C2A4" : "var(--parchment-muted)", background: "transparent", border: "none", cursor: "pointer" }}
                         aria-label="Toggle completion status"
                       >
                         {isDone ? <CheckCircle2 size={18} /> : <Circle size={18} />}
@@ -289,7 +383,7 @@ export default function DashboardPage() {
             </div>
           </div>
 
-          {/* Upcoming Campus Events */}
+          {/* Upcoming Campus Gatherings with Direct Cartography Route Link */}
           <div className="magical-card ornate-corners">
             <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "1.2rem" }}>
               <div style={{ display: "flex", alignItems: "center", gap: "0.6rem" }}>
@@ -328,8 +422,16 @@ export default function DashboardPage() {
                         {evt.category}
                       </span>
                     </div>
-                    <div style={{ fontSize: "0.75rem", color: "var(--antique-gold)" }}>
-                      {evt.date} · {evt.location}
+                    <div style={{ fontSize: "0.75rem", color: "var(--antique-gold)", display: "flex", alignItems: "center", gap: "0.5rem" }}>
+                      <span>{evt.dateTime || evt.date}</span>
+                      <span>•</span>
+                      {/* Cross-Department Navigation Link to Map */}
+                      <Link
+                        to={`/explore?dest=${evt.locationId || "loc-1"}`}
+                        style={{ color: "var(--antique-gold)", display: "inline-flex", alignItems: "center", gap: "0.2rem", textDecoration: "none" }}
+                      >
+                        <Compass size={12} /> {evt.locationName || evt.location}
+                      </Link>
                     </div>
                   </div>
 
@@ -338,11 +440,11 @@ export default function DashboardPage() {
                       {evt.rsvpCount} Attending
                     </span>
                     <MagicalButton
-                      onClick={() => toggleEventRsvp(evt.id)}
+                      onClick={() => handleToggleEventRsvp(evt.id)}
                       variant={evt.isRsvp ? "emerald" : "secondary"}
                       size="sm"
                     >
-                      {evt.isRsvp ? "RSVP Confirmed ✓" : "RSVP Pass"}
+                      {evt.isRsvp ? "RSVP Confirmed ✓" : "RSVP Pass (+10 pts)"}
                     </MagicalButton>
                   </div>
                 </div>
@@ -351,7 +453,7 @@ export default function DashboardPage() {
           </div>
         </div>
 
-        {/* Right Column: House Cup Leaderboard & Discipline Progress */}
+        {/* Right Column: House Cup Leaderboard & Academic Progress */}
         <div style={{ display: "flex", flexDirection: "column", gap: "2rem" }}>
           {/* House Cup Points Preview */}
           <div className="magical-card ornate-corners">
@@ -368,10 +470,9 @@ export default function DashboardPage() {
             </div>
 
             <div>
-              {housesData.map((h, i) => {
-                const maxPoints = 1500;
-                const points = h.id === "ravencrest" ? h.points + pointsBonus : h.points;
-                const percentage = Math.round((points / maxPoints) * 100);
+              {houses.map((h, i) => {
+                const points = h.points || 0;
+                const percentage = Math.min(100, Math.round((points / maxHousePoints) * 100));
 
                 return (
                   <div key={h.id} className="house-bar-row">
@@ -389,8 +490,8 @@ export default function DashboardPage() {
                         className="house-progress-fill"
                         style={{
                           width: `${percentage}%`,
-                          backgroundColor: h.crestColor === "#151D35" ? "var(--antique-gold)" : h.crestColor,
-                          boxShadow: `0 0 8px ${h.accentColor}44`,
+                          backgroundColor: h.crestColor === "#151D35" ? "var(--antique-gold)" : h.crestColor || "var(--antique-gold)",
+                          boxShadow: `0 0 8px ${h.accentColor || "#D6B46A"}44`,
                         }}
                       />
                     </div>
@@ -404,64 +505,61 @@ export default function DashboardPage() {
             </p>
           </div>
 
-          {/* Magical Discipline Mastery */}
+          {/* Academic Learning Progress (Live from Quizzes & Potions) */}
           <div className="magical-card ornate-corners">
-            <h3 style={{ fontSize: "1.1rem", marginBottom: "1rem", color: "var(--ivory)" }}>
-              Year V Discipline Mastery
-            </h3>
+            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "1rem" }}>
+              <h3 style={{ fontSize: "1.1rem", color: "var(--ivory)" }}>
+                Academic Mastery & Verified Records
+              </h3>
+              <Link to="/academics" style={{ fontSize: "0.75rem", color: "var(--antique-gold)" }}>
+                Labs & Exams →
+              </Link>
+            </div>
 
-            <div style={{ display: "flex", flexDirection: "column", gap: "0.9rem" }}>
-              {[
-                { name: "Celestial Arithmancy", level: 91, color: "var(--antique-gold)" },
-                { name: "Volatile Potion Alchemy", level: 94, color: "#79C2A4" },
-                { name: "Charms & Incantations", level: 88, color: "#AA8438" },
-                { name: "Counter-Curse Defense", level: 76, color: "#E288A1" },
-              ].map((disc) => (
-                <div key={disc.name}>
-                  <div style={{ display: "flex", justifyContent: "space-between", fontSize: "0.78rem", marginBottom: "0.25rem" }}>
-                    <span style={{ color: "var(--ivory)" }}>{disc.name}</span>
-                    <span style={{ color: disc.color, fontWeight: 600 }}>{disc.level}%</span>
+            <div style={{ display: "flex", flexDirection: "column", gap: "0.8rem" }}>
+              {academicProgress?.completedQuizzes && academicProgress.completedQuizzes.length > 0 ? (
+                academicProgress.completedQuizzes.map((q, idx) => (
+                  <div key={idx} style={{ padding: "0.6rem 0.8rem", background: "rgba(11, 16, 32, 0.5)", borderRadius: "var(--radius-sm)", display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                    <span style={{ fontSize: "0.82rem", color: "var(--ivory)" }}>{q.courseCode} Examination</span>
+                    <span className={q.passed ? "badge-emerald" : "badge-gold"} style={{ fontSize: "0.68rem" }}>
+                      Score: {q.score}% ({q.passed ? "Passed" : "Completed"})
+                    </span>
                   </div>
-                  <div style={{ height: "6px", background: "rgba(11, 16, 32, 0.6)", borderRadius: "var(--radius-round)", overflow: "hidden" }}>
-                    <div
-                      style={{
-                        height: "100%",
-                        width: `${disc.level}%`,
-                        backgroundColor: disc.color,
-                        boxShadow: `0 0 6px ${disc.color}`,
-                      }}
-                    />
-                  </div>
+                ))
+              ) : (
+                <div style={{ fontSize: "0.8rem", color: "var(--parchment-muted)" }}>
+                  No examination completed this term. Head to Academics to master Transfiguration and Runic Glyphs.
                 </div>
-              ))}
+              )}
             </div>
           </div>
 
-          {/* Recent Campus Activity */}
+          {/* Recent Campus Activity from Great Hall Ledger */}
           <div className="magical-card ornate-corners">
             <h3 style={{ fontSize: "1.1rem", marginBottom: "0.8rem", color: "var(--ivory)" }}>
-              Recent Dispatches & Lore
+              Great Hall Points Activity
             </h3>
 
             <div style={{ display: "flex", flexDirection: "column", gap: "0.7rem", fontSize: "0.78rem" }}>
-              <div style={{ borderLeft: "2px solid var(--antique-gold)", paddingLeft: "0.6rem" }}>
-                <p style={{ color: "var(--ivory)", margin: 0 }}>
-                  Earned 25 House Points in Potion Brewing Laboratory
-                </p>
-                <span style={{ color: "var(--parchment-muted)", fontSize: "0.7rem" }}>2 hours ago</span>
-              </div>
-              <div style={{ borderLeft: "2px solid #79C2A4", paddingLeft: "0.6rem" }}>
-                <p style={{ color: "var(--ivory)", margin: 0 }}>
-                  Discovered hidden passage behind Grand Library Tapestry
-                </p>
-                <span style={{ color: "var(--parchment-muted)", fontSize: "0.7rem" }}>5 hours ago</span>
-              </div>
-              <div style={{ borderLeft: "2px solid var(--antique-gold)", paddingLeft: "0.6rem" }}>
-                <p style={{ color: "var(--ivory)", margin: 0 }}>
-                  Encrypted owl scroll received from Arch-Magister Valerius
-                </p>
-                <span style={{ color: "var(--parchment-muted)", fontSize: "0.7rem" }}>Yesterday</span>
-              </div>
+              {pointsHistory.length > 0 ? (
+                pointsHistory.slice(0, 3).map((item) => (
+                  <div key={item.id} style={{ borderLeft: "2px solid var(--antique-gold)", paddingLeft: "0.6rem" }}>
+                    <p style={{ color: "var(--ivory)", margin: 0 }}>
+                      +{item.amount} pts to {item.houseName}: {item.reason}
+                    </p>
+                    <span style={{ color: "var(--parchment-muted)", fontSize: "0.7rem" }}>
+                      by {item.awardedBy}
+                    </span>
+                  </div>
+                ))
+              ) : (
+                <div style={{ borderLeft: "2px solid var(--antique-gold)", paddingLeft: "0.6rem" }}>
+                  <p style={{ color: "var(--ivory)", margin: 0 }}>
+                    Aris Thorne stabilized Draught of Luminescence (+15 pts)
+                  </p>
+                  <span style={{ color: "var(--parchment-muted)", fontSize: "0.7rem" }}>Earlier today</span>
+                </div>
+              )}
             </div>
           </div>
         </div>

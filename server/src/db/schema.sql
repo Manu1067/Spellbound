@@ -103,6 +103,13 @@ CREATE TABLE IF NOT EXISTS learning_resources (
   author TEXT NOT NULL,
   rarity TEXT DEFAULT 'Standard', -- 'Standard', 'Rare', 'Restricted'
   content_snippet TEXT,
+  subject TEXT,
+  topic TEXT,
+  difficulty TEXT DEFAULT 'Adept',
+  study_notes TEXT,
+  chamber TEXT DEFAULT 'Grand Scriptoria',
+  citation TEXT,
+  is_approved INTEGER DEFAULT 1,
   created_at DATETIME DEFAULT CURRENT_TIMESTAMP
 );
 

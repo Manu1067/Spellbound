@@ -59,7 +59,7 @@ export const getHouseById = (id) => {
       awarded_at as awardedAt
     FROM house_points_log
     WHERE house_id = ?
-    ORDER BY awarded_at DESC
+    ORDER BY awarded_at DESC, id DESC
     LIMIT 20
   `).all(id);
 
@@ -123,7 +123,7 @@ export const getPointsHistory = (limit = 20) => {
       l.awarded_at as awardedAt
     FROM house_points_log l
     JOIN houses h ON l.house_id = h.id
-    ORDER BY l.awarded_at DESC
+    ORDER BY l.awarded_at DESC, l.id DESC
     LIMIT ?
   `).all(limit);
 };
