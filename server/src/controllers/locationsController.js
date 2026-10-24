@@ -37,3 +37,18 @@ export const getPathways = (req, res, next) => {
     next(err);
   }
 };
+
+export const togglePathwayLock = (req, res, next) => {
+  try {
+    const { id } = req.params;
+    const result = locationsService.togglePathwayLock(id);
+
+    if (!result) {
+      return sendError(res, `Pathway not found with ID '${id}'`, 'NOT_FOUND', 404);
+    }
+
+    return sendSuccess(res, result);
+  } catch (err) {
+    next(err);
+  }
+};

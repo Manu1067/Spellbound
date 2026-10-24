@@ -440,3 +440,105 @@ describe('12. Validation and Safe Error Handling', () => {
     assert.equal(json.error.code, 'VALIDATION_ERROR');
   });
 });
+
+describe('13. Phase 2B Department Extended Workflows', () => {
+  test('PATCH /api/locations/pathways/:id/toggle closes and reopens pathway', async () => {
+    const res = await fetch(`${baseUrl}/api/locations/pathways/path-1/toggle`, { method: 'PATCH' });
+    assert.equal(res.status, 200);
+    const json = await res.json();
+    assert.equal(json.success, true);
+    assert.equal(json.data.id, 'path-1');
+    assert.equal(typeof json.data.isUnlocked, 'boolean');
+  });
+
+  test('PUT /api/students/:id updates student dossier with skills & bio', async () => {
+    const res = await fetch(`${baseUrl}/api/students/student-aris-thorne`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        title: 'Master of Celestial Runes',
+        skills: ['Ancient Runes', 'Chronomancy', 'Aero-Tactics'],
+        bio: 'Updated senior thesis on ley-line harmonic resonance.'
+      })
+    });
+    assert.equal(res.status, 200);
+    const json = await res.json();
+    assert.equal(json.success, true);
+    assert.equal(json.data.title, 'Master of Celestial Runes');
+    assert.ok(json.data.skills.includes('Chronomancy'));
+  });
+
+  test('POST /api/sports/matches/:id/simulate simulates match deterministically', async () => {
+    const res = await fetch(`${baseUrl}/api/sports/matches/match-3/simulate`, { method: 'POST' });
+    assert.equal(res.status, 200);
+    const json = await res.json();
+    assert.equal(json.success, true);
+    assert.ok(json.data.match);
+    assert.equal(json.data.match.status, 'Completed');
+    assert.equal(typeof json.data.match.homeScore, 'number');
+  });
+
+  test('POST /api/courses/brew-potion simulates deterministic brewing', async () => {
+    const res = await fetch(`${baseUrl}/api/courses/brew-potion`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        ingredientIds: ['ing-2', 'ing-3'],
+        heatLevel: 'Steady Flame',
+        stirDirection: 'Clockwise'
+      })
+    });
+    assert.equal(res.status, 200);
+    const json = await res.json();
+    assert.equal(json.success, true);
+    assert.ok(json.data.potionName);
+    assert.ok(json.data.disclaimer.includes('fictional wizarding simulation'));
+  });
+
+  test('POST /api/courses/quizzes/submit calculates score and awards house points', async () => {
+    const res = await fetch(`${baseUrl}/api/courses/quizzes/submit`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        courseCode: 'TRANS-501',
+        answers: { q1: 1, q2: 3, q3: 1 }
+      })
+    });
+    assert.equal(res.status, 200);
+    const json = await res.json();
+    assert.equal(json.success, true);
+    assert.equal(json.data.scorePercent, 100);
+    assert.equal(json.data.passed, true);
+    assert.equal(json.data.pointsAwarded, 25);
+  });
+
+  test('POST /api/houses/sorting-quiz provides transparent house affinity', async () => {
+    const res = await fetch(`${baseUrl}/api/houses/sorting-quiz`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        answers: { q1: 0, q2: 0, q3: 0, q4: 0 }
+      })
+    });
+    assert.equal(res.status, 200);
+    const json = await res.json();
+    assert.equal(json.success, true);
+    assert.equal(json.data.sortedHouse.id, 'ravencrest');
+    assert.equal(json.data.breakdownPercentages.ravencrest, 100);
+  });
+
+  test('POST /api/mysteries/ask-scribe returns verified lore from archives', async () => {
+    const res = await fetch(`${baseUrl}/api/mysteries/ask-scribe`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        prompt: 'What are the properties of crushed moonstone?'
+      })
+    });
+    assert.equal(res.status, 200);
+    const json = await res.json();
+    assert.equal(json.success, true);
+    assert.equal(json.data.status, 'Verified Lore');
+    assert.ok(json.data.answer.includes('Moonstone'));
+  });
+});

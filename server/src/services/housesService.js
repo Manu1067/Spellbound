@@ -127,3 +127,107 @@ export const getPointsHistory = (limit = 20) => {
     LIMIT ?
   `).all(limit);
 };
+
+export const SORTING_QUESTIONS = [
+  {
+    id: 'q1',
+    prompt: 'When entering an unmapped chamber of the castle, your first impulse is:',
+    options: [
+      { text: 'Inspect the astral glyphs and deduce the ward logic.', house: 'ravencrest' },
+      { text: 'Draw your wand and step boldly into the threshold.', house: 'gryphonhart' },
+      { text: 'Observe from the shadows to see what lurks unseen.', house: 'shadowvale' },
+      { text: 'Check that your companions are safe and warm.', house: 'emberwyrm' }
+    ]
+  },
+  {
+    id: 'q2',
+    prompt: 'Which magical relic would you guard with your life?',
+    options: [
+      { text: 'The Astrolabe of Infinite Constellations.', house: 'ravencrest' },
+      { text: 'The Sword of Gryphon Flight.', house: 'gryphonhart' },
+      { text: 'The Philtre of Nocturnal Ambition.', house: 'shadowvale' },
+      { text: 'The Heart-Root of the Eternal Forest.', house: 'emberwyrm' }
+    ]
+  },
+  {
+    id: 'q3',
+    prompt: 'Your greatest magical ambition is:',
+    options: [
+      { text: 'To unlock the ultimate secrets of the cosmos.', house: 'ravencrest' },
+      { text: 'To perform heroic feats that inspire legends.', house: 'gryphonhart' },
+      { text: 'To attain mastery over subtlety and power.', house: 'shadowvale' },
+      { text: 'To protect the harmony of all living souls.', house: 'emberwyrm' }
+    ]
+  },
+  {
+    id: 'q4',
+    prompt: 'When brewing a volatile cauldron elixir:',
+    options: [
+      { text: 'Calculate the exact thermodynamic formula before brewing.', house: 'ravencrest' },
+      { text: 'Stir with swift courage and trust your instinct.', house: 'gryphonhart' },
+      { text: 'Alter the recipe with a cunning catalyst.', house: 'shadowvale' },
+      { text: 'Tend with patience and steady low flame; let nature take its course.', house: 'emberwyrm' }
+    ]
+  }
+];
+
+export const submitSortingQuiz = ({ studentId = 'student-aris-thorne', answers = {} }) => {
+  const db = getDatabase();
+
+  const scores = {
+    ravencrest: 0,
+    gryphonhart: 0,
+    shadowvale: 0,
+    emberwyrm: 0
+  };
+
+  SORTING_QUESTIONS.forEach((q) => {
+    const chosenIndex = answers[q.id];
+    if (chosenIndex !== undefined && q.options[chosenIndex]) {
+      const houseKey = q.options[chosenIndex].house;
+      scores[houseKey] = (scores[houseKey] || 0) + 1;
+    }
+  });
+
+  const totalAnswered = Object.values(scores).reduce((a, b) => a + b, 0) || 1;
+
+  // Find top house
+  let topHouseId = 'ravencrest';
+  let topScore = -1;
+  for (const [houseId, score] of Object.entries(scores)) {
+    if (score > topScore) {
+      topScore = score;
+      topHouseId = houseId;
+    }
+  }
+
+  const housePercentages = {
+    ravencrest: Math.round((scores.ravencrest / totalAnswered) * 100),
+    gryphonhart: Math.round((scores.gryphonhart / totalAnswered) * 100),
+    shadowvale: Math.round((scores.shadowvale / totalAnswered) * 100),
+    emberwyrm: Math.round((scores.emberwyrm / totalAnswered) * 100)
+  };
+
+  const house = db.prepare('SELECT id, name, motto, crest_color as crestColor, animal FROM houses WHERE id = ?').get(topHouseId);
+
+  // Update student house in DB
+  const pointsAwarded = 50;
+  const txn = db.transaction(() => {
+    db.prepare('UPDATE students SET house_id = ? WHERE id = ?').run(topHouseId, studentId);
+    db.prepare('UPDATE houses SET points = points + ? WHERE id = ?').run(pointsAwarded, topHouseId);
+    db.prepare(`
+      INSERT INTO house_points_log (house_id, amount, reason, awarded_by)
+      VALUES (?, ?, ?, 'The Grand Ceremonial Sorting Hat')
+    `).run(topHouseId, pointsAwarded, `Sorting Ceremony Inscription for Adept`);
+  });
+
+  txn();
+
+  return {
+    sortedHouse: house,
+    affinityScores: scores,
+    breakdownPercentages: housePercentages,
+    pointsAwarded,
+    message: `The ancient magic resonates: You are proclaimed an adept of House ${house.name}!`
+  };
+};

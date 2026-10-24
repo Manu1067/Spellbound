@@ -68,7 +68,12 @@ export const students = [
     avatar_url: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=250&q=80',
     points_contributed: 340,
     academic_rank: '4th in Class of 180',
-    is_current_user: 1
+    is_current_user: 1,
+    skills: JSON.stringify(['Ancient Runes', 'Celestial Geometry', 'Ward Scripting', 'Arithmancy']),
+    interests: JSON.stringify(['Astrolabe Calibration', 'Library Archiving', 'Star-Weaving']),
+    project_experience: 'Constructed the miniature bronze Orrery of Eldoria, translating 14th-century parchment scripts into orbital brass gears.',
+    is_mentor: 1,
+    role: 'Senior Adept & Peer Mentor'
   },
   {
     id: 'p-1',
@@ -83,7 +88,12 @@ export const students = [
     avatar_url: 'https://images.unsplash.com/photo-1517841905240-472988babdf9?auto=format&fit=crop&w=250&q=80',
     points_contributed: 290,
     academic_rank: '2nd in Class of 175',
-    is_current_user: 0
+    is_current_user: 0,
+    skills: JSON.stringify(['Runic Translation', 'Harmonic Resonance', 'Astral Cartography']),
+    interests: JSON.stringify(['Ancient Manuscripts', 'Ward Breaking', 'Observatory Studies']),
+    project_experience: 'Cataloged the 12 Forbidden Folios in the East Alcove scriptorium.',
+    is_mentor: 1,
+    role: 'Prefect & Senior Researcher'
   },
   {
     id: 'p-2',
@@ -98,7 +108,12 @@ export const students = [
     avatar_url: 'https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?auto=format&fit=crop&w=250&q=80',
     points_contributed: 310,
     academic_rank: '18th in Class of 180',
-    is_current_user: 0
+    is_current_user: 0,
+    skills: JSON.stringify(['High-Speed Slalom', 'Crosswind Evasions', 'Broom Aerodynamics']),
+    interests: JSON.stringify(['Skyspire Derby', 'Aerial Strategy', 'Storm Chasing']),
+    project_experience: 'Engineered aerodynamic tail-braces for Thunderstrike broomsticks.',
+    is_mentor: 0,
+    role: 'Team Captain & Seeker'
   },
   {
     id: 'p-3',
@@ -113,7 +128,12 @@ export const students = [
     avatar_url: 'https://images.unsplash.com/photo-1524504388940-b1c1722653e1?auto=format&fit=crop&w=250&q=80',
     points_contributed: 420,
     academic_rank: '1st in Class of 160',
-    is_current_user: 0
+    is_current_user: 0,
+    skills: JSON.stringify(['Subterranean Distillation', 'Philtre Stabilization', 'Memory Extraction']),
+    interests: JSON.stringify(['Nocturnal Botany', 'Shadow Cauldrons', 'Elixir Preservation']),
+    project_experience: 'Synthesized the first non-corrosive Draught of Twilight Luminescence.',
+    is_mentor: 1,
+    role: 'Master Alchemist Adept'
   },
   {
     id: 'p-4',
@@ -128,7 +148,12 @@ export const students = [
     avatar_url: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?auto=format&fit=crop&w=250&q=80',
     points_contributed: 260,
     academic_rank: '12th in Class of 190',
-    is_current_user: 0
+    is_current_user: 0,
+    skills: JSON.stringify(['Mandrake Propagation', 'Greenhouse Care', 'Soil Geodesic Balancing']),
+    interests: JSON.stringify(['Rare Orchids', 'Herbal Tonics', 'Feral Flora']),
+    project_experience: 'Cultivated acoustic-dampening moss around Greenhouse 4.',
+    is_mentor: 0,
+    role: 'Herbological Keeper'
   },
   {
     id: 'p-5',
@@ -143,7 +168,12 @@ export const students = [
     avatar_url: 'https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&w=250&q=80',
     points_contributed: 285,
     academic_rank: '8th in Class of 180',
-    is_current_user: 0
+    is_current_user: 0,
+    skills: JSON.stringify(['Lunar Astrometry', 'Star-Weaving', 'Divination Glyphs']),
+    interests: JSON.stringify(['Constellation Mapping', 'Celestial Equinoxes', 'Starlight Prisms']),
+    project_experience: 'Mapped the retrograde trajectory of the Comet of Cassiopeia.',
+    is_mentor: 0,
+    role: 'Observatory Adept'
   },
   {
     id: 'p-6',
@@ -158,7 +188,52 @@ export const students = [
     avatar_url: 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?auto=format&fit=crop&w=250&q=80',
     points_contributed: 1200,
     academic_rank: 'Dean Emeritus',
-    is_current_user: 0
+    is_current_user: 0,
+    skills: JSON.stringify(['Ancient Languages', 'Grand Castle Wards', 'High Chronomancy']),
+    interests: JSON.stringify(['Academy History', 'Arcane Preservation', 'Adept Guidance']),
+    project_experience: 'Re-anchored the living castle ley lines during the Great Shifting of 1884.',
+    is_mentor: 1,
+    role: 'Faculty Dean & Mentor'
+  },
+  {
+    id: 'p-7',
+    name: 'Rowan Vance',
+    house_id: 'gryphonhart',
+    year: '4th Year',
+    title: 'Chaser & Wind Tactician',
+    wand: '10¾ in · Ash · Dragon Tendon',
+    patronus: 'Peregrine Falcon',
+    fav_subject: 'Aero-Tactics',
+    bio: 'Agile Skyspire chaser known for steep reverse dives and team coordination.',
+    avatar_url: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?auto=format&fit=crop&w=250&q=80',
+    points_contributed: 240,
+    academic_rank: '22nd in Class of 190',
+    is_current_user: 0,
+    skills: JSON.stringify(['Aerial Formations', 'Broom Tuning', 'Reflex Agility']),
+    interests: JSON.stringify(['Wind Vectors', 'Tournament Scrims', 'Gale Flight']),
+    project_experience: 'Co-authored the Skyspire Offensive Playbook for high-wind conditions.',
+    is_mentor: 0,
+    role: 'Junior Chaser'
+  },
+  {
+    id: 'p-8',
+    name: 'Sylvia Sunstrider',
+    house_id: 'emberwyrm',
+    year: '6th Year · Senior Adept',
+    title: 'Elemental Catalyst Researcher',
+    wand: '12½ in · Cypress · Phoenix Feather',
+    patronus: 'Golden Badger',
+    fav_subject: 'Elemental Alchemy',
+    bio: 'Senior research adept researching heat transfer in dragon-scale crucibles.',
+    avatar_url: 'https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&w=250&q=80',
+    points_contributed: 380,
+    academic_rank: '5th in Class of 175',
+    is_current_user: 0,
+    skills: JSON.stringify(['Thermal Transmutation', 'Catalyst Synthesis', 'Rune Inscription']),
+    interests: JSON.stringify(['Crucible Metallurgy', 'Flame Enchantments', 'Safety Wards']),
+    project_experience: 'Designed the ember-resistant gloves used in all beginner lab stations.',
+    is_mentor: 1,
+    role: 'Lab Teaching Assistant'
   }
 ];
 
@@ -249,6 +324,7 @@ export const pathways = [
     to_location_id: 'loc-2',
     name: 'Marble Grand Staircase',
     path_type: 'Moving Staircase',
+    distance: 14,
     is_unlocked: 1,
     description: 'Connects the Great Hall to the Grand Library; shifts orientation every half hour.'
   },
@@ -258,6 +334,7 @@ export const pathways = [
     to_location_id: 'loc-3',
     name: 'Spire Winding Spiral',
     path_type: 'Corridor',
+    distance: 12,
     is_unlocked: 1,
     description: 'Ascends 400 stone steps from the Library scriptoria to the starry pinnacle.'
   },
@@ -267,6 +344,7 @@ export const pathways = [
     to_location_id: 'loc-5',
     name: 'Basalt Cellar Descent',
     path_type: 'Corridor',
+    distance: 16,
     is_unlocked: 1,
     description: 'Chilly granite passageway leading to the potion dungeon vaults.'
   },
@@ -276,6 +354,7 @@ export const pathways = [
     to_location_id: 'loc-4',
     name: 'Gorge Suspension Skybridge',
     path_type: 'Skybridge',
+    distance: 22,
     is_unlocked: 1,
     description: 'Arched stone bridge spanning the windy gorge to the Skyspire pitch.'
   },
@@ -285,8 +364,59 @@ export const pathways = [
     to_location_id: 'loc-7',
     name: 'Shadow Runic Vault Passage',
     path_type: 'Secret Passage',
-    is_unlocked: 0,
+    distance: 18,
+    is_unlocked: 1,
     description: 'Hidden behind a tapestry of the Solstice Serpent, requiring the Chronos Cipher.'
+  },
+  {
+    id: 'path-6',
+    from_location_id: 'loc-2',
+    to_location_id: 'loc-5',
+    name: 'Secret Scholars Flue',
+    path_type: 'Secret Passage',
+    distance: 15,
+    is_unlocked: 1,
+    description: 'Concealed spiral chute between the Restricted Archives and Potions Dungeons.'
+  },
+  {
+    id: 'path-7',
+    from_location_id: 'loc-1',
+    to_location_id: 'loc-6',
+    name: 'South Cloister Walk',
+    path_type: 'Corridor',
+    distance: 14,
+    is_unlocked: 1,
+    description: 'Covered gothic archway skirting the outer castle walls toward the botanical fringe.'
+  },
+  {
+    id: 'path-8',
+    from_location_id: 'loc-6',
+    to_location_id: 'loc-4',
+    name: 'Periphery Forest Bridleway',
+    path_type: 'Corridor',
+    distance: 20,
+    is_unlocked: 1,
+    description: 'Winding gravel path connecting the wild woods fringe directly to the Skyspire arena.'
+  },
+  {
+    id: 'path-9',
+    from_location_id: 'loc-3',
+    to_location_id: 'loc-4',
+    name: 'Skyward Aerodrome Viaduct',
+    path_type: 'Skybridge',
+    distance: 26,
+    is_unlocked: 1,
+    description: 'High-altitude stone viaduct connecting the Astronomy Spire to the upper spectator stands.'
+  },
+  {
+    id: 'path-10',
+    from_location_id: 'loc-6',
+    to_location_id: 'loc-5',
+    name: 'Root Cellar Conduit',
+    path_type: 'Corridor',
+    distance: 17,
+    is_unlocked: 1,
+    description: 'Subterranean conduit for transporting freshly harvested botanical catalysts to the stills.'
   }
 ];
 
@@ -378,6 +508,7 @@ export const events = [
     category: 'Gala & Feast',
     description: 'Annual gala celebrating the winter solstice under levitating ice sculptures and enchanted choral melodies.',
     rsvp_count: 248,
+    capacity: 300,
     is_active: 1
   },
   {
@@ -389,6 +520,7 @@ export const events = [
     category: 'Championship',
     description: 'Ravencrest vs. Gryphonhart in the Autumn season final. Expect aerial tactical speed maneuvers.',
     rsvp_count: 312,
+    capacity: 350,
     is_active: 1
   },
   {
@@ -400,6 +532,7 @@ export const events = [
     category: 'Academic',
     description: 'Planetary alignment of Saturn and Orion. Rare opportunity to observe astral ley line pulses.',
     rsvp_count: 89,
+    capacity: 100,
     is_active: 1
   },
   {
@@ -411,6 +544,7 @@ export const events = [
     category: 'Expedition',
     description: 'Botanical expedition to harvest bioluminescent nightshade spores at peak potency.',
     rsvp_count: 45,
+    capacity: 50,
     is_active: 1
   }
 ];
@@ -436,7 +570,16 @@ export const sportsTeams = [
     losses: 1,
     goal_differential: '+180',
     points: 15,
-    crest_color: 'var(--burgundy-light)'
+    crest_color: 'var(--burgundy-light)',
+    roster: JSON.stringify([
+      { name: 'Cedric Blackthorn', position: 'Seeker', broom: 'Firebolt Apex', speedRating: 98 },
+      { name: 'Rowan Vance', position: 'Chaser', broom: 'Nimbus 3000', speedRating: 92 },
+      { name: 'Garrick Stone', position: 'Chaser', broom: 'Cleansweep X', speedRating: 88 },
+      { name: 'Julian Pike', position: 'Chaser', broom: 'Comet 290', speedRating: 87 },
+      { name: 'Bartholomew Kane', position: 'Beater', broom: 'Ironwood Mark IV', speedRating: 85 },
+      { name: 'Marcus Flint', position: 'Beater', broom: 'Ironwood Mark IV', speedRating: 84 },
+      { name: 'Cassian Drake', position: 'Keeper', broom: 'Silver Arrow', speedRating: 90 }
+    ])
   },
   {
     id: 'team-ravencrest',
@@ -447,7 +590,16 @@ export const sportsTeams = [
     losses: 2,
     goal_differential: '+120',
     points: 12,
-    crest_color: 'var(--antique-gold)'
+    crest_color: 'var(--antique-gold)',
+    roster: JSON.stringify([
+      { name: 'Rowan Vance', position: 'Seeker', broom: 'Silver Arrow II', speedRating: 96 },
+      { name: 'Lyra Valerius', position: 'Chaser', broom: 'Nimbus 3000', speedRating: 91 },
+      { name: 'Morrigan Gale', position: 'Chaser', broom: 'Starflyer 500', speedRating: 89 },
+      { name: 'Kaelen Ward', position: 'Chaser', broom: 'Comet 290', speedRating: 86 },
+      { name: 'Titus Vane', position: 'Beater', broom: 'Thunderstrike', speedRating: 88 },
+      { name: 'Arthur Pendelton', position: 'Beater', broom: 'Thunderstrike', speedRating: 87 },
+      { name: 'Helena Starling', position: 'Keeper', broom: 'Aegis Broomcraft', speedRating: 93 }
+    ])
   },
   {
     id: 'team-shadowvale',
@@ -458,7 +610,16 @@ export const sportsTeams = [
     losses: 3,
     goal_differential: '+40',
     points: 9,
-    crest_color: '#79C2A4'
+    crest_color: '#79C2A4',
+    roster: JSON.stringify([
+      { name: 'Damian Blackwood', position: 'Seeker', broom: 'Nightshade X', speedRating: 95 },
+      { name: 'Isolde Ravenshadow', position: 'Chaser', broom: 'Vipera S', speedRating: 90 },
+      { name: 'Valen Cross', position: 'Chaser', broom: 'Vipera S', speedRating: 88 },
+      { name: 'Draco Malfoy Jr', position: 'Chaser', broom: 'Silver Arrow', speedRating: 86 },
+      { name: 'Giles Thorne', position: 'Beater', broom: 'Ironwood Heavy', speedRating: 86 },
+      { name: 'Corvus Grim', position: 'Beater', broom: 'Ironwood Heavy', speedRating: 85 },
+      { name: 'Seraphina Bell', position: 'Keeper', broom: 'Shadowveil 4', speedRating: 89 }
+    ])
   },
   {
     id: 'team-emberwyrm',
@@ -469,7 +630,16 @@ export const sportsTeams = [
     losses: 6,
     goal_differential: '-340',
     points: 0,
-    crest_color: '#D48C45'
+    crest_color: '#D48C45',
+    roster: JSON.stringify([
+      { name: 'Alistair Thorne', position: 'Seeker', broom: 'Oakleaf Pro', speedRating: 91 },
+      { name: 'Thaddeus Thorne', position: 'Chaser', broom: 'Cleansweep Eleven', speedRating: 85 },
+      { name: 'Bramwell Root', position: 'Chaser', broom: 'Cleansweep Eleven', speedRating: 84 },
+      { name: 'Maeve Oakhaven', position: 'Chaser', broom: 'Comet 260', speedRating: 83 },
+      { name: 'Orson Drake', position: 'Beater', broom: 'Broadwood V', speedRating: 87 },
+      { name: 'Tobias Finch', position: 'Beater', broom: 'Broadwood V', speedRating: 85 },
+      { name: 'Phoebe Vance', position: 'Keeper', broom: 'Earthwarden 2', speedRating: 88 }
+    ])
   }
 ];
 
@@ -653,3 +823,84 @@ export const housePointsLogs = [
     awarded_by: 'Elder Rosemary Vance'
   }
 ];
+
+export const communities = [
+  {
+    id: 'comm-1',
+    name: 'The Arithmancy & Runic Circle',
+    description: 'Scholarly guild dedicated to deciphering pre-Eldorian glyphs and astral geometric projections.',
+    category: 'Study Circle',
+    house_id: 'ravencrest',
+    member_count: 28,
+    icon_name: 'BookOpen',
+    is_joined: 1
+  },
+  {
+    id: 'comm-2',
+    name: 'Skyspire Aero-Tactics League',
+    description: 'Competitive aeromancers and broom racers analyzing wind shear vectors and high-speed maneuvers.',
+    category: 'Aero-Athletics',
+    house_id: 'gryphonhart',
+    member_count: 42,
+    icon_name: 'Trophy',
+    is_joined: 0
+  },
+  {
+    id: 'comm-3',
+    name: 'Nocturnal Alchemical Brewers Guild',
+    description: 'Experimental potioneers testing lunar distillation, crucible heat regulation, and philtre stability.',
+    category: 'Potion Craft',
+    house_id: 'shadowvale',
+    member_count: 31,
+    icon_name: 'Sparkles',
+    is_joined: 0
+  },
+  {
+    id: 'comm-4',
+    name: 'Botanical & Symbiosis Society',
+    description: 'Wardens of the carnivorous greenhouses, mandrake propagation, and rare bioluminescent fungi.',
+    category: 'Herbology',
+    house_id: 'emberwyrm',
+    member_count: 24,
+    icon_name: 'Flame',
+    is_joined: 0
+  },
+  {
+    id: 'comm-5',
+    name: 'Order of the Golden Quill',
+    description: 'Inter-house philosophical debate, enchanted parchment chronicles, and legal wizarding treaties.',
+    category: 'Scholarly Debate',
+    house_id: null,
+    member_count: 36,
+    icon_name: 'Shield',
+    is_joined: 1
+  }
+];
+
+export const communityReplies = [
+  {
+    id: 'rep-1',
+    post_id: 'note-1',
+    author_id: 'student-aris-thorne',
+    author_name: 'Aris Thorne',
+    house_id: 'ravencrest',
+    body: 'I will bring the obsidian astrolabe lens to compare with the glyph table.'
+  },
+  {
+    id: 'rep-2',
+    post_id: 'note-1',
+    author_id: 'p-5',
+    author_name: 'Elowen Frost',
+    house_id: 'ravencrest',
+    body: 'Save a seat near the brazier for me; I have notes on the 3rd stela from yesterday.'
+  },
+  {
+    id: 'rep-3',
+    post_id: 'note-2',
+    author_id: 'p-7',
+    author_name: 'Rowan Vance',
+    house_id: 'gryphonhart',
+    body: 'Count me in for Thursday slalom drills. Let us test the Hawk-wing 360 formation.'
+  }
+];
+

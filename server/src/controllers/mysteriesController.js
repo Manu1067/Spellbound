@@ -32,3 +32,36 @@ export const verifyAnswer = (req, res, next) => {
     next(err);
   }
 };
+
+export const getMysteryArchives = (req, res, next) => {
+  try {
+    const { chamber, difficulty, search } = req.query;
+    const archives = mysteriesService.getMysteryArchives({ chamber, difficulty, search });
+    return sendSuccess(res, archives, { total: archives.length });
+  } catch (err) {
+    next(err);
+  }
+};
+
+export const getRecommendations = (req, res, next) => {
+  try {
+    const { studentId } = req.query;
+    const recs = mysteriesService.getRecommendations(studentId);
+    return sendSuccess(res, recs);
+  } catch (err) {
+    next(err);
+  }
+};
+
+export const queryArchivalScribe = (req, res, next) => {
+  try {
+    const { prompt } = req.body;
+    if (!prompt || !prompt.trim()) {
+      return sendError(res, 'Prompt or query topic is required for the Archival Scribe.', 'VALIDATION_ERROR', 400);
+    }
+    const result = mysteriesService.queryArchivalScribe(prompt);
+    return sendSuccess(res, result);
+  } catch (err) {
+    next(err);
+  }
+};

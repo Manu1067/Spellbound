@@ -16,6 +16,10 @@ export const initializeDatabase = ({ reset = false } = {}) => {
     console.log('[Database] Resetting existing tables...');
     db.exec(`
       PRAGMA foreign_keys = OFF;
+      DROP TABLE IF EXISTS potion_brews;
+      DROP TABLE IF EXISTS student_quizzes;
+      DROP TABLE IF EXISTS community_replies;
+      DROP TABLE IF EXISTS communities;
       DROP TABLE IF EXISTS owl_dispatches;
       DROP TABLE IF EXISTS potion_ingredients;
       DROP TABLE IF EXISTS daily_schedules;
@@ -75,13 +79,15 @@ export const initializeDatabase = ({ reset = false } = {}) => {
     // 3. Students
     const insertStudent = db.prepare(`
       INSERT OR IGNORE INTO students (
-        id, name, house_id, year, title, wand, patronus, fav_subject, bio, avatar_url, points_contributed, academic_rank, is_current_user
-      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        id, name, house_id, year, title, wand, patronus, fav_subject, bio, avatar_url, points_contributed, academic_rank, is_current_user,
+        skills, interests, project_experience, is_mentor, role
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     `);
     for (const s of seedData.students) {
       insertStudent.run(
         s.id, s.name, s.house_id, s.year, s.title, s.wand, s.patronus,
-        s.fav_subject, s.bio, s.avatar_url, s.points_contributed, s.academic_rank, s.is_current_user
+        s.fav_subject, s.bio, s.avatar_url, s.points_contributed, s.academic_rank, s.is_current_user,
+        s.skills || '[]', s.interests || '[]', s.project_experience || '', s.is_mentor || 0, s.role || 'Senior Adept'
       );
     }
 
@@ -101,13 +107,13 @@ export const initializeDatabase = ({ reset = false } = {}) => {
     // 5. Pathways
     const insertPathway = db.prepare(`
       INSERT OR IGNORE INTO pathways (
-        id, from_location_id, to_location_id, name, path_type, is_unlocked, description
-      ) VALUES (?, ?, ?, ?, ?, ?, ?)
+        id, from_location_id, to_location_id, name, path_type, distance, is_unlocked, description
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?)
     `);
     for (const p of seedData.pathways) {
       insertPathway.run(
         p.id, p.from_location_id, p.to_location_id, p.name,
-        p.path_type, p.is_unlocked, p.description
+        p.path_type, p.distance || 15, p.is_unlocked, p.description
       );
     }
 
@@ -140,13 +146,13 @@ export const initializeDatabase = ({ reset = false } = {}) => {
     // 8. Events
     const insertEvent = db.prepare(`
       INSERT OR IGNORE INTO events (
-        id, title, date_time, location_id, location_name, category, description, rsvp_count, is_active
-      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+        id, title, date_time, location_id, location_name, category, description, rsvp_count, capacity, is_active
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     `);
     for (const e of seedData.events) {
       insertEvent.run(
         e.id, e.title, e.date_time, e.location_id, e.location_name,
-        e.category, e.description, e.rsvp_count, e.is_active
+        e.category, e.description, e.rsvp_count, e.capacity || 50, e.is_active
       );
     }
 
@@ -162,13 +168,13 @@ export const initializeDatabase = ({ reset = false } = {}) => {
     // 10. Sports Teams
     const insertTeam = db.prepare(`
       INSERT OR IGNORE INTO sports_teams (
-        id, name, house_id, captain, wins, losses, goal_differential, points, crest_color
-      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+        id, name, house_id, captain, wins, losses, goal_differential, points, crest_color, roster
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     `);
     for (const t of seedData.sportsTeams) {
       insertTeam.run(
         t.id, t.name, t.house_id, t.captain, t.wins,
-        t.losses, t.goal_differential, t.points, t.crest_color
+        t.losses, t.goal_differential, t.points, t.crest_color, t.roster || '[]'
       );
     }
 
@@ -188,14 +194,43 @@ export const initializeDatabase = ({ reset = false } = {}) => {
     // 12. Community Posts
     const insertPost = db.prepare(`
       INSERT OR IGNORE INTO community_posts (
-        id, author_id, author_name, house_id, category, title, body, signature_count
-      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+        id, author_id, author_name, house_id, category, title, body, signature_count, is_reported
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
     `);
     for (const cp of seedData.communityPosts) {
       insertPost.run(
         cp.id, cp.author_id, cp.author_name, cp.house_id,
-        cp.category, cp.title, cp.body, cp.signature_count
+        cp.category, cp.title, cp.body, cp.signature_count, cp.is_reported || 0
       );
+    }
+
+    // 12B. Communities
+    if (seedData.communities) {
+      const insertComm = db.prepare(`
+        INSERT OR IGNORE INTO communities (
+          id, name, description, category, house_id, member_count, icon_name, is_joined
+        ) VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+      `);
+      for (const comm of seedData.communities) {
+        insertComm.run(
+          comm.id, comm.name, comm.description, comm.category,
+          comm.house_id, comm.member_count, comm.icon_name || 'Flame', comm.is_joined || 0
+        );
+      }
+    }
+
+    // 12C. Community Discussion Replies
+    if (seedData.communityReplies) {
+      const insertReply = db.prepare(`
+        INSERT OR IGNORE INTO community_replies (
+          id, post_id, author_id, author_name, house_id, body
+        ) VALUES (?, ?, ?, ?, ?, ?)
+      `);
+      for (const rep of seedData.communityReplies) {
+        insertReply.run(
+          rep.id, rep.post_id, rep.author_id, rep.author_name, rep.house_id, rep.body
+        );
+      }
     }
 
     // 13. Mystery Puzzles
@@ -253,6 +288,8 @@ export const initializeDatabase = ({ reset = false } = {}) => {
     'sports_teams',
     'sports_matches',
     'community_posts',
+    'communities',
+    'community_replies',
     'mystery_puzzles',
     'daily_schedules',
     'potion_ingredients'

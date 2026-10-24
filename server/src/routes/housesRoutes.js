@@ -5,6 +5,7 @@ const router = Router();
 
 router.get('/', housesController.getHouses);
 router.get('/history', housesController.getPointsHistory);
+router.post('/sorting-quiz', housesController.submitSortingQuiz);
 router.get('/:id', housesController.getHouseById);
 router.post('/:id/points', housesController.awardPoints);
 

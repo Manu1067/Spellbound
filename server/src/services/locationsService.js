@@ -75,6 +75,7 @@ export const getLocationById = (id) => {
       p.id,
       p.name,
       p.path_type as pathType,
+      p.distance,
       p.is_unlocked as isUnlocked,
       p.description,
       p.from_location_id as fromId,
@@ -96,6 +97,7 @@ export const getLocationById = (id) => {
     isSecret: Boolean(row.isSecret),
     pathways: pathways.map((p) => ({
       ...p,
+      distance: p.distance || 15,
       isUnlocked: Boolean(p.isUnlocked)
     })),
     createdAt: row.createdAt
@@ -109,6 +111,7 @@ export const getPathways = () => {
       p.id,
       p.name,
       p.path_type as pathType,
+      p.distance,
       p.is_unlocked as isUnlocked,
       p.description,
       p.from_location_id as fromLocationId,
@@ -122,6 +125,26 @@ export const getPathways = () => {
 
   return rows.map((r) => ({
     ...r,
+    distance: r.distance || 15,
     isUnlocked: Boolean(r.isUnlocked)
   }));
+};
+
+export const togglePathwayLock = (id) => {
+  const db = getDatabase();
+
+  const pathway = db.prepare('SELECT id, is_unlocked, name FROM pathways WHERE id = ?').get(id);
+  if (!pathway) return null;
+
+  const nextState = pathway.is_unlocked === 1 ? 0 : 1;
+  db.prepare('UPDATE pathways SET is_unlocked = ? WHERE id = ?').run(nextState, id);
+
+  return {
+    id: pathway.id,
+    name: pathway.name,
+    isUnlocked: Boolean(nextState),
+    message: nextState === 1
+      ? `Ward lifted on ${pathway.name}; corridor reopened.`
+      : `Ward sealed across ${pathway.name}; corridor impassable.`
+  };
 };

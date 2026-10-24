@@ -44,6 +44,11 @@ CREATE TABLE IF NOT EXISTS students (
   points_contributed INTEGER DEFAULT 0,
   academic_rank TEXT,
   is_current_user INTEGER DEFAULT 0,
+  skills TEXT DEFAULT '[]', -- JSON string array of adept skills
+  interests TEXT DEFAULT '[]', -- JSON string array of magical interests
+  project_experience TEXT DEFAULT '', -- Description of past magical projects
+  is_mentor INTEGER DEFAULT 0, -- 1 if qualified student mentor, 0 otherwise
+  role TEXT DEFAULT 'Senior Adept', -- 'Senior Adept', 'Prefect', 'Researcher', 'Team Captain'
   created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
   updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
 );
@@ -70,6 +75,7 @@ CREATE TABLE IF NOT EXISTS pathways (
   to_location_id TEXT NOT NULL REFERENCES locations(id) ON DELETE CASCADE,
   name TEXT NOT NULL,
   path_type TEXT NOT NULL DEFAULT 'Corridor', -- 'Corridor', 'Moving Staircase', 'Secret Passage', 'Skybridge'
+  distance INTEGER DEFAULT 15, -- Distance in paces / transit cost
   is_unlocked INTEGER DEFAULT 1,
   description TEXT,
   created_at DATETIME DEFAULT CURRENT_TIMESTAMP
@@ -110,6 +116,7 @@ CREATE TABLE IF NOT EXISTS events (
   category TEXT NOT NULL,
   description TEXT NOT NULL,
   rsvp_count INTEGER DEFAULT 0,
+  capacity INTEGER DEFAULT 50, -- Max RSVP capacity
   is_active INTEGER DEFAULT 1,
   created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
   updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
@@ -135,6 +142,7 @@ CREATE TABLE IF NOT EXISTS sports_teams (
   goal_differential TEXT DEFAULT '+0',
   points INTEGER DEFAULT 0,
   crest_color TEXT,
+  roster TEXT DEFAULT '[]', -- JSON string array of players with positions & stats
   created_at DATETIME DEFAULT CURRENT_TIMESTAMP
 );
 
@@ -162,6 +170,7 @@ CREATE TABLE IF NOT EXISTS community_posts (
   title TEXT NOT NULL,
   body TEXT NOT NULL,
   signature_count INTEGER DEFAULT 0,
+  is_reported INTEGER DEFAULT 0, -- 1 if reported to Prefect/Moderator
   created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
   updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
 );
@@ -173,6 +182,53 @@ CREATE TABLE IF NOT EXISTS community_signatures (
   student_id TEXT NOT NULL REFERENCES students(id) ON DELETE CASCADE,
   signed_at DATETIME DEFAULT CURRENT_TIMESTAMP,
   UNIQUE(post_id, student_id)
+);
+
+-- 13B. COMMUNITY DISCUSSION REPLIES (THREADED HEARTH TALK)
+CREATE TABLE IF NOT EXISTS community_replies (
+  id TEXT PRIMARY KEY,
+  post_id TEXT NOT NULL REFERENCES community_posts(id) ON DELETE CASCADE,
+  author_id TEXT REFERENCES students(id) ON DELETE SET NULL,
+  author_name TEXT NOT NULL,
+  house_id TEXT NOT NULL,
+  body TEXT NOT NULL,
+  created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+);
+
+-- 13C. COMMUNITY CIRCLES & SOCIETIES
+CREATE TABLE IF NOT EXISTS communities (
+  id TEXT PRIMARY KEY,
+  name TEXT NOT NULL UNIQUE,
+  description TEXT NOT NULL,
+  category TEXT NOT NULL,
+  house_id TEXT REFERENCES houses(id) ON DELETE SET NULL,
+  member_count INTEGER DEFAULT 12,
+  icon_name TEXT DEFAULT 'Flame',
+  is_joined INTEGER DEFAULT 0,
+  created_at DATETIME DEFAULT CURRENT_TIMESTAMP
+);
+
+-- 13D. STUDENT QUIZ PROGRESS & MASTERY
+CREATE TABLE IF NOT EXISTS student_quizzes (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  student_id TEXT NOT NULL REFERENCES students(id) ON DELETE CASCADE,
+  quiz_id TEXT NOT NULL,
+  course_code TEXT NOT NULL,
+  score INTEGER NOT NULL,
+  total_questions INTEGER NOT NULL,
+  passed INTEGER DEFAULT 1,
+  completed_at DATETIME DEFAULT CURRENT_TIMESTAMP
+);
+
+-- 13E. POTION LAB BREW JOURNAL
+CREATE TABLE IF NOT EXISTS potion_brews (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  student_id TEXT NOT NULL REFERENCES students(id) ON DELETE CASCADE,
+  potion_name TEXT NOT NULL,
+  potency INTEGER NOT NULL,
+  stability INTEGER NOT NULL,
+  outcome TEXT NOT NULL,
+  brewed_at DATETIME DEFAULT CURRENT_TIMESTAMP
 );
 
 -- 14. MYSTERY PUZZLES & CIPHERS (DEPARTMENT OF MYSTERIES)

@@ -57,3 +57,13 @@ export const getPointsHistory = (req, res, next) => {
     next(err);
   }
 };
+
+export const submitSortingQuiz = (req, res, next) => {
+  try {
+    const { studentId, answers } = req.body;
+    const result = housesService.submitSortingQuiz({ studentId, answers });
+    return sendSuccess(res, result);
+  } catch (err) {
+    next(err);
+  }
+};
