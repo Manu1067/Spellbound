@@ -21,17 +21,26 @@ export const initializeDatabase = ({ reset = false } = {}) => {
       DROP TABLE IF EXISTS daily_schedules;
       DROP TABLE IF EXISTS mystery_records;
       DROP TABLE IF EXISTS mystery_puzzles;
+      DROP TABLE IF EXISTS official_notices;
+      DROP TABLE IF EXISTS confessions;
+      DROP TABLE IF EXISTS complaints;
+      DROP TABLE IF EXISTS student_council;
       DROP TABLE IF EXISTS community_signatures;
       DROP TABLE IF EXISTS community_posts;
+      DROP TABLE IF EXISTS sports_registrations;
       DROP TABLE IF EXISTS sports_matches;
       DROP TABLE IF EXISTS sports_teams;
+      DROP TABLE IF EXISTS sports_disciplines;
       DROP TABLE IF EXISTS event_registrations;
       DROP TABLE IF EXISTS events;
       DROP TABLE IF EXISTS learning_resources;
       DROP TABLE IF EXISTS courses;
+      DROP TABLE IF EXISTS lab_resources;
+      DROP TABLE IF EXISTS laboratories;
       DROP TABLE IF EXISTS pathways;
-      DROP TABLE IF EXISTS locations;
       DROP TABLE IF EXISTS students;
+      DROP TABLE IF EXISTS clubs;
+      DROP TABLE IF EXISTS locations;
       DROP TABLE IF EXISTS house_points_log;
       DROP TABLE IF EXISTS houses;
       PRAGMA foreign_keys = ON;
@@ -72,20 +81,7 @@ export const initializeDatabase = ({ reset = false } = {}) => {
       }
     }
 
-    // 3. Students
-    const insertStudent = db.prepare(`
-      INSERT OR IGNORE INTO students (
-        id, name, house_id, year, title, wand, patronus, fav_subject, bio, avatar_url, points_contributed, academic_rank, is_current_user
-      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-    `);
-    for (const s of seedData.students) {
-      insertStudent.run(
-        s.id, s.name, s.house_id, s.year, s.title, s.wand, s.patronus,
-        s.fav_subject, s.bio, s.avatar_url, s.points_contributed, s.academic_rank, s.is_current_user
-      );
-    }
-
-    // 4. Locations
+    // 3. Campus Locations (Foundational for Labs, Pathways, Events)
     const insertLocation = db.prepare(`
       INSERT OR IGNORE INTO locations (
         id, name, zone, description, highlights, danger_level, coord_x, coord_y, is_secret
@@ -98,20 +94,69 @@ export const initializeDatabase = ({ reset = false } = {}) => {
       );
     }
 
+    // 4. Clubs
+    const insertClub = db.prepare(`
+      INSERT OR IGNORE INTO clubs (
+        id, name, description, lead_coordinator, meeting_schedule, activities, icon_name
+      ) VALUES (?, ?, ?, ?, ?, ?, ?)
+    `);
+    for (const c of seedData.clubs) {
+      insertClub.run(c.id, c.name, c.description, c.lead_coordinator, c.meeting_schedule, c.activities, c.icon_name);
+    }
+
     // 5. Pathways
     const insertPathway = db.prepare(`
       INSERT OR IGNORE INTO pathways (
-        id, from_location_id, to_location_id, name, path_type, is_unlocked, description
-      ) VALUES (?, ?, ?, ?, ?, ?, ?)
+        id, from_location_id, to_location_id, name, path_type, distance_meters, is_unlocked, description
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?)
     `);
     for (const p of seedData.pathways) {
       insertPathway.run(
         p.id, p.from_location_id, p.to_location_id, p.name,
-        p.path_type, p.is_unlocked, p.description
+        p.path_type, p.distance_meters, p.is_unlocked, p.description
       );
     }
 
-    // 6. Courses
+    // 6. Laboratories
+    const insertLab = db.prepare(`
+      INSERT OR IGNORE INTO laboratories (
+        id, name, code, description, location_id, faculty_in_charge, available_equipment, safety_guidelines
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+    `);
+    for (const lab of seedData.laboratories) {
+      insertLab.run(
+        lab.id, lab.name, lab.code, lab.description,
+        lab.location_id, lab.faculty_in_charge, lab.available_equipment, lab.safety_guidelines
+      );
+    }
+
+    // 7. Laboratory Resources
+    const insertLabRes = db.prepare(`
+      INSERT OR IGNORE INTO lab_resources (
+        id, lab_id, title, category, description, file_size, download_url
+      ) VALUES (?, ?, ?, ?, ?, ?, ?)
+    `);
+    for (const lr of seedData.labResources) {
+      insertLabRes.run(
+        lr.id, lr.lab_id, lr.title, lr.category, lr.description, lr.file_size, lr.download_url
+      );
+    }
+
+    // 8. Students
+    const insertStudent = db.prepare(`
+      INSERT OR IGNORE INTO students (
+        id, name, house_id, year, title, branch, languages, hobbies, fields_of_interest, skills,
+        wand, patronus, fav_subject, bio, avatar_url, points_contributed, academic_rank, is_current_user
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+    `);
+    for (const s of seedData.students) {
+      insertStudent.run(
+        s.id, s.name, s.house_id, s.year, s.title, s.branch, s.languages, s.hobbies, s.fields_of_interest, s.skills,
+        s.wand, s.patronus, s.fav_subject, s.bio, s.avatar_url, s.points_contributed, s.academic_rank, s.is_current_user
+      );
+    }
+
+    // 9. Courses
     const insertCourse = db.prepare(`
       INSERT OR IGNORE INTO courses (
         code, title, instructor, term, credits, description, location_id
@@ -124,7 +169,7 @@ export const initializeDatabase = ({ reset = false } = {}) => {
       );
     }
 
-    // 7. Learning Resources
+    // 10. Learning Resources
     const insertResource = db.prepare(`
       INSERT OR IGNORE INTO learning_resources (
         id, course_code, title, resource_type, author, rarity, content_snippet
@@ -137,20 +182,20 @@ export const initializeDatabase = ({ reset = false } = {}) => {
       );
     }
 
-    // 8. Events
+    // 11. Events
     const insertEvent = db.prepare(`
       INSERT OR IGNORE INTO events (
-        id, title, date_time, location_id, location_name, category, description, rsvp_count, is_active
-      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+        id, club_id, title, date_time, location_id, location_name, category, description, rsvp_count, is_active
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     `);
     for (const e of seedData.events) {
       insertEvent.run(
-        e.id, e.title, e.date_time, e.location_id, e.location_name,
+        e.id, e.club_id, e.title, e.date_time, e.location_id, e.location_name,
         e.category, e.description, e.rsvp_count, e.is_active
       );
     }
 
-    // 9. Event Registrations
+    // 12. Event Registrations
     const insertReg = db.prepare(`
       INSERT OR IGNORE INTO event_registrations (event_id, student_id)
       VALUES (?, ?)
@@ -159,33 +204,46 @@ export const initializeDatabase = ({ reset = false } = {}) => {
       insertReg.run(reg.event_id, reg.student_id);
     }
 
-    // 10. Sports Teams
+    // 13. Sports Disciplines
+    const insertSport = db.prepare(`
+      INSERT OR IGNORE INTO sports_disciplines (
+        id, name, category, description, team_size, venue, equipment, rules_summary, icon_name
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+    `);
+    for (const sp of seedData.sportsDisciplines) {
+      insertSport.run(
+        sp.id, sp.name, sp.category, sp.description, sp.team_size,
+        sp.venue, sp.equipment, sp.rules_summary, sp.icon_name
+      );
+    }
+
+    // 14. Sports Teams
     const insertTeam = db.prepare(`
       INSERT OR IGNORE INTO sports_teams (
-        id, name, house_id, captain, wins, losses, goal_differential, points, crest_color
-      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+        id, sport_id, name, house_id, captain, wins, losses, goal_differential, points, crest_color
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     `);
     for (const t of seedData.sportsTeams) {
       insertTeam.run(
-        t.id, t.name, t.house_id, t.captain, t.wins,
+        t.id, t.sport_id, t.name, t.house_id, t.captain, t.wins,
         t.losses, t.goal_differential, t.points, t.crest_color
       );
     }
 
-    // 11. Sports Matches
+    // 15. Sports Matches
     const insertMatch = db.prepare(`
       INSERT OR IGNORE INTO sports_matches (
-        id, home_team_id, away_team_id, match_date, venue, status, home_score, away_score, snitch_caught_by
-      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+        id, sport_id, home_team_id, away_team_id, match_date, venue, status, home_score, away_score, snitch_caught_by
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     `);
     for (const m of seedData.sportsMatches) {
       insertMatch.run(
-        m.id, m.home_team_id, m.away_team_id, m.match_date,
+        m.id, m.sport_id, m.home_team_id, m.away_team_id, m.match_date,
         m.venue, m.status, m.home_score, m.away_score, m.snitch_caught_by
       );
     }
 
-    // 12. Community Posts
+    // 16. Community Posts
     const insertPost = db.prepare(`
       INSERT OR IGNORE INTO community_posts (
         id, author_id, author_name, house_id, category, title, body, signature_count
@@ -198,7 +256,58 @@ export const initializeDatabase = ({ reset = false } = {}) => {
       );
     }
 
-    // 13. Mystery Puzzles
+    // 17. Student Council
+    const insertCouncil = db.prepare(`
+      INSERT OR IGNORE INTO student_council (
+        id, role, student_name, branch, office_hours, contact_email, avatar_url, announcements
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+    `);
+    for (const sc of seedData.studentCouncil) {
+      insertCouncil.run(
+        sc.id, sc.role, sc.student_name, sc.branch,
+        sc.office_hours, sc.contact_email, sc.avatar_url, sc.announcements
+      );
+    }
+
+    // 18. Complaints
+    const insertComplaint = db.prepare(`
+      INSERT OR IGNORE INTO complaints (
+        id, student_id, category, subject, description, priority, status, is_confidential
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+    `);
+    for (const comp of seedData.complaints) {
+      insertComplaint.run(
+        comp.id, comp.student_id, comp.category, comp.subject,
+        comp.description, comp.priority, comp.status, comp.is_confidential
+      );
+    }
+
+    // 19. Confessions
+    const insertConfession = db.prepare(`
+      INSERT OR IGNORE INTO confessions (
+        id, message, category, status, likes_count
+      ) VALUES (?, ?, ?, ?, ?)
+    `);
+    for (const conf of seedData.confessions) {
+      insertConfession.run(
+        conf.id, conf.message, conf.category, conf.status, conf.likes_count
+      );
+    }
+
+    // 20. Official Notices
+    const insertNotice = db.prepare(`
+      INSERT OR IGNORE INTO official_notices (
+        id, title, category, message, publication_date, expiry_date, priority, issuing_authority, is_verified
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+    `);
+    for (const n of seedData.officialNotices) {
+      insertNotice.run(
+        n.id, n.title, n.category, n.message, n.publication_date,
+        n.expiry_date, n.priority, n.issuing_authority, n.is_verified
+      );
+    }
+
+    // 21. Mystery Puzzles
     const insertPuzzle = db.prepare(`
       INSERT OR IGNORE INTO mystery_puzzles (
         id, title, question, options, correct_index, explanation, difficulty, chamber
@@ -211,7 +320,7 @@ export const initializeDatabase = ({ reset = false } = {}) => {
       );
     }
 
-    // 14. Daily Schedules
+    // 22. Daily Schedules
     const insertSchedule = db.prepare(`
       INSERT OR IGNORE INTO daily_schedules (
         id, student_id, time_slot, subject, instructor, location, status, notes
@@ -224,7 +333,7 @@ export const initializeDatabase = ({ reset = false } = {}) => {
       );
     }
 
-    // 15. Potion Ingredients
+    // 23. Potion Ingredients
     const insertIngredient = db.prepare(`
       INSERT OR IGNORE INTO potion_ingredients (
         id, name, potency, stability, color, description
@@ -243,19 +352,23 @@ export const initializeDatabase = ({ reset = false } = {}) => {
   // Print summary counts
   const tables = [
     'houses',
-    'students',
     'locations',
+    'clubs',
     'pathways',
+    'laboratories',
+    'lab_resources',
+    'students',
     'courses',
-    'learning_resources',
-    'events',
-    'event_registrations',
+    'sports_disciplines',
     'sports_teams',
     'sports_matches',
+    'student_council',
+    'complaints',
+    'confessions',
+    'official_notices',
     'community_posts',
-    'mystery_puzzles',
-    'daily_schedules',
-    'potion_ingredients'
+    'events',
+    'daily_schedules'
   ];
 
   console.log('[Database] Table statistics:');
@@ -265,7 +378,7 @@ export const initializeDatabase = ({ reset = false } = {}) => {
   }
 };
 
-// Allow direct CLI execution
+// Direct CLI execution
 if (process.argv[1] === fileURLToPath(import.meta.url)) {
   const resetFlag = process.argv.includes('--reset');
   try {

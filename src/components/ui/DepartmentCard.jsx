@@ -1,139 +1,45 @@
 import React from "react";
 import { Link } from "react-router-dom";
-import {
-  Compass,
-  Users,
-  Trophy,
-  BookOpen,
-  Flame,
-  Shield,
-  Sparkles,
-  ArrowRight,
-} from "lucide-react";
-
-const ICON_MAP = {
-  Compass,
-  Users,
-  Trophy,
-  BookOpen,
-  Flame,
-  Shield,
-  Sparkles,
-};
+import { ArrowRight } from "lucide-react";
+import "./DepartmentCard.css";
 
 export default function DepartmentCard({ department }) {
-  const IconComponent = ICON_MAP[department.iconName] || Compass;
-
   return (
     <Link
       to={department.slug}
-      className="department-card-link"
-      style={{ textDecoration: "none", display: "block", height: "100%" }}
+      className="arched-dept-card-link"
+      aria-label={`Enter ${department.title}`}
     >
-      <div
-        className="magical-card ornate-corners department-card"
-        style={{
-          height: "100%",
-          display: "flex",
-          flexDirection: "column",
-          justifyContent: "space-between",
-          borderTop: `2px solid ${department.accentColor}`,
-          position: "relative",
-          background: "linear-gradient(180deg, rgba(21, 29, 53, 0.85) 0%, rgba(11, 16, 32, 0.95) 100%)",
-        }}
-      >
-        <div>
-          {/* Header row: Icon & Tag */}
-          <div
-            style={{
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "space-between",
-              marginBottom: "1.2rem",
-            }}
-          >
-            <div
-              style={{
-                width: "48px",
-                height: "48px",
-                borderRadius: "var(--radius-md)",
-                background: `radial-gradient(circle at 50% 50%, rgba(214, 180, 106, 0.15), rgba(21, 29, 53, 0.6))`,
-                border: `1px solid ${department.accentColor}55`,
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                color: department.accentColor,
-                boxShadow: `0 0 12px ${department.accentColor}25`,
-              }}
-            >
-              <IconComponent size={22} />
-            </div>
-
-            <span
-              className="badge-gold"
-              style={{
-                fontSize: "0.68rem",
-                borderColor: `${department.accentColor}66`,
-                color: department.accentColor,
-              }}
-            >
-              {department.tag}
-            </span>
+      <div className="arched-dept-card">
+        {/* Ornate Arched Image Frame */}
+        <div className="card-arch-frame">
+          {/* Top Filigree Jewel Ornament */}
+          <div className="card-top-crest" aria-hidden="true">
+            <span className="crest-jewel" style={{ background: department.accentColor || "var(--antique-gold)" }} />
           </div>
 
-          {/* Department Title */}
-          <h3
-            style={{
-              fontSize: "1.22rem",
-              marginBottom: "0.65rem",
-              color: "var(--ivory)",
-              fontFamily: "var(--font-display)",
-              letterSpacing: "0.03em",
-            }}
-          >
-            {department.title}
-          </h3>
+          {/* Arched Illustration */}
+          <div className="card-img-wrapper">
+            <img
+              src={department.image}
+              alt={department.title}
+              className="card-illustration"
+              loading="lazy"
+            />
+            {/* Inner Atmospheric Shadow */}
+            <div className="card-inner-vignette" />
+          </div>
 
-          {/* Department Description */}
-          <p
-            style={{
-              fontSize: "0.88rem",
-              color: "var(--parchment-muted)",
-              lineHeight: 1.55,
-              marginBottom: "1.2rem",
-            }}
-          >
-            {department.description}
-          </p>
+          {/* Golden Gilded Border Overlay */}
+          <div className="card-gilded-border" />
         </div>
 
-        {/* Footer: Snippet & Enter Link */}
-        <div
-          style={{
-            borderTop: "1px solid rgba(214, 180, 106, 0.12)",
-            paddingTop: "0.85rem",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "space-between",
-            fontSize: "0.78rem",
-            fontFamily: "var(--font-display)",
-            color: "var(--antique-gold)",
-          }}
-        >
-          <span style={{ color: "var(--parchment-muted)", fontStyle: "italic", fontFamily: "var(--font-literary)", fontSize: "0.88rem" }}>
-            {department.bannerSnippet}
-          </span>
-          <span
-            style={{
-              display: "inline-flex",
-              alignItems: "center",
-              gap: "0.3rem",
-              fontWeight: 600,
-              letterSpacing: "0.05em",
-            }}
-          >
-            Enter <ArrowRight size={14} />
-          </span>
+        {/* Card Label & Navigation Indicator */}
+        <div className="card-content-area">
+          <h3 className="card-dept-title">{department.title}</h3>
+          <div className="card-arrow-indicator" aria-hidden="true">
+            <ArrowRight size={14} />
+          </div>
         </div>
       </div>
     </Link>

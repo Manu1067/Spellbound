@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import {
   Users,
@@ -10,38 +10,111 @@ import {
   Shield,
   Check,
   X,
+  HeartHandshake,
+  BookOpen,
+  Globe,
+  Compass,
+  Award,
+  Filter,
+  Info
 } from "lucide-react";
-import { studentDirectory } from "../../data/mockData";
+import { getStudents, getLikeMindedStudents, dispatchOwl } from "../../services/api";
+import { studentDirectory as fallbackStudents, currentUser } from "../../data/mockData";
 import MagicalButton from "../../components/ui/MagicalButton";
 import "./PeoplePage.css";
 
-const HOUSES = ["All Houses", "Ravencrest", "Gryphonhart", "Shadowvale", "Emberwyrm"];
+const HOUSES = ["All Houses", "Gryffindor", "Slytherin", "Ravenclaw", "Hufflepuff"];
+const BRANCHES = [
+  "All",
+  "Computer Science & Arcana",
+  "Mechanical Alchemical Engineering",
+  "Electronics & Optical Engineering",
+  "Civil & Sustainable Infrastructure",
+  "Physics & Applied Celestial Mechanics"
+];
+const LANGUAGES = ["All", "English", "Hindi", "French", "German", "Spanish", "Telugu", "Tamil", "Japanese"];
+const INTERESTS = [
+  "All",
+  "Artificial Intelligence",
+  "Chronomancy",
+  "Quantum Arithmancy",
+  "Cyber Security",
+  "Robotics",
+  "Semiconductors & C2S",
+  "Sustainable Magic",
+  "Astrophysics"
+];
 
 export default function PeoplePage() {
+  const [students, setStudents] = useState(fallbackStudents);
   const [selectedHouse, setSelectedHouse] = useState("All Houses");
+  const [selectedBranch, setSelectedBranch] = useState("All");
+  const [selectedLanguage, setSelectedLanguage] = useState("All");
+  const [selectedInterest, setSelectedInterest] = useState("All");
   const [searchQuery, setSearchQuery] = useState("");
   const [activeDossier, setActiveDossier] = useState(null);
   const [owlModalTarget, setOwlModalTarget] = useState(null);
   const [owlMessage, setOwlMessage] = useState("");
   const [sentToast, setSentToast] = useState("");
+  const [isSendingOwl, setIsSendingOwl] = useState(false);
 
-  const filteredStudents = studentDirectory.filter((s) => {
-    const matchesHouse = selectedHouse === "All Houses" || s.house === selectedHouse;
-    const matchesQuery =
-      s.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      s.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      s.favSubject.toLowerCase().includes(searchQuery.toLowerCase());
-    return matchesHouse && matchesQuery;
-  });
+  // Like-minded matching mode
+  const [isLikeMindedMode, setIsLikeMindedMode] = useState(false);
+  const [likeMindedMatches, setLikeMindedMatches] = useState([]);
+  const [isLoadingMatches, setIsLoadingMatches] = useState(false);
 
-  const handleSendOwl = (e) => {
+  useEffect(() => {
+    let mounted = true;
+    getStudents({
+      house: selectedHouse,
+      branch: selectedBranch,
+      language: selectedLanguage,
+      interest: selectedInterest,
+      search: searchQuery
+    })
+      .then((data) => {
+        if (mounted && Array.isArray(data)) {
+          setStudents(data);
+        }
+      })
+      .catch((err) => console.warn("Using fallback students:", err));
+    return () => { mounted = false; };
+  }, [selectedHouse, selectedBranch, selectedLanguage, selectedInterest, searchQuery]);
+
+  const handleToggleLikeMinded = async () => {
+    if (!isLikeMindedMode) {
+      setIsLoadingMatches(true);
+      try {
+        const result = await getLikeMindedStudents(currentUser.id);
+        setLikeMindedMatches(result.matches || []);
+        setIsLikeMindedMode(true);
+      } catch (err) {
+        console.error("Match error:", err);
+      } finally {
+        setIsLoadingMatches(false);
+      }
+    } else {
+      setIsLikeMindedMode(false);
+    }
+  };
+
+  const handleSendOwl = async (e) => {
     e.preventDefault();
-    if (!owlMessage.trim()) return;
-    const recipient = owlModalTarget.name;
-    setOwlModalTarget(null);
-    setOwlMessage("");
-    setSentToast(`A snowy owl was dispatched with your parchment scroll to ${recipient}!`);
-    setTimeout(() => setSentToast(""), 5000);
+    if (!owlMessage.trim() || !owlModalTarget) return;
+
+    setIsSendingOwl(true);
+    try {
+      await dispatchOwl(owlModalTarget.id, owlMessage);
+      const recipient = owlModalTarget.name;
+      setOwlModalTarget(null);
+      setOwlMessage("");
+      setSentToast(`An enchanted owl has departed with your parchment dispatch to ${recipient}!`);
+      setTimeout(() => setSentToast(""), 6000);
+    } catch (err) {
+      console.error("Owl dispatch error:", err);
+    } finally {
+      setIsSendingOwl(false);
+    }
   };
 
   return (
@@ -63,30 +136,42 @@ export default function PeoplePage() {
           <ArrowLeft size={14} /> Return to Academy Hall
         </Link>
 
-        <div style={{ display: "flex", alignItems: "center", gap: "0.8rem", marginBottom: "0.4rem" }}>
-          <div
-            style={{
-              width: "42px",
-              height: "42px",
-              borderRadius: "var(--radius-sm)",
-              background: "rgba(121, 194, 164, 0.15)",
-              border: "1px solid #79C2A4",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              color: "#79C2A4",
-            }}
+        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: "1rem", marginBottom: "0.4rem" }}>
+          <div style={{ display: "flex", alignItems: "center", gap: "0.8rem" }}>
+            <div
+              style={{
+                width: "44px",
+                height: "44px",
+                borderRadius: "var(--radius-sm)",
+                background: "rgba(121, 194, 164, 0.15)",
+                border: "1px solid #79C2A4",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                color: "#79C2A4",
+              }}
+            >
+              <Users size={26} />
+            </div>
+            <div>
+              <h1 style={{ fontSize: "1.85rem", color: "var(--ivory)", fontFamily: "var(--font-display)" }}>
+                People of the Wizarding World: Student Directory & Affinity
+              </h1>
+              <p style={{ color: "var(--parchment-muted)", fontSize: "0.92rem" }}>
+                Discover fellow scholars, filter by academic branch, languages, and hobbies, and connect with like-minded peers.
+              </p>
+            </div>
+          </div>
+
+          {/* Find Like-Minded Students Action Button */}
+          <MagicalButton
+            onClick={handleToggleLikeMinded}
+            variant={isLikeMindedMode ? "primary" : "secondary"}
+            size="md"
+            icon={HeartHandshake}
           >
-            <Users size={24} />
-          </div>
-          <div>
-            <h1 style={{ fontSize: "1.85rem", color: "var(--ivory)", fontFamily: "var(--font-display)" }}>
-              People of the Wizarding World: The Living Register
-            </h1>
-            <p style={{ color: "var(--parchment-muted)", fontSize: "0.92rem" }}>
-              Gilded portraits, lineage records & magical companions across the Four Houses.
-            </p>
-          </div>
+            {isLikeMindedMode ? "View Full Directory" : "✦ Find Like-Minded Students"}
+          </MagicalButton>
         </div>
       </div>
 
@@ -96,7 +181,7 @@ export default function PeoplePage() {
           className="badge-emerald"
           style={{
             padding: "0.8rem 1.2rem",
-            fontSize: "0.86rem",
+            fontSize: "0.88rem",
             display: "flex",
             alignItems: "center",
             gap: "0.6rem",
@@ -109,267 +194,372 @@ export default function PeoplePage() {
         </div>
       )}
 
-      {/* Filter & Search Bar */}
-      <div
-        style={{
-          display: "flex",
-          justifyContent: "space-between",
-          alignItems: "center",
-          gap: "1rem",
-          flexWrap: "wrap",
-          padding: "1rem 1.2rem",
-          background: "rgba(21, 29, 53, 0.6)",
-          borderRadius: "var(--radius-md)",
-          border: "1px solid var(--antique-gold-border)",
-        }}
-      >
-        {/* House Filter Tabs */}
-        <div style={{ display: "flex", gap: "0.5rem", flexWrap: "wrap" }}>
-          {HOUSES.map((h) => (
-            <button
-              key={h}
-              onClick={() => setSelectedHouse(h)}
-              style={{
-                padding: "0.4rem 0.85rem",
-                borderRadius: "var(--radius-round)",
-                fontFamily: "var(--font-display)",
-                fontSize: "0.76rem",
-                letterSpacing: "0.04em",
-                cursor: "pointer",
-                background: selectedHouse === h ? "var(--antique-gold)" : "rgba(11, 16, 32, 0.6)",
-                color: selectedHouse === h ? "var(--midnight)" : "var(--parchment)",
-                border: `1px solid ${selectedHouse === h ? "var(--antique-gold-bright)" : "rgba(214, 180, 106, 0.2)"}`,
-                transition: "var(--transition-fast)",
-                fontWeight: selectedHouse === h ? 700 : 500,
-              }}
-            >
-              {h}
-            </button>
-          ))}
-        </div>
-
-        {/* Search Input */}
-        <div
-          style={{
-            display: "flex",
-            alignItems: "center",
-            gap: "0.5rem",
-            background: "rgba(11, 16, 32, 0.7)",
-            border: "1px solid var(--antique-gold-border)",
-            borderRadius: "var(--radius-round)",
-            padding: "0.35rem 0.8rem",
-            minWidth: "240px",
-          }}
-        >
-          <Search size={14} color="var(--antique-gold)" />
-          <input
-            type="text"
-            placeholder="Search adepts by name or subject..."
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-            style={{
-              background: "transparent",
-              border: "none",
-              color: "var(--ivory)",
-              fontSize: "0.82rem",
-              fontFamily: "var(--font-sans)",
-              outline: "none",
-              width: "100%",
-            }}
-          />
-        </div>
+      {/* Privacy & Ethical Discovery Notice */}
+      <div className="people-privacy-banner">
+        <Info size={18} color="#79C2A4" style={{ flexShrink: 0 }} />
+        <span>
+          <strong>Consent-Based Directory:</strong> Profiles are published with student consent for collaborative academic exploration, project partnering, and peer mentorship. Private owl addresses and sensitive personal contact records are strictly confidential.
+        </span>
       </div>
 
-      {/* Student Portraits Grid */}
-      <div className="portrait-grid">
-        {filteredStudents.map((person) => {
-          const isRaven = person.house === "Ravencrest";
-          const isGryph = person.house === "Gryphonhart";
-          const isShadow = person.house === "Shadowvale";
+      {/* Like-Minded Algorithm Explainer Banner (When Active) */}
+      {isLikeMindedMode && (
+        <div className="like-minded-header-card ornate-corners anim-fade-in-up">
+          <div style={{ display: "flex", alignItems: "center", gap: "0.6rem", marginBottom: "0.4rem" }}>
+            <Sparkles size={18} color="var(--antique-gold-bright)" />
+            <h3 style={{ fontFamily: "var(--font-display)", color: "var(--antique-gold-bright)", fontSize: "1.15rem" }}>
+              Deterministic Affinity Match for {currentUser.name}
+            </h3>
+          </div>
+          <p style={{ color: "var(--parchment)", fontSize: "0.86rem", lineHeight: 1.5 }}>
+            Profiles ranked using transparent multi-attribute compatibility: shared academic interests (+3), shared hobbies (+2), shared languages (+2), and matching branch (+2). Shared attributes are highlighted on each card.
+          </p>
+        </div>
+      )}
 
-          const houseAccent = isRaven
-            ? "var(--antique-gold)"
-            : isGryph
-            ? "var(--burgundy-light)"
-            : isShadow
-            ? "#79C2A4"
-            : "#D48C45";
+      {/* Filter and Search Bar (When in Regular Directory Mode) */}
+      {!isLikeMindedMode && (
+        <div className="people-filters-bar">
+          <div className="people-search-box">
+            <Search size={16} color="var(--parchment-muted)" />
+            <input
+              type="text"
+              placeholder="Search by student name, academic branch, skills, or bio..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+            />
+          </div>
 
-          return (
-            <div key={person.id} className="portrait-card ornate-corners">
-              <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
-                {/* Circular Portrait Frame with Initials / Motif */}
-                <div
-                  className="portrait-frame"
-                  style={{
-                    borderColor: houseAccent,
-                    display: "flex",
-                    alignItems: "center",
-                    justifyContent: "center",
-                  }}
-                >
-                  <div
-                    style={{
-                      width: "100%",
-                      height: "100%",
-                      borderRadius: "50%",
-                      background: `linear-gradient(135deg, ${houseAccent}33, #0B1020)`,
-                      display: "flex",
-                      alignItems: "center",
-                      justifyContent: "center",
-                      fontFamily: "var(--font-decorative)",
-                      fontSize: "1.6rem",
-                      fontWeight: 700,
-                      color: "var(--ivory)",
-                      textShadow: `0 0 10px ${houseAccent}`,
-                    }}
-                  >
-                    {person.name.split(" ").map((n) => n[0]).join("")}
+          <div className="people-dropdowns-row">
+            {/* House Dropdown */}
+            <div className="select-wrapper">
+              <label>House:</label>
+              <select value={selectedHouse} onChange={(e) => setSelectedHouse(e.target.value)}>
+                {HOUSES.map((h) => (
+                  <option key={h} value={h}>{h}</option>
+                ))}
+              </select>
+            </div>
+
+            {/* Branch Dropdown */}
+            <div className="select-wrapper">
+              <label>Branch:</label>
+              <select value={selectedBranch} onChange={(e) => setSelectedBranch(e.target.value)}>
+                {BRANCHES.map((b) => (
+                  <option key={b} value={b}>{b}</option>
+                ))}
+              </select>
+            </div>
+
+            {/* Language Dropdown */}
+            <div className="select-wrapper">
+              <label>Language:</label>
+              <select value={selectedLanguage} onChange={(e) => setSelectedLanguage(e.target.value)}>
+                {LANGUAGES.map((l) => (
+                  <option key={l} value={l}>{l}</option>
+                ))}
+              </select>
+            </div>
+
+            {/* Interest Dropdown */}
+            <div className="select-wrapper">
+              <label>Field of Interest:</label>
+              <select value={selectedInterest} onChange={(e) => setSelectedInterest(e.target.value)}>
+                {INTERESTS.map((interest) => (
+                  <option key={interest} value={interest}>{interest}</option>
+                ))}
+              </select>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Student Cards Grid */}
+      {isLikeMindedMode ? (
+        /* Like-Minded Students Affinity View */
+        <div className="portrait-grid">
+          {isLoadingMatches ? (
+            <div style={{ color: "var(--parchment-muted)", textAlign: "center", padding: "3rem", gridColumn: "1 / -1" }}>
+              Calculating affinity vectors across the living register...
+            </div>
+          ) : likeMindedMatches.length === 0 ? (
+            <div style={{ color: "var(--parchment-muted)", textAlign: "center", padding: "3rem", gridColumn: "1 / -1" }}>
+              No affinity matches found matching current criteria.
+            </div>
+          ) : (
+            likeMindedMatches.map((matchItem) => {
+              const student = matchItem.student;
+              return (
+                <div key={student.id} className="portrait-card ornate-corners anim-fade-in-up">
+                  {/* Match Percentage Badge */}
+                  <div className="match-score-badge">
+                    <Sparkles size={13} />
+                    <span>{matchItem.matchPercentage}% Compatibility</span>
+                  </div>
+
+                  <div className="portrait-top">
+                    <div className="portrait-frame">
+                      <img src={student.avatarUrl} alt={student.name} className="avatar-img" />
+                    </div>
+                    <div>
+                      <span className="badge-gold" style={{ fontSize: "0.65rem", marginBottom: "0.2rem" }}>
+                        {student.house} · {student.year}
+                      </span>
+                      <h3 style={{ fontSize: "1.2rem", color: "var(--ivory)", fontFamily: "var(--font-display)" }}>
+                        {student.name}
+                      </h3>
+                      <p style={{ color: "var(--antique-gold)", fontSize: "0.8rem", fontWeight: "500" }}>
+                        {student.branch}
+                      </p>
+                    </div>
+                  </div>
+
+                  {/* Shared Attributes Highlight Section */}
+                  <div className="shared-attributes-box">
+                    <span className="shared-title">Shared Attributes With You:</span>
+                    <div className="shared-tags-container">
+                      {matchItem.sharedTags?.map((tag, idx) => (
+                        <span key={idx} className={`shared-tag tag-${tag.category.toLowerCase()}`}>
+                          {tag.label} <small>({tag.category})</small>
+                        </span>
+                      ))}
+                    </div>
+                  </div>
+
+                  <p style={{ color: "var(--parchment-muted)", fontSize: "0.85rem", lineHeight: 1.5, marginBottom: "1rem" }}>
+                    {student.bio?.slice(0, 110)}...
+                  </p>
+
+                  <div className="portrait-actions">
+                    <button
+                      onClick={() => setActiveDossier(student)}
+                      className="inspect-dossier-btn"
+                    >
+                      Inspect Dossier
+                    </button>
+                    <MagicalButton
+                      onClick={() => setOwlModalTarget(student)}
+                      variant="primary"
+                      size="sm"
+                      icon={Feather}
+                    >
+                      Send Owl
+                    </MagicalButton>
+                  </div>
+                </div>
+              );
+            })
+          )}
+        </div>
+      ) : (
+        /* Regular Directory Grid */
+        <div className="portrait-grid">
+          {students.length === 0 ? (
+            <div style={{ color: "var(--parchment-muted)", textAlign: "center", padding: "3rem", gridColumn: "1 / -1" }}>
+              No wizard scholars found matching your filters.
+            </div>
+          ) : (
+            students.map((student) => (
+              <div key={student.id} className="portrait-card ornate-corners">
+                <div className="portrait-top">
+                  <div className="portrait-frame">
+                    <img src={student.avatarUrl} alt={student.name} className="avatar-img" />
+                  </div>
+                  <div>
+                    <span className="badge-gold" style={{ fontSize: "0.65rem", marginBottom: "0.2rem" }}>
+                      {student.house} · {student.year}
+                    </span>
+                    <h3 style={{ fontSize: "1.2rem", color: "var(--ivory)", fontFamily: "var(--font-display)" }}>
+                      {student.name}
+                    </h3>
+                    <p style={{ color: "var(--antique-gold)", fontSize: "0.8rem", fontWeight: "500" }}>
+                      {student.branch}
+                    </p>
                   </div>
                 </div>
 
-                <span
-                  className="badge-gold"
-                  style={{
-                    fontSize: "0.68rem",
-                    borderColor: `${houseAccent}77`,
-                    color: houseAccent,
-                  }}
-                >
-                  {person.house}
-                </span>
-              </div>
+                <p style={{ color: "var(--parchment-muted)", fontSize: "0.85rem", lineHeight: 1.5, marginBottom: "0.8rem" }}>
+                  {student.bio?.slice(0, 110)}...
+                </p>
 
-              {/* Name & Academic Title */}
-              <h3 style={{ fontSize: "1.25rem", color: "var(--ivory)", fontFamily: "var(--font-display)", marginBottom: "0.2rem" }}>
-                {person.name}
-              </h3>
-              <p style={{ fontSize: "0.78rem", color: "var(--antique-gold)", fontFamily: "var(--font-display)", marginBottom: "0.6rem" }}>
-                {person.title} · {person.year}
-              </p>
-
-              {/* Biography excerpt */}
-              <p style={{ fontSize: "0.85rem", color: "var(--parchment)", lineHeight: 1.5, marginBottom: "1rem" }}>
-                {person.bio}
-              </p>
-
-              {/* Magical Specifications Quick List */}
-              <div
-                style={{
-                  background: "rgba(11, 16, 32, 0.5)",
-                  padding: "0.75rem",
-                  borderRadius: "var(--radius-sm)",
-                  border: "1px solid rgba(214, 180, 106, 0.12)",
-                  fontSize: "0.75rem",
-                  display: "flex",
-                  flexDirection: "column",
-                  gap: "0.35rem",
-                  marginBottom: "1.2rem",
-                }}
-              >
-                <div>
-                  <span style={{ color: "var(--parchment-muted)" }}>Wand: </span>
-                  <span style={{ color: "var(--ivory)" }}>{person.wand}</span>
+                {/* Tags Row */}
+                <div className="student-tags-preview">
+                  <div className="tag-group">
+                    <strong>Interests:</strong>
+                    <span>{student.fieldsOfInterest?.slice(0, 2).join(", ")}</span>
+                  </div>
+                  <div className="tag-group">
+                    <strong>Languages:</strong>
+                    <span>{student.languages?.slice(0, 3).join(", ")}</span>
+                  </div>
                 </div>
-                <div>
-                  <span style={{ color: "var(--parchment-muted)" }}>Spirit Guardian: </span>
-                  <span style={{ color: "var(--antique-gold-bright)" }}>{person.patronus}</span>
-                </div>
-                <div>
-                  <span style={{ color: "var(--parchment-muted)" }}>Focus Subject: </span>
-                  <span style={{ color: "#79C2A4" }}>{person.favSubject}</span>
+
+                <div className="portrait-actions">
+                  <button
+                    onClick={() => setActiveDossier(student)}
+                    className="inspect-dossier-btn"
+                  >
+                    Inspect Dossier
+                  </button>
+                  <MagicalButton
+                    onClick={() => setOwlModalTarget(student)}
+                    variant="primary"
+                    size="sm"
+                    icon={Feather}
+                  >
+                    Send Owl
+                  </MagicalButton>
                 </div>
               </div>
+            ))
+          )}
+        </div>
+      )}
 
-              {/* Actions: Send Owl Dispatch */}
-              <div style={{ display: "flex", gap: "0.6rem" }}>
-                <MagicalButton
-                  onClick={() => setOwlModalTarget(person)}
-                  variant="primary"
-                  size="sm"
-                  icon={Feather}
-                  style={{ flex: 1 }}
-                >
-                  Send Owl Post
-                </MagicalButton>
+      {/* Dossier Modal */}
+      {activeDossier && (
+        <div className="modal-backdrop" onClick={() => setActiveDossier(null)}>
+          <div className="dossier-modal ornate-corners" onClick={(e) => e.stopPropagation()}>
+            <div className="modal-header">
+              <div style={{ display: "flex", alignItems: "center", gap: "0.8rem" }}>
+                <div className="dossier-avatar-frame">
+                  <img src={activeDossier.avatarUrl} alt={activeDossier.name} />
+                </div>
+                <div>
+                  <span className="badge-gold">{activeDossier.house} · {activeDossier.year}</span>
+                  <h2 style={{ fontSize: "1.5rem", color: "var(--ivory)", fontFamily: "var(--font-display)" }}>
+                    {activeDossier.name}
+                  </h2>
+                  <p style={{ color: "var(--antique-gold)", fontSize: "0.88rem" }}>
+                    {activeDossier.branch}
+                  </p>
+                </div>
               </div>
+              <button onClick={() => setActiveDossier(null)} className="modal-close-btn">
+                <X size={20} />
+              </button>
             </div>
-          );
-        })}
-      </div>
 
-      {/* Send Owl Post Modal */}
+            <div className="dossier-body">
+              <div className="dossier-section">
+                <h4>Biography & Academic Focus</h4>
+                <p>{activeDossier.bio}</p>
+              </div>
+
+              <div className="dossier-grid">
+                <div className="dossier-field">
+                  <strong>Languages Spoken:</strong>
+                  <div className="dossier-pills">
+                    {activeDossier.languages?.map((l, i) => (
+                      <span key={i} className="pill-lang">{l}</span>
+                    ))}
+                  </div>
+                </div>
+
+                <div className="dossier-field">
+                  <strong>Hobbies & Pursuits:</strong>
+                  <div className="dossier-pills">
+                    {activeDossier.hobbies?.map((h, i) => (
+                      <span key={i} className="pill-hobby">{h}</span>
+                    ))}
+                  </div>
+                </div>
+
+                <div className="dossier-field">
+                  <strong>Fields of Interest:</strong>
+                  <div className="dossier-pills">
+                    {activeDossier.fieldsOfInterest?.map((f, i) => (
+                      <span key={i} className="pill-interest">{f}</span>
+                    ))}
+                  </div>
+                </div>
+
+                <div className="dossier-field">
+                  <strong>Skills & Collaboration:</strong>
+                  <div className="dossier-pills">
+                    {activeDossier.skills?.map((s, i) => (
+                      <span key={i} className="pill-skill">{s}</span>
+                    ))}
+                  </div>
+                </div>
+              </div>
+
+              {activeDossier.wand && (
+                <div className="dossier-lore-row">
+                  <div><strong>Wand:</strong> {activeDossier.wand}</div>
+                  <div><strong>Patronus:</strong> {activeDossier.patronus}</div>
+                </div>
+              )}
+            </div>
+
+            <div className="dossier-footer">
+              <span className="consent-label">
+                <Shield size={14} /> Consent-based directory profile
+              </span>
+              <MagicalButton
+                onClick={() => {
+                  setOwlModalTarget(activeDossier);
+                  setActiveDossier(null);
+                }}
+                variant="primary"
+                size="md"
+                icon={Feather}
+              >
+                Dispatch Owl Parchment
+              </MagicalButton>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Send Owl Modal */}
       {owlModalTarget && (
-        <div
-          style={{
-            position: "fixed",
-            inset: 0,
-            zIndex: "var(--z-modal)",
-            background: "rgba(5, 8, 17, 0.75)",
-            backdropFilter: "blur(6px)",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            padding: "1rem",
-          }}
-          onClick={() => setOwlModalTarget(null)}
-        >
-          <div
-            className="magical-card ornate-corners"
-            style={{
-              width: "480px",
-              maxWidth: "100%",
-              background: "linear-gradient(180deg, #151D35 0%, #0B1020 100%)",
-              border: "1px solid var(--antique-gold-border-bright)",
-              boxShadow: "var(--shadow-floating)",
-            }}
-            onClick={(e) => e.stopPropagation()}
-          >
-            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "1rem" }}>
-              <div style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
-                <Feather size={18} color="var(--antique-gold)" />
-                <h3 style={{ fontFamily: "var(--font-display)", fontSize: "1.1rem", color: "var(--ivory)" }}>
+        <div className="modal-backdrop" onClick={() => setOwlModalTarget(null)}>
+          <div className="owl-modal ornate-corners" onClick={(e) => e.stopPropagation()}>
+            <div className="modal-header">
+              <div style={{ display: "flex", alignItems: "center", gap: "0.6rem" }}>
+                <Feather size={20} color="var(--antique-gold)" />
+                <h3 style={{ fontFamily: "var(--font-display)", color: "var(--ivory)", fontSize: "1.2rem" }}>
                   Dispatch Owl to {owlModalTarget.name}
                 </h3>
               </div>
-              <button onClick={() => setOwlModalTarget(null)} style={{ color: "var(--parchment-muted)", cursor: "pointer" }}>
+              <button onClick={() => setOwlModalTarget(null)} className="modal-close-btn">
                 <X size={18} />
               </button>
             </div>
 
-            <p style={{ fontSize: "0.82rem", color: "var(--parchment)", marginBottom: "1rem" }}>
-              Compose your parchment scroll. The academy owls depart every quarter-hour from the West Aviary.
-            </p>
+            <form onSubmit={handleSendOwl} className="owl-form">
+              <p style={{ color: "var(--parchment-muted)", fontSize: "0.85rem" }}>
+                Inscribe your parchment scroll for peer study inquiries, academic project collaboration, or friendly greetings.
+              </p>
 
-            <textarea
-              autoFocus
-              rows={4}
-              placeholder="Inscribe your enchanted message..."
-              value={owlMessage}
-              onChange={(e) => setOwlMessage(e.target.value)}
-              style={{
-                width: "100%",
-                background: "rgba(11, 16, 32, 0.7)",
-                border: "1px solid var(--antique-gold-border)",
-                borderRadius: "var(--radius-sm)",
-                padding: "0.8rem",
-                color: "var(--ivory)",
-                fontFamily: "var(--font-literary)",
-                fontSize: "1rem",
-                resize: "vertical",
-                marginBottom: "1rem",
-                outline: "none",
-              }}
-            />
+              <textarea
+                rows={4}
+                placeholder="Inscribe your message with quill and enchanted ink..."
+                value={owlMessage}
+                onChange={(e) => setOwlMessage(e.target.value)}
+                required
+              />
 
-            <div style={{ display: "flex", justifyContent: "flex-end", gap: "0.8rem" }}>
-              <MagicalButton onClick={() => setOwlModalTarget(null)} variant="secondary" size="sm">
-                Cancel
-              </MagicalButton>
-              <MagicalButton onClick={handleSendOwl} variant="primary" size="sm" icon={Send}>
-                Seal & Release Owl
-              </MagicalButton>
-            </div>
+              <div style={{ display: "flex", justifyContent: "flex-end", gap: "0.8rem" }}>
+                <button
+                  type="button"
+                  onClick={() => setOwlModalTarget(null)}
+                  className="cancel-btn"
+                >
+                  Cancel
+                </button>
+                <MagicalButton
+                  type="submit"
+                  variant="primary"
+                  size="md"
+                  disabled={isSendingOwl}
+                  icon={Send}
+                >
+                  {isSendingOwl ? "Releasing Owl..." : "Release Owl Dispatch"}
+                </MagicalButton>
+              </div>
+            </form>
           </div>
         </div>
       )}

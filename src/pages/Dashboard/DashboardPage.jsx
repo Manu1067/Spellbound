@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import {
   Sparkles,
@@ -15,6 +15,11 @@ import {
   ArrowRight,
   Award,
   Zap,
+  MapPin,
+  Cpu,
+  HeartHandshake,
+  AlertTriangle,
+  Building
 } from "lucide-react";
 import {
   currentUser,
@@ -22,7 +27,10 @@ import {
   campusEvents as initialEvents,
   housesData,
   sevenDepartments,
+  campusLocations,
+  laboratoriesData
 } from "../../data/mockData";
+import { getLikeMindedStudents, getOfficialNotices } from "../../services/api";
 import MagicalButton from "../../components/ui/MagicalButton";
 import "./DashboardPage.css";
 
@@ -41,6 +49,27 @@ export default function DashboardPage() {
   const [events, setEvents] = useState(initialEvents);
   const [challengeSolved, setChallengeSolved] = useState(false);
   const [pointsBonus, setPointsBonus] = useState(0);
+  const [likeMindedMatches, setLikeMindedMatches] = useState([]);
+  const [urgentNotices, setUrgentNotices] = useState([]);
+
+  useEffect(() => {
+    let mounted = true;
+    getLikeMindedStudents()
+      .then((res) => {
+        if (mounted && res?.matches) setLikeMindedMatches(res.matches.slice(0, 3));
+      })
+      .catch(() => {});
+
+    getOfficialNotices()
+      .then((data) => {
+        if (mounted && Array.isArray(data)) {
+          setUrgentNotices(data.filter((n) => n.priority === "Urgent" || n.priority === "High").slice(0, 2));
+        }
+      })
+      .catch(() => {});
+
+    return () => { mounted = false; };
+  }, []);
 
   const toggleScheduleStatus = (id) => {
     setSchedule((prev) =>
@@ -62,7 +91,7 @@ export default function DashboardPage() {
           ? {
               ...e,
               isRsvp: !e.isRsvp,
-              rsvpCount: e.isRsvp ? e.rsvpCount - 1 : e.rsvpCount + 1,
+              rsvps: e.isRsvp ? e.rsvps - 1 : e.rsvps + 1,
             }
           : e
       )
@@ -83,15 +112,14 @@ export default function DashboardPage() {
         <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", flexWrap: "wrap", gap: "1rem" }}>
           <div>
             <div className="badge-gold" style={{ marginBottom: "0.6rem" }}>
-              Academic Term III · Active Adept
+              Academic Term III · Senior Adept Scholar
             </div>
             <h1 className="welcome-title">
               Welcome back, {currentUser.name}
             </h1>
             <p className="welcome-subtitle">
               Your House of {currentUser.house} currently holds 1st place in the
-              House Cup ledger. Your celestial readings for this evening show
-              favorable astral alignment for Potion Distillation.
+              House Cup ledger. Celestial ley-lines show high stability across the 5 specialized campus laboratories.
             </p>
           </div>
 
@@ -107,7 +135,7 @@ export default function DashboardPage() {
               House Points: {currentUser.pointsContributed + pointsBonus} pts
             </div>
             <span style={{ fontSize: "0.75rem", color: "var(--parchment-muted)" }}>
-              {currentUser.academicRank}
+              {currentUser.branch} · {currentUser.academicRank}
             </span>
           </div>
         </div>
@@ -124,10 +152,10 @@ export default function DashboardPage() {
           }}
         >
           <h3 style={{ fontSize: "1.1rem", fontFamily: "var(--font-display)", color: "var(--antique-gold)" }}>
-            Department Portals
+            Seven Academy Departments
           </h3>
           <span style={{ fontSize: "0.75rem", color: "var(--parchment-muted)" }}>
-            Direct Academy Shortcuts
+            Explore All Academy Portals
           </span>
         </div>
 
@@ -163,7 +191,7 @@ export default function DashboardPage() {
                     lineHeight: 1.25,
                   }}
                 >
-                  {dept.title.replace("Department", "")}
+                  {dept.title}
                 </span>
               </Link>
             );
@@ -171,9 +199,58 @@ export default function DashboardPage() {
         </div>
       </div>
 
-      {/* 3. Main Dashboard Two-Column Grid */}
+      {/* 3. Cross-Department Facilities Ribbon */}
+      <div className="facilities-ribbon-grid">
+        {/* 5 Campus Locations Quick Access */}
+        <div className="ribbon-card ornate-corners">
+          <div className="ribbon-card-header">
+            <div style={{ display: "flex", alignItems: "center", gap: "0.4rem" }}>
+              <MapPin size={16} color="var(--antique-gold)" />
+              <h4 style={{ fontFamily: "var(--font-display)", fontSize: "0.92rem", color: "var(--ivory)" }}>
+                Campus Facilities (5 Primary Locations)
+              </h4>
+            </div>
+            <Link to="/explore" style={{ fontSize: "0.72rem", color: "var(--antique-gold)" }}>
+              Open Map →
+            </Link>
+          </div>
+          <div className="facility-chips-row">
+            {campusLocations.map((loc) => (
+              <Link key={loc.id} to="/explore" className="facility-chip">
+                <span>{loc.name}</span>
+                <small>({loc.zone})</small>
+              </Link>
+            ))}
+          </div>
+        </div>
+
+        {/* 5 Academic Laboratories Quick Access */}
+        <div className="ribbon-card ornate-corners">
+          <div className="ribbon-card-header">
+            <div style={{ display: "flex", alignItems: "center", gap: "0.4rem" }}>
+              <Cpu size={16} color="#79C2A4" />
+              <h4 style={{ fontFamily: "var(--font-display)", fontSize: "0.92rem", color: "var(--ivory)" }}>
+                Academic Laboratories (5 Practical Labs)
+              </h4>
+            </div>
+            <Link to="/academics" style={{ fontSize: "0.72rem", color: "var(--antique-gold)" }}>
+              All Labs →
+            </Link>
+          </div>
+          <div className="facility-chips-row">
+            {laboratoriesData.map((lab) => (
+              <Link key={lab.id} to="/academics" className="facility-chip lab-chip">
+                <span>{lab.name}</span>
+                <small>[{lab.code}]</small>
+              </Link>
+            ))}
+          </div>
+        </div>
+      </div>
+
+      {/* 4. Main Dashboard Two-Column Grid */}
       <div className="dashboard-grid-main">
-        {/* Left Column: Schedule & Featured Challenge */}
+        {/* Left Column: Schedule, Like-Minded Peers & Events */}
         <div style={{ display: "flex", flexDirection: "column", gap: "2rem" }}>
           {/* Daily Challenge Card */}
           <div className="magical-card challenge-card ornate-corners">
@@ -220,6 +297,49 @@ export default function DashboardPage() {
             </div>
           </div>
 
+          {/* Recommended Like-Minded Students Widget */}
+          {likeMindedMatches.length > 0 && (
+            <div className="magical-card ornate-corners">
+              <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "1.2rem" }}>
+                <div style={{ display: "flex", alignItems: "center", gap: "0.6rem" }}>
+                  <HeartHandshake size={18} color="#79C2A4" />
+                  <h3 style={{ fontSize: "1.15rem", color: "var(--ivory)" }}>
+                    Recommended Like-Minded Peers
+                  </h3>
+                </div>
+                <Link to="/people" style={{ fontSize: "0.75rem", color: "var(--antique-gold)" }}>
+                  Full Directory →
+                </Link>
+              </div>
+
+              <div style={{ display: "flex", flexDirection: "column", gap: "0.8rem" }}>
+                {likeMindedMatches.map((m) => (
+                  <div key={m.student.id} className="peer-match-item">
+                    <div className="peer-avatar">
+                      <img src={m.student.avatarUrl} alt={m.student.name} />
+                    </div>
+                    <div style={{ flex: 1 }}>
+                      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+                        <span style={{ fontWeight: 600, color: "var(--ivory)", fontSize: "0.92rem" }}>
+                          {m.student.name}
+                        </span>
+                        <span className="badge-gold" style={{ fontSize: "0.65rem" }}>
+                          {m.matchPercentage}% Match
+                        </span>
+                      </div>
+                      <div style={{ fontSize: "0.74rem", color: "var(--antique-gold)" }}>
+                        {m.student.branch} · {m.student.house}
+                      </div>
+                      <div style={{ fontSize: "0.72rem", color: "var(--parchment-muted)", marginTop: "0.2rem" }}>
+                        Shared: {m.sharedTags?.slice(0, 3).map((t) => t.label).join(", ")}
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
           {/* Today's Schedule */}
           <div className="magical-card ornate-corners">
             <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "1.2rem" }}>
@@ -230,7 +350,7 @@ export default function DashboardPage() {
                 </h3>
               </div>
               <Link to="/academics" style={{ fontSize: "0.75rem", color: "var(--antique-gold)" }}>
-                View Full Syllabus →
+                View Labs & Syllabus →
               </Link>
             </div>
 
@@ -335,14 +455,14 @@ export default function DashboardPage() {
 
                   <div style={{ display: "flex", alignItems: "center", gap: "0.8rem" }}>
                     <span style={{ fontSize: "0.74rem", color: "var(--parchment-muted)" }}>
-                      {evt.rsvpCount} Attending
+                      {evt.rsvps} Attending
                     </span>
                     <MagicalButton
                       onClick={() => toggleEventRsvp(evt.id)}
-                      variant={evt.isRsvp ? "emerald" : "secondary"}
+                      variant={evt.isRsvp ? "secondary" : "primary"}
                       size="sm"
                     >
-                      {evt.isRsvp ? "RSVP Confirmed ✓" : "RSVP Pass"}
+                      {evt.isRsvp ? "RSVP'd ✓" : "RSVP Pass"}
                     </MagicalButton>
                   </div>
                 </div>
@@ -351,8 +471,41 @@ export default function DashboardPage() {
           </div>
         </div>
 
-        {/* Right Column: House Cup Leaderboard & Discipline Progress */}
+        {/* Right Column: House Cup, Urgent Notices & Activity */}
         <div style={{ display: "flex", flexDirection: "column", gap: "2rem" }}>
+          {/* Urgent Official Notices Widget */}
+          {urgentNotices.length > 0 && (
+            <div className="magical-card ornate-corners" style={{ borderColor: "#E05A47" }}>
+              <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "0.8rem" }}>
+                <div style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
+                  <AlertTriangle size={18} color="#E05A47" />
+                  <h3 style={{ fontSize: "1.1rem", color: "var(--ivory)" }}>
+                    Urgent Official Notices
+                  </h3>
+                </div>
+                <Link to="/mysteries" style={{ fontSize: "0.75rem", color: "#E05A47" }}>
+                  Mysteries Hub →
+                </Link>
+              </div>
+
+              <div style={{ display: "flex", flexDirection: "column", gap: "0.8rem" }}>
+                {urgentNotices.map((n) => (
+                  <div key={n.id} style={{ padding: "0.6rem 0.8rem", background: "rgba(11, 16, 32, 0.6)", borderRadius: "var(--radius-sm)", borderLeft: "3px solid #E05A47" }}>
+                    <span style={{ fontSize: "0.7rem", color: "#E05A47", fontWeight: "bold" }}>
+                      {n.priority} · {n.issuingAuthority}
+                    </span>
+                    <h5 style={{ color: "var(--ivory)", fontSize: "0.86rem", margin: "0.2rem 0" }}>
+                      {n.title}
+                    </h5>
+                    <p style={{ color: "var(--parchment-muted)", fontSize: "0.78rem", margin: 0 }}>
+                      {n.body.slice(0, 95)}...
+                    </p>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
           {/* House Cup Points Preview */}
           <div className="magical-card ornate-corners">
             <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "1.2rem" }}>
@@ -369,8 +522,8 @@ export default function DashboardPage() {
 
             <div>
               {housesData.map((h, i) => {
-                const maxPoints = 1500;
-                const points = h.id === "ravencrest" ? h.points + pointsBonus : h.points;
+                const maxPoints = 1600;
+                const points = h.id === "ravenclaw" ? h.points + pointsBonus : h.points;
                 const percentage = Math.round((points / maxPoints) * 100);
 
                 return (
@@ -389,7 +542,7 @@ export default function DashboardPage() {
                         className="house-progress-fill"
                         style={{
                           width: `${percentage}%`,
-                          backgroundColor: h.crestColor === "#151D35" ? "var(--antique-gold)" : h.crestColor,
+                          backgroundColor: h.crestColor,
                           boxShadow: `0 0 8px ${h.accentColor}44`,
                         }}
                       />
@@ -400,68 +553,34 @@ export default function DashboardPage() {
             </div>
 
             <p style={{ fontSize: "0.74rem", color: "var(--parchment-muted)", fontStyle: "italic", marginTop: "0.5rem" }}>
-              Updated automatically via the enchanted hourglasses in the Great Hall.
+              Synchronized with the Great Hall gem hourglasses.
             </p>
           </div>
 
-          {/* Magical Discipline Mastery */}
+          {/* Sports Department Summary */}
           <div className="magical-card ornate-corners">
-            <h3 style={{ fontSize: "1.1rem", marginBottom: "1rem", color: "var(--ivory)" }}>
-              Year V Discipline Mastery
-            </h3>
-
-            <div style={{ display: "flex", flexDirection: "column", gap: "0.9rem" }}>
-              {[
-                { name: "Celestial Arithmancy", level: 91, color: "var(--antique-gold)" },
-                { name: "Volatile Potion Alchemy", level: 94, color: "#79C2A4" },
-                { name: "Charms & Incantations", level: 88, color: "#AA8438" },
-                { name: "Counter-Curse Defense", level: 76, color: "#E288A1" },
-              ].map((disc) => (
-                <div key={disc.name}>
-                  <div style={{ display: "flex", justifyContent: "space-between", fontSize: "0.78rem", marginBottom: "0.25rem" }}>
-                    <span style={{ color: "var(--ivory)" }}>{disc.name}</span>
-                    <span style={{ color: disc.color, fontWeight: 600 }}>{disc.level}%</span>
-                  </div>
-                  <div style={{ height: "6px", background: "rgba(11, 16, 32, 0.6)", borderRadius: "var(--radius-round)", overflow: "hidden" }}>
-                    <div
-                      style={{
-                        height: "100%",
-                        width: `${disc.level}%`,
-                        backgroundColor: disc.color,
-                        boxShadow: `0 0 6px ${disc.color}`,
-                      }}
-                    />
-                  </div>
-                </div>
-              ))}
+            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "0.8rem" }}>
+              <div style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
+                <Trophy size={18} color="var(--antique-gold)" />
+                <h3 style={{ fontSize: "1.1rem", color: "var(--ivory)" }}>
+                  Athletics & Sports Hub
+                </h3>
+              </div>
+              <Link to="/sports" style={{ fontSize: "0.75rem", color: "var(--antique-gold)" }}>
+                Fixtures →
+              </Link>
             </div>
-          </div>
 
-          {/* Recent Campus Activity */}
-          <div className="magical-card ornate-corners">
-            <h3 style={{ fontSize: "1.1rem", marginBottom: "0.8rem", color: "var(--ivory)" }}>
-              Recent Dispatches & Lore
-            </h3>
+            <p style={{ fontSize: "0.82rem", color: "var(--parchment)", marginBottom: "0.8rem" }}>
+              9 active disciplines (6 Outdoor + 3 Indoor) open for squad trials:
+            </p>
 
-            <div style={{ display: "flex", flexDirection: "column", gap: "0.7rem", fontSize: "0.78rem" }}>
-              <div style={{ borderLeft: "2px solid var(--antique-gold)", paddingLeft: "0.6rem" }}>
-                <p style={{ color: "var(--ivory)", margin: 0 }}>
-                  Earned 25 House Points in Potion Brewing Laboratory
-                </p>
-                <span style={{ color: "var(--parchment-muted)", fontSize: "0.7rem" }}>2 hours ago</span>
-              </div>
-              <div style={{ borderLeft: "2px solid #79C2A4", paddingLeft: "0.6rem" }}>
-                <p style={{ color: "var(--ivory)", margin: 0 }}>
-                  Discovered hidden passage behind Grand Library Tapestry
-                </p>
-                <span style={{ color: "var(--parchment-muted)", fontSize: "0.7rem" }}>5 hours ago</span>
-              </div>
-              <div style={{ borderLeft: "2px solid var(--antique-gold)", paddingLeft: "0.6rem" }}>
-                <p style={{ color: "var(--ivory)", margin: 0 }}>
-                  Encrypted owl scroll received from Arch-Magister Valerius
-                </p>
-                <span style={{ color: "var(--parchment-muted)", fontSize: "0.7rem" }}>Yesterday</span>
-              </div>
+            <div style={{ display: "flex", flexWrap: "wrap", gap: "0.35rem" }}>
+              {["Volleyball", "Kho-Kho", "Kabaddi", "Football", "Throwball", "Badminton", "Chess", "Carroms", "Table Tennis"].map((s) => (
+                <span key={s} className="badge-gold" style={{ fontSize: "0.68rem" }}>
+                  {s}
+                </span>
+              ))}
             </div>
           </div>
         </div>

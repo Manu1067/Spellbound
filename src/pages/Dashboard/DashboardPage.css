@@ -129,3 +129,91 @@
     grid-template-columns: 1fr;
   }
 }
+
+/* Facilities Ribbon */
+.facilities-ribbon-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1.2rem;
+}
+
+.ribbon-card {
+  background: rgba(21, 29, 53, 0.7);
+  border: 1px solid var(--antique-gold-border);
+  border-radius: var(--radius-md);
+  padding: 1rem 1.2rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+}
+
+.ribbon-card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.facility-chips-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+}
+
+.facility-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  padding: 0.3rem 0.65rem;
+  background: rgba(11, 16, 32, 0.6);
+  border: 1px solid rgba(214, 180, 106, 0.2);
+  border-radius: var(--radius-round);
+  font-size: 0.75rem;
+  color: var(--ivory);
+  text-decoration: none;
+  transition: var(--transition-fast);
+}
+
+.facility-chip:hover {
+  background: rgba(214, 180, 106, 0.15);
+  border-color: var(--antique-gold);
+}
+
+.facility-chip small {
+  color: var(--antique-gold);
+}
+
+.facility-chip.lab-chip small {
+  color: #79C2A4;
+}
+
+/* Peer Match Item */
+.peer-match-item {
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+  padding: 0.65rem 0.8rem;
+  background: rgba(11, 16, 32, 0.5);
+  border: 1px solid rgba(214, 180, 106, 0.15);
+  border-radius: var(--radius-sm);
+}
+
+.peer-avatar {
+  width: 44px;
+  height: 44px;
+  border-radius: 50%;
+  border: 1.5px solid var(--antique-gold);
+  overflow: hidden;
+  flex-shrink: 0;
+}
+
+.peer-avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+@media (max-width: 900px) {
+  .facilities-ribbon-grid {
+    grid-template-columns: 1fr;
+  }
+}

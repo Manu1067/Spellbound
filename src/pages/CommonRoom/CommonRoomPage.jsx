@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import {
   Flame,
@@ -10,103 +10,91 @@ import {
   Sparkles,
   Users,
   X,
+  Search,
+  CheckCircle2,
+  Share2
 } from "lucide-react";
+import { getCommunityPosts, createCommunityPost, signCommunityPost } from "../../services/api";
+import { currentUser } from "../../data/mockData";
 import MagicalButton from "../../components/ui/MagicalButton";
 import "./CommonRoomPage.css";
 
-const INITIAL_NOTICES = [
-  {
-    id: "note-1",
-    author: "Lyra Valerius",
-    house: "Ravencrest",
-    category: "Study Circle",
-    title: "Ancient Runes Review for Eldoria Exam",
-    body: "Meeting tonight in the West Alcove at 20:00. Bring your copper translation styluses. Herbal tea provided.",
-    signatures: 8,
-    isSigned: false,
-    date: "1 hour ago",
-  },
-  {
-    id: "note-2",
-    author: "Cedric Blackthorn",
-    house: "Gryphonhart",
-    category: "Sports Gathering",
-    title: "Skyspire Slalom Practice Squad",
-    body: "Looking for two Chasers to practice crosswind evasions before Thursday's gale storm. High speed guaranteed.",
-    signatures: 14,
-    isSigned: true,
-    date: "3 hours ago",
-  },
-  {
-    id: "note-3",
-    author: "Thaddeus Thorne",
-    house: "Emberwyrm",
-    category: "Lost Artifact",
-    title: "Missing: Brass Armillary Lens",
-    body: "Misplaced near the Greenhouse 4 fountain. It whispers when pointed toward Orion. Generous reward of mandrake tea.",
-    signatures: 5,
-    isSigned: false,
-    date: "Yesterday",
-  },
-  {
-    id: "note-4",
-    author: "Isolde Ravenshadow",
-    house: "Shadowvale",
-    category: "Alchemical Trade",
-    title: "Trading Crushed Moonstone for Phoenix Ash",
-    body: "Have 3 drams of purified lunar dust. Looking to exchange for fresh pyrotechnic feather embers for potion finals.",
-    signatures: 7,
-    isSigned: false,
-    date: "Yesterday",
-  },
-];
+const CATEGORIES = ["All", "Study Circle", "Sports Gathering", "Academic Collaboration", "Lost Artifact"];
 
 export default function CommonRoomPage() {
-  const [notices, setNotices] = useState(INITIAL_NOTICES);
+  const [posts, setPosts] = useState([]);
+  const [activeCategory, setActiveCategory] = useState("All");
+  const [searchQuery, setSearchQuery] = useState("");
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [newTitle, setNewTitle] = useState("");
   const [newBody, setNewBody] = useState("");
   const [newCategory, setNewCategory] = useState("Study Circle");
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [toastMessage, setToastMessage] = useState("");
 
-  const toggleSign = (id) => {
-    setNotices((prev) =>
-      prev.map((n) =>
-        n.id === id
-          ? {
-              ...n,
-              isSigned: !n.isSigned,
-              signatures: n.isSigned ? n.signatures - 1 : n.signatures + 1,
-            }
-          : n
-      )
-    );
+  useEffect(() => {
+    let mounted = true;
+    getCommunityPosts(activeCategory)
+      .then((data) => {
+        if (mounted && Array.isArray(data)) setPosts(data);
+      })
+      .catch((err) => console.warn("Using fallback posts:", err));
+    return () => { mounted = false; };
+  }, [activeCategory]);
+
+  const toggleSign = async (id) => {
+    try {
+      await signCommunityPost(id);
+      setPosts((prev) =>
+        prev.map((p) => {
+          if (p.id === id) {
+            const nextSigned = !p.isSigned;
+            return {
+              ...p,
+              isSigned: nextSigned,
+              signatures: nextSigned ? p.signatures + 1 : Math.max(0, p.signatures - 1),
+            };
+          }
+          return p;
+        })
+      );
+    } catch (err) {
+      console.error("Sign error:", err);
+    }
   };
 
-  const handlePostNotice = (e) => {
+  const handlePostNotice = async (e) => {
     e.preventDefault();
     if (!newTitle.trim() || !newBody.trim()) return;
 
-    const newNote = {
-      id: `note-${Date.now()}`,
-      author: "Aris Thorne",
-      house: "Ravencrest",
-      category: newCategory,
-      title: newTitle,
-      body: newBody,
-      signatures: 1,
-      isSigned: true,
-      date: "Just now",
-    };
-
-    setNotices([newNote, ...notices]);
-    setIsModalOpen(false);
-    setNewTitle("");
-    setNewBody("");
+    setIsSubmitting(true);
+    try {
+      const created = await createCommunityPost(newTitle, newBody, newCategory);
+      setPosts([created, ...posts]);
+      setIsModalOpen(false);
+      setNewTitle("");
+      setNewBody("");
+      setToastMessage("Your parchment notice has been pinned to the Hearth Notice Board!");
+      setTimeout(() => setToastMessage(""), 5000);
+    } catch (err) {
+      console.error("Post error:", err);
+    } finally {
+      setIsSubmitting(false);
+    }
   };
+
+  const filteredPosts = posts.filter((p) => {
+    const matchesCat = activeCategory === "All" || p.category === activeCategory;
+    const matchesQuery =
+      p.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      p.body.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      p.author.toLowerCase().includes(searchQuery.toLowerCase());
+    return matchesCat && matchesQuery;
+  });
 
   return (
     <div className="common-room-container anim-fade-in-up">
-      {/* Return Path & Header */}
+      {/* Return to Dashboard & Header */}
       <div>
         <Link
           to="/dashboard"
@@ -123,46 +111,31 @@ export default function CommonRoomPage() {
           <ArrowLeft size={14} /> Return to Academy Hall
         </Link>
 
-        <div style={{ display: "flex", alignItems: "center", gap: "0.8rem", marginBottom: "0.4rem" }}>
-          <div
-            style={{
-              width: "42px",
-              height: "42px",
-              borderRadius: "var(--radius-sm)",
-              background: "rgba(212, 140, 69, 0.2)",
-              border: "1px solid #D48C45",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              color: "#D48C45",
-            }}
-          >
-            <Flame size={24} />
-          </div>
-          <div>
-            <h1 style={{ fontSize: "1.85rem", color: "var(--ivory)", fontFamily: "var(--font-display)" }}>
-              Wizarding Social Network: The Hearthside Noticeboard
-            </h1>
-            <p style={{ color: "var(--parchment-muted)", fontSize: "0.92rem" }}>
-              Hearthside fellowship, quill notices & study circles by the crackling flame.
-            </p>
-          </div>
-        </div>
-      </div>
-
-      {/* Hearthside Banner */}
-      <div className="hearth-banner ornate-corners">
-        <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", flexWrap: "wrap", gap: "1rem" }}>
-          <div>
-            <span className="badge-gold" style={{ marginBottom: "0.5rem" }}>
-              Ravencrest Common Room Lounge
-            </span>
-            <h2 style={{ fontSize: "1.5rem", color: "var(--ivory)", fontFamily: "var(--font-display)", marginBottom: "0.4rem" }}>
-              The Pinned Parchments
-            </h2>
-            <p style={{ color: "var(--parchment)", fontSize: "0.92rem", maxWidth: "600px" }}>
-              Pin notes to find study partners, request rare potion reagents, or rally peers for campus excursions.
-            </p>
+        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: "1rem", marginBottom: "0.4rem" }}>
+          <div style={{ display: "flex", alignItems: "center", gap: "0.8rem" }}>
+            <div
+              style={{
+                width: "44px",
+                height: "44px",
+                borderRadius: "var(--radius-sm)",
+                background: "rgba(212, 140, 69, 0.15)",
+                border: "1px solid #D48C45",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                color: "#D48C45",
+              }}
+            >
+              <Flame size={26} />
+            </div>
+            <div>
+              <h1 style={{ fontSize: "1.85rem", color: "var(--ivory)", fontFamily: "var(--font-display)" }}>
+                Wizarding Social Network: The Hearthside Notice Board
+              </h1>
+              <p style={{ color: "var(--parchment-muted)", fontSize: "0.92rem" }}>
+                Parchment notices, peer study circles, sports squad formations & academy fellowship.
+              </p>
+            </div>
           </div>
 
           <MagicalButton
@@ -176,201 +149,142 @@ export default function CommonRoomPage() {
         </div>
       </div>
 
-      {/* Pinned Parchment Notes Grid */}
-      <div className="notice-board-grid">
-        {notices.map((note) => (
-          <div key={note.id} className="parchment-sticky-note">
-            <div className="pin-tack" />
+      {/* Success Toast */}
+      {toastMessage && (
+        <div className="common-toast-banner anim-fade-in-up">
+          <CheckCircle2 size={18} color="#79C2A4" />
+          <span>{toastMessage}</span>
+        </div>
+      )}
 
-            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "0.5rem", marginTop: "0.4rem" }}>
-              <span style={{ fontSize: "0.68rem", textTransform: "uppercase", letterSpacing: "0.08em", fontWeight: 700, color: "#6A532E" }}>
-                {note.category}
-              </span>
-              <span style={{ fontSize: "0.7rem", color: "#6A532E" }}>{note.date}</span>
-            </div>
+      {/* Filter and Search Bar */}
+      <div className="common-filters-bar">
+        <div className="common-search-box">
+          <Search size={15} color="var(--parchment-muted)" />
+          <input
+            type="text"
+            placeholder="Search parchment notices by topic, author, or keyword..."
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+          />
+        </div>
 
-            <h3
-              style={{
-                fontFamily: "var(--font-display)",
-                fontSize: "1.08rem",
-                color: "#18120C",
-                marginBottom: "0.6rem",
-                lineHeight: 1.3,
-              }}
+        <div className="common-category-chips">
+          {CATEGORIES.map((cat) => (
+            <button
+              key={cat}
+              onClick={() => setActiveCategory(cat)}
+              className={`cat-chip ${activeCategory === cat ? "active" : ""}`}
             >
-              {note.title}
-            </h3>
-
-            <p
-              style={{
-                fontFamily: "var(--font-literary)",
-                fontSize: "1.05rem",
-                color: "#2B2117",
-                lineHeight: 1.5,
-                marginBottom: "1.2rem",
-              }}
-            >
-              {note.body}
-            </p>
-
-            <div
-              style={{
-                borderTop: "1px dashed rgba(60, 40, 20, 0.3)",
-                paddingTop: "0.6rem",
-                display: "flex",
-                justifyContent: "space-between",
-                alignItems: "center",
-                fontSize: "0.78rem",
-              }}
-            >
-              <span style={{ fontWeight: 600, color: "#443422" }}>
-                ~ {note.author} ({note.house})
-              </span>
-
-              <button
-                onClick={() => toggleSign(note.id)}
-                style={{
-                  display: "flex",
-                  alignItems: "center",
-                  gap: "0.3rem",
-                  background: note.isSigned ? "#AA8438" : "rgba(60, 40, 20, 0.15)",
-                  color: note.isSigned ? "#FFF" : "#2B2117",
-                  padding: "0.25rem 0.55rem",
-                  borderRadius: "var(--radius-round)",
-                  fontSize: "0.72rem",
-                  fontWeight: 600,
-                  cursor: "pointer",
-                  transition: "var(--transition-fast)",
-                }}
-              >
-                <Heart size={12} fill={note.isSigned ? "#FFF" : "none"} />
-                <span>{note.signatures} Signs</span>
-              </button>
-            </div>
-          </div>
-        ))}
+              {cat}
+            </button>
+          ))}
+        </div>
       </div>
 
-      {/* Modal: Inscribe New Notice */}
+      {/* Notice Board Parchments Grid */}
+      <div className="notices-board-grid">
+        {filteredPosts.length === 0 ? (
+          <div style={{ color: "var(--parchment-muted)", textAlign: "center", padding: "3rem", gridColumn: "1 / -1" }}>
+            No hearth notices pinned under this category. Be the first to inscribe one!
+          </div>
+        ) : (
+          filteredPosts.map((post) => (
+            <div key={post.id} className="parchment-notice-card ornate-corners">
+              <div className="notice-pin-header">
+                <div style={{ display: "flex", alignItems: "center", gap: "0.4rem" }}>
+                  <Pin size={15} color="var(--antique-gold)" />
+                  <span className="badge-gold" style={{ fontSize: "0.68rem" }}>{post.category}</span>
+                </div>
+                <span className="notice-timestamp">{post.createdAt || post.date || "Today"}</span>
+              </div>
+
+              <h3 className="notice-title">{post.title}</h3>
+              <p className="notice-body">{post.body}</p>
+
+              <div className="notice-footer">
+                <div className="notice-author">
+                  <span className="author-name">{post.author}</span>
+                  <span className="author-house">({post.house || "Academy Adept"})</span>
+                </div>
+
+                <button
+                  onClick={() => toggleSign(post.id)}
+                  className={`sign-notice-btn ${post.isSigned ? "signed" : ""}`}
+                >
+                  <Heart size={14} fill={post.isSigned ? "var(--burgundy-bright)" : "none"} />
+                  <span>{post.signatures || 0} Endorsements</span>
+                </button>
+              </div>
+            </div>
+          ))
+        )}
+      </div>
+
+      {/* Inscribe Notice Modal */}
       {isModalOpen && (
-        <div
-          style={{
-            position: "fixed",
-            inset: 0,
-            zIndex: "var(--z-modal)",
-            background: "rgba(5, 8, 17, 0.75)",
-            backdropFilter: "blur(6px)",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            padding: "1rem",
-          }}
-          onClick={() => setIsModalOpen(false)}
-        >
-          <div
-            className="magical-card ornate-corners"
-            style={{
-              width: "480px",
-              maxWidth: "100%",
-              background: "linear-gradient(180deg, #151D35 0%, #0B1020 100%)",
-              border: "1px solid var(--antique-gold-border-bright)",
-              boxShadow: "var(--shadow-floating)",
-            }}
-            onClick={(e) => e.stopPropagation()}
-          >
-            <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "1rem" }}>
-              <div style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
-                <Pin size={18} color="var(--antique-gold)" />
-                <h3 style={{ fontFamily: "var(--font-display)", fontSize: "1.1rem", color: "var(--ivory)" }}>
-                  Inscribe Notice to the Hearth
+        <div className="modal-backdrop" onClick={() => setIsModalOpen(false)}>
+          <div className="inscribe-modal ornate-corners" onClick={(e) => e.stopPropagation()}>
+            <div className="modal-header">
+              <div style={{ display: "flex", alignItems: "center", gap: "0.6rem" }}>
+                <Flame size={20} color="#D48C45" />
+                <h3 style={{ fontFamily: "var(--font-display)", color: "var(--ivory)", fontSize: "1.25rem" }}>
+                  Pin a Parchment to the Hearth Board
                 </h3>
               </div>
-              <button onClick={() => setIsModalOpen(false)} style={{ color: "var(--parchment-muted)", cursor: "pointer" }}>
+              <button onClick={() => setIsModalOpen(false)} className="modal-close-btn">
                 <X size={18} />
               </button>
             </div>
 
-            <form onSubmit={handlePostNotice} style={{ display: "flex", flexDirection: "column", gap: "0.8rem" }}>
-              <div>
-                <label style={{ fontSize: "0.75rem", color: "var(--antique-gold)", textTransform: "uppercase", letterSpacing: "0.06em", display: "block", marginBottom: "0.3rem" }}>
-                  Category
-                </label>
-                <select
-                  value={newCategory}
-                  onChange={(e) => setNewCategory(e.target.value)}
-                  style={{
-                    width: "100%",
-                    background: "rgba(11, 16, 32, 0.7)",
-                    border: "1px solid var(--antique-gold-border)",
-                    borderRadius: "var(--radius-sm)",
-                    padding: "0.6rem",
-                    color: "var(--ivory)",
-                    fontFamily: "var(--font-sans)",
-                    outline: "none",
-                  }}
-                >
-                  <option value="Study Circle">Study Circle</option>
-                  <option value="Lost Artifact">Lost Artifact</option>
-                  <option value="Sports Gathering">Sports Gathering</option>
-                  <option value="Alchemical Trade">Alchemical Trade</option>
-                  <option value="Campus Excursion">Campus Excursion</option>
+            <form onSubmit={handlePostNotice} className="inscribe-form">
+              <div className="form-group">
+                <label>Notice Category:</label>
+                <select value={newCategory} onChange={(e) => setNewCategory(e.target.value)}>
+                  {CATEGORIES.filter((c) => c !== "All").map((c) => (
+                    <option key={c} value={c}>{c}</option>
+                  ))}
                 </select>
               </div>
 
-              <div>
-                <label style={{ fontSize: "0.75rem", color: "var(--antique-gold)", textTransform: "uppercase", letterSpacing: "0.06em", display: "block", marginBottom: "0.3rem" }}>
-                  Notice Title
-                </label>
+              <div className="form-group">
+                <label>Subject / Title:</label>
                 <input
                   type="text"
-                  placeholder="e.g. Seeking Study Partner for Arithmancy"
+                  placeholder="e.g., C2S Lab Verilog Review Circle..."
                   value={newTitle}
                   onChange={(e) => setNewTitle(e.target.value)}
                   required
-                  style={{
-                    width: "100%",
-                    background: "rgba(11, 16, 32, 0.7)",
-                    border: "1px solid var(--antique-gold-border)",
-                    borderRadius: "var(--radius-sm)",
-                    padding: "0.6rem",
-                    color: "var(--ivory)",
-                    fontFamily: "var(--font-sans)",
-                    outline: "none",
-                  }}
                 />
               </div>
 
-              <div>
-                <label style={{ fontSize: "0.75rem", color: "var(--antique-gold)", textTransform: "uppercase", letterSpacing: "0.06em", display: "block", marginBottom: "0.3rem" }}>
-                  Message Content
-                </label>
+              <div className="form-group">
+                <label>Parchment Inscription:</label>
                 <textarea
                   rows={4}
-                  placeholder="Write details with location and time..."
+                  placeholder="Detail your study circle, sports practice, or collaborative announcement..."
                   value={newBody}
                   onChange={(e) => setNewBody(e.target.value)}
                   required
-                  style={{
-                    width: "100%",
-                    background: "rgba(11, 16, 32, 0.7)",
-                    border: "1px solid var(--antique-gold-border)",
-                    borderRadius: "var(--radius-sm)",
-                    padding: "0.6rem",
-                    color: "var(--ivory)",
-                    fontFamily: "var(--font-literary)",
-                    fontSize: "1rem",
-                    resize: "vertical",
-                    outline: "none",
-                  }}
                 />
               </div>
 
               <div style={{ display: "flex", justifyContent: "flex-end", gap: "0.8rem", marginTop: "0.5rem" }}>
-                <MagicalButton onClick={() => setIsModalOpen(false)} variant="secondary" size="sm">
-                  Discard
-                </MagicalButton>
-                <MagicalButton type="submit" variant="primary" size="sm" icon={Pin}>
-                  Pin to Hearth
+                <button
+                  type="button"
+                  onClick={() => setIsModalOpen(false)}
+                  className="cancel-btn"
+                >
+                  Cancel
+                </button>
+                <MagicalButton
+                  type="submit"
+                  variant="primary"
+                  size="md"
+                  disabled={isSubmitting}
+                  icon={Pin}
+                >
+                  {isSubmitting ? "Pinning Notice..." : "Pin Notice to Board"}
                 </MagicalButton>
               </div>
             </form>

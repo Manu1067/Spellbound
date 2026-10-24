@@ -3,41 +3,485 @@
 .mysteries-container {
   display: flex;
   flex-direction: column;
-  gap: 2.2rem;
+  gap: 1.5rem;
 }
 
-.vault-atmosphere {
-  background: radial-gradient(circle at 50% 40%, #1D1526 0%, #0A0812 70%, #050409 100%);
-  border: 2px solid #8E445B;
-  border-radius: var(--radius-lg);
-  padding: 2.2rem;
-  box-shadow: 0 10px 50px rgba(0, 0, 0, 0.8), 0 0 25px rgba(109, 51, 69, 0.35);
-  position: relative;
-  overflow: hidden;
-}
-
-.astrolabe-dial-box {
-  background: rgba(11, 16, 32, 0.7);
-  border: 1px solid var(--antique-gold-border);
-  border-radius: var(--radius-md);
-  padding: 1.5rem;
+.mysteries-tabs-nav {
   display: flex;
-  flex-direction: column;
-  align-items: center;
-  text-align: center;
+  gap: 0.5rem;
+  background: rgba(21, 29, 53, 0.7);
+  padding: 0.5rem;
+  border-radius: var(--radius-md);
+  border: 1px solid var(--antique-gold-border);
+  flex-wrap: wrap;
 }
 
-.constellation-card {
-  padding: 1rem;
+.mysteries-tab-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.5rem 0.85rem;
+  font-family: var(--font-display);
+  font-size: 0.8rem;
   border-radius: var(--radius-sm);
-  background: rgba(21, 29, 53, 0.5);
-  border: 1px solid rgba(214, 180, 106, 0.15);
+  background: transparent;
+  border: none;
+  color: var(--parchment);
   cursor: pointer;
   transition: var(--transition-fast);
 }
 
-.constellation-card:hover, .constellation-card.active {
+.mysteries-tab-btn.active {
+  background: var(--antique-gold);
+  color: var(--midnight-deep);
+  font-weight: 700;
+}
+
+.section-container {
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+.section-header-box {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  flex-wrap: wrap;
+  gap: 1rem;
+  padding: 1.2rem;
+  background: rgba(21, 29, 53, 0.8);
+  border: 1px solid var(--antique-gold-border);
+  border-radius: var(--radius-md);
+}
+
+/* Section A: Student Council */
+.council-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+  gap: 1.5rem;
+}
+
+.council-card {
+  background: linear-gradient(180deg, rgba(21, 29, 53, 0.9) 0%, rgba(11, 16, 32, 0.95) 100%);
+  border: 1.5px solid var(--antique-gold-border);
+  border-radius: var(--radius-lg);
+  padding: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  transition: var(--transition-normal);
+}
+
+.council-card:hover {
+  transform: translateY(-4px);
+  border-color: var(--antique-gold-bright);
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+}
+
+.council-top {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.council-avatar {
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  border: 2px solid var(--antique-gold);
+  overflow: hidden;
+  flex-shrink: 0;
+}
+
+.council-avatar img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.council-office-hours {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.78rem;
+  color: var(--parchment);
+  background: rgba(11, 16, 32, 0.6);
+  padding: 0.5rem 0.7rem;
+  border-radius: var(--radius-sm);
+}
+
+.council-announcements {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+  margin-top: auto;
+  border-top: 1px solid rgba(214, 180, 106, 0.15);
+  padding-top: 0.8rem;
+}
+
+.announcements-label {
+  font-size: 0.74rem;
+  font-family: var(--font-display);
+  color: var(--antique-gold-bright);
+}
+
+.council-announcement-item {
+  font-size: 0.8rem;
+  color: var(--parchment);
+  line-height: 1.4;
+}
+
+/* Section B: Events Calendar */
+.events-calendar-list {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.mysteries-event-row {
+  background: rgba(21, 29, 53, 0.85);
+  border: 1px solid var(--antique-gold-border);
+  border-radius: var(--radius-md);
+  padding: 1.2rem;
+  display: flex;
+  gap: 1.5rem;
+  align-items: center;
+}
+
+.event-date-col {
+  width: 130px;
+  background: rgba(11, 16, 32, 0.7);
+  border: 1px solid rgba(214, 180, 106, 0.2);
+  border-radius: var(--radius-sm);
+  padding: 0.8rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  flex-shrink: 0;
+}
+
+.date-main {
+  font-family: var(--font-display);
+  font-size: 1rem;
+  font-weight: 700;
+  color: var(--antique-gold-bright);
+}
+
+.date-time {
+  font-size: 0.72rem;
+  color: var(--parchment-muted);
+}
+
+.event-info-col {
+  flex: 1;
+}
+
+/* Section C: Complaints & Tracking */
+.complaint-confidentiality-notice {
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+  padding: 1rem 1.2rem;
+  background: rgba(121, 194, 164, 0.08);
+  border: 1px solid rgba(121, 194, 164, 0.3);
+  border-radius: var(--radius-md);
+  color: var(--parchment);
+  font-size: 0.86rem;
+  line-height: 1.5;
+}
+
+.complaints-grid {
+  display: grid;
+  grid-template-columns: 1.2fr 1fr;
+  gap: 1.8rem;
+}
+
+.complaint-card {
+  background: rgba(21, 29, 53, 0.9);
+  border: 1.5px solid var(--antique-gold-border);
+  border-radius: var(--radius-lg);
+  padding: 1.6rem;
+}
+
+.complaint-form {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.form-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 1rem;
+}
+
+.complaint-form input, .complaint-form select, .complaint-form textarea {
+  padding: 0.55rem 0.8rem;
+  background: rgba(11, 16, 32, 0.8);
+  border: 1px solid rgba(214, 180, 106, 0.3);
+  border-radius: var(--radius-sm);
+  color: var(--ivory);
+  font-size: 0.85rem;
+  outline: none;
+}
+
+.ref-id-success-box {
+  margin-top: 1.5rem;
+  padding: 1rem 1.2rem;
+  background: rgba(49, 92, 74, 0.2);
+  border: 1px solid #79C2A4;
+  border-radius: var(--radius-md);
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+.track-form {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.tracked-result-card {
+  margin-top: 1.5rem;
+  padding: 1rem 1.2rem;
+  background: rgba(11, 16, 32, 0.8);
+  border: 1px solid var(--antique-gold);
+  border-radius: var(--radius-md);
+}
+
+/* Section D: Confessions */
+.confessions-layout {
+  display: grid;
+  grid-template-columns: 1.3fr 1fr;
+  gap: 1.8rem;
+}
+
+.confessions-list {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.confession-bubble {
+  background: radial-gradient(circle at 50% 0%, #20172B 0%, #0F0C16 100%);
+  border: 1.5px solid rgba(142, 68, 91, 0.4);
+  border-radius: var(--radius-lg);
+  padding: 1.4rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.8rem;
+}
+
+.bubble-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.anon-tag {
+  font-size: 0.72rem;
+  color: var(--parchment-muted);
+  font-style: italic;
+}
+
+.bubble-text {
+  font-family: var(--font-literary);
+  font-size: 1rem;
+  color: var(--ivory);
+  line-height: 1.6;
+}
+
+.bubble-footer {
+  display: flex;
+  justify-content: flex-end;
+}
+
+.like-confession-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  background: rgba(109, 51, 69, 0.2);
+  border: 1px solid #8E445B;
+  border-radius: var(--radius-round);
+  padding: 0.35rem 0.75rem;
+  color: var(--parchment);
+  font-size: 0.75rem;
+  cursor: pointer;
+  transition: var(--transition-fast);
+}
+
+.confession-compose-card {
+  background: rgba(21, 29, 53, 0.9);
+  border: 1.5px solid var(--antique-gold-border);
+  border-radius: var(--radius-lg);
+  padding: 1.6rem;
+  height: fit-content;
+}
+
+.confession-form {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.confession-form textarea {
+  padding: 0.8rem;
+  background: rgba(11, 16, 32, 0.8);
+  border: 1px solid rgba(214, 180, 106, 0.3);
+  border-radius: var(--radius-sm);
+  color: var(--ivory);
+  font-family: var(--font-literary);
+  font-size: 0.95rem;
+  outline: none;
+  resize: vertical;
+}
+
+/* Section E: Official Notices */
+.notice-filter-pills {
+  display: flex;
+  gap: 0.4rem;
+}
+
+.prio-pill {
+  padding: 0.35rem 0.75rem;
+  font-size: 0.76rem;
+  font-family: var(--font-display);
+  border-radius: var(--radius-round);
+  background: rgba(11, 16, 32, 0.6);
+  border: 1px solid rgba(214, 180, 106, 0.2);
+  color: var(--parchment);
+  cursor: pointer;
+}
+
+.prio-pill.active {
+  background: var(--antique-gold);
+  color: var(--midnight-deep);
+  font-weight: 700;
+}
+
+.notices-feed-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 1.2rem;
+}
+
+.official-notice-card {
+  background: linear-gradient(180deg, rgba(21, 29, 53, 0.9) 0%, rgba(11, 16, 32, 0.95) 100%);
+  border: 1.5px solid var(--antique-gold-border);
+  border-radius: var(--radius-lg);
+  padding: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.8rem;
+}
+
+.official-notice-card.priority-urgent {
+  border-color: #E05A47;
+  background: linear-gradient(180deg, rgba(45, 18, 24, 0.9) 0%, rgba(15, 10, 14, 0.95) 100%);
+}
+
+.official-notice-card.priority-high {
+  border-color: var(--antique-gold-bright);
+}
+
+.notice-card-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.notice-authority {
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: var(--antique-gold-bright);
+}
+
+.notice-time {
+  font-size: 0.72rem;
+  color: var(--parchment-muted);
+}
+
+.notice-title {
+  font-family: var(--font-display);
+  font-size: 1.25rem;
+  color: var(--ivory);
+}
+
+.notice-body {
+  color: var(--parchment);
+  font-size: 0.9rem;
+  line-height: 1.6;
+}
+
+.notice-footer-meta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-top: 1px solid rgba(214, 180, 106, 0.15);
+  padding-top: 0.6rem;
+  font-size: 0.76rem;
+  color: var(--parchment-muted);
+}
+
+/* Enigma Section */
+.enigma-card {
+  background: rgba(21, 29, 53, 0.9);
+  border: 1.5px solid var(--antique-gold-border);
+  border-radius: var(--radius-lg);
+  padding: 2rem;
+}
+
+.riddle-question {
+  font-family: var(--font-literary);
+  font-size: 1.25rem;
+  color: var(--parchment);
+  font-style: italic;
+  line-height: 1.6;
+  margin-bottom: 1.5rem;
+}
+
+.riddle-options-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.8rem;
+}
+
+.riddle-option-btn {
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+  padding: 0.8rem 1rem;
+  background: rgba(11, 16, 32, 0.7);
+  border: 1px solid rgba(214, 180, 106, 0.25);
+  border-radius: var(--radius-md);
+  color: var(--parchment);
+  cursor: pointer;
+  text-align: left;
+  transition: var(--transition-fast);
+}
+
+.riddle-option-btn:hover {
   border-color: var(--antique-gold);
   background: rgba(214, 180, 106, 0.12);
-  box-shadow: 0 0 12px rgba(214, 180, 106, 0.25);
+}
+
+.riddle-option-btn.selected {
+  border-color: var(--antique-gold-bright);
+  background: rgba(214, 180, 106, 0.25);
+  color: var(--antique-gold-bright);
+}
+
+.opt-marker {
+  font-weight: 700;
+  color: var(--antique-gold);
+}
+
+@media (max-width: 900px) {
+  .complaints-grid, .confessions-layout, .riddle-options-grid {
+    grid-template-columns: 1fr;
+  }
 }

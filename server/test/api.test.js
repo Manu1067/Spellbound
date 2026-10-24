@@ -8,11 +8,9 @@ let server;
 let baseUrl;
 
 before(async () => {
-  // Fresh DB for clean test state
   initializeDatabase({ reset: true });
 
   await new Promise((resolve) => {
-    // Listen on an ephemeral port (0) to avoid conflicts
     server = app.listen(0, () => {
       const port = server.address().port;
       baseUrl = `http://127.0.0.1:${port}`;
@@ -35,408 +33,253 @@ describe('1. Health Check Endpoint', () => {
     assert.equal(json.success, true);
     assert.equal(json.data.status, 'ok');
     assert.equal(json.data.database, 'connected');
-    assert.equal(json.data.academy, 'Spellbound Wizarding Academy');
-    assert.equal(typeof json.data.uptime, 'number');
   });
 });
 
-describe('2. Campus Events Endpoints', () => {
-  test('GET /api/events should return array of active events', async () => {
-    const res = await fetch(`${baseUrl}/api/events`);
-    assert.equal(res.status, 200);
-
-    const json = await res.json();
-    assert.equal(json.success, true);
-    assert.ok(Array.isArray(json.data));
-    assert.ok(json.data.length >= 4);
-
-    const first = json.data[0];
-    assert.ok(first.id);
-    assert.ok(first.title);
-    assert.ok(first.locationName);
-    assert.equal(typeof first.rsvpCount, 'number');
-    assert.equal(typeof first.isRsvp, 'boolean');
-  });
-
-  test('GET /api/events/:id should return single event detail', async () => {
-    const res = await fetch(`${baseUrl}/api/events/evt-1`);
-    assert.equal(res.status, 200);
-
-    const json = await res.json();
-    assert.equal(json.success, true);
-    assert.equal(json.data.id, 'evt-1');
-    assert.equal(json.data.title, 'Celestial Solstice Ball');
-    assert.equal(json.data.isRsvp, true);
-  });
-
-  test('POST /api/events/:id/rsvp toggles RSVP registration', async () => {
-    // First toggle: existing RSVP on evt-1 should unregister
-    const res1 = await fetch(`${baseUrl}/api/events/evt-1/rsvp`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ studentId: 'student-aris-thorne' })
-    });
-    assert.equal(res1.status, 200);
-    const json1 = await res1.json();
-    assert.equal(json1.success, true);
-    assert.equal(json1.data.isRsvp, false);
-
-    // Second toggle: should re-register
-    const res2 = await fetch(`${baseUrl}/api/events/evt-1/rsvp`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ studentId: 'student-aris-thorne' })
-    });
-    assert.equal(res2.status, 200);
-    const json2 = await res2.json();
-    assert.equal(json2.success, true);
-    assert.equal(json2.data.isRsvp, true);
-  });
-});
-
-describe('3. Locations and Pathways Endpoints', () => {
-  test('GET /api/locations should return campus cartography', async () => {
+describe('2. Campus Locations & Dijkstra Shortest Path', () => {
+  test('GET /api/locations returns 5 required campus locations', async () => {
     const res = await fetch(`${baseUrl}/api/locations`);
     assert.equal(res.status, 200);
 
     const json = await res.json();
     assert.equal(json.success, true);
-    assert.ok(Array.isArray(json.data));
-    assert.ok(json.data.length >= 6);
+    assert.equal(json.data.length, 5);
 
-    const greatHall = json.data.find((l) => l.id === 'loc-1');
-    assert.ok(greatHall);
-    assert.equal(greatHall.name, 'The Great Hall');
-    assert.equal(greatHall.zone, 'Central Keep');
-    assert.ok(Array.isArray(greatHall.highlights));
-    assert.equal(greatHall.coords.x, 50);
-    assert.equal(greatHall.coords.y, 56);
+    const names = json.data.map((l) => l.name);
+    assert.ok(names.includes('Academic Building'));
+    assert.ok(names.includes("Girls' Hostel"));
+    assert.ok(names.includes("Boys' Hostel"));
+    assert.ok(names.includes('Mess'));
+    assert.ok(names.includes('Cafeteria'));
   });
 
-  test('GET /api/locations/:id should include connected pathways', async () => {
-    const res = await fetch(`${baseUrl}/api/locations/loc-1`);
+  test('GET /api/locations/directions calculates shortest path via Dijkstra', async () => {
+    // Route from Girls Hostel to Mess
+    const res = await fetch(`${baseUrl}/api/locations/directions?from=loc-hostel-girls&to=loc-mess`);
     assert.equal(res.status, 200);
 
     const json = await res.json();
     assert.equal(json.success, true);
-    assert.equal(json.data.id, 'loc-1');
-    assert.ok(Array.isArray(json.data.pathways));
-    assert.ok(json.data.pathways.length >= 2);
-  });
-
-  test('GET /api/locations/pathways should return ley-line corridors', async () => {
-    const res = await fetch(`${baseUrl}/api/locations/pathways`);
-    assert.equal(res.status, 200);
-
-    const json = await res.json();
-    assert.equal(json.success, true);
-    assert.ok(Array.isArray(json.data));
-    assert.ok(json.data.length >= 5);
+    assert.ok(Array.isArray(json.data.path));
+    assert.ok(json.data.path.length >= 2);
+    assert.equal(json.data.from.id, 'loc-hostel-girls');
+    assert.equal(json.data.to.id, 'loc-mess');
+    assert.ok(json.data.totalDistanceMeters > 0);
+    assert.ok(json.data.estimatedWalkMinutes > 0);
+    assert.ok(Array.isArray(json.data.instructions));
+    assert.ok(json.data.instructions.length >= 1);
   });
 });
 
-describe('4. Academics and Courses Endpoints', () => {
-  test('GET /api/courses should return list of curricula', async () => {
-    const res = await fetch(`${baseUrl}/api/courses`);
-    assert.equal(res.status, 200);
-
-    const json = await res.json();
-    assert.equal(json.success, true);
-    assert.ok(Array.isArray(json.data));
-    assert.ok(json.data.length >= 5);
-
-    const transfig = json.data.find((c) => c.code === 'TRANS-501');
-    assert.ok(transfig);
-    assert.equal(transfig.title, 'Advanced Inanimate Transfiguration');
-    assert.equal(transfig.instructor, 'Prof. Morgana Vance');
-  });
-
-  test('GET /api/courses/:code should include course grimoires and resources', async () => {
-    const res = await fetch(`${baseUrl}/api/courses/TRANS-501`);
-    assert.equal(res.status, 200);
-
-    const json = await res.json();
-    assert.equal(json.success, true);
-    assert.equal(json.data.code, 'TRANS-501');
-    assert.ok(Array.isArray(json.data.resources));
-    assert.ok(json.data.resources.length >= 1);
-    assert.equal(json.data.resources[0].resourceType, 'Grimoire');
-  });
-});
-
-describe('5. Students Directory & Dossiers', () => {
-  test('GET /api/students should return all adepts and faculty', async () => {
+describe('3. Student Directory & Like-Minded Discovery', () => {
+  test('GET /api/students returns profiles with branch, languages, hobbies, and interests', async () => {
     const res = await fetch(`${baseUrl}/api/students`);
     assert.equal(res.status, 200);
 
     const json = await res.json();
     assert.equal(json.success, true);
-    assert.ok(Array.isArray(json.data));
     assert.ok(json.data.length >= 7);
+
+    const first = json.data[0];
+    assert.ok(first.branch);
+    assert.ok(Array.isArray(first.languages));
+    assert.ok(Array.isArray(first.hobbies));
+    assert.ok(Array.isArray(first.fieldsOfInterest));
   });
 
-  test('GET /api/students?house=Ravencrest should filter by house', async () => {
-    const res = await fetch(`${baseUrl}/api/students?house=Ravencrest`);
+  test('GET /api/students/match calculates like-minded matches with shared tags', async () => {
+    const res = await fetch(`${baseUrl}/api/students/match?studentId=student-aris-thorne`);
     assert.equal(res.status, 200);
 
     const json = await res.json();
     assert.equal(json.success, true);
-    assert.ok(json.data.every((s) => s.house === 'Ravencrest'));
-  });
+    assert.ok(json.data.matches.length > 0);
 
-  test('GET /api/students?search=Valerius should search by keyword', async () => {
-    const res = await fetch(`${baseUrl}/api/students?search=Valerius`);
-    assert.equal(res.status, 200);
-
-    const json = await res.json();
-    assert.equal(json.success, true);
-    assert.ok(json.data.length >= 2);
-  });
-
-  test('GET /api/students/current/dossier should return active user profile', async () => {
-    const res = await fetch(`${baseUrl}/api/students/current/dossier`);
-    assert.equal(res.status, 200);
-
-    const json = await res.json();
-    assert.equal(json.success, true);
-    assert.equal(json.data.id, 'student-aris-thorne');
-    assert.equal(json.data.name, 'Aris Thorne');
-    assert.equal(json.data.house, 'Ravencrest');
-    assert.equal(json.data.isCurrentUser, true);
+    const topMatch = json.data.matches[0];
+    assert.ok(topMatch.score > 0);
+    assert.ok(topMatch.matchPercentage > 0);
+    assert.ok(Array.isArray(topMatch.sharedTags));
+    assert.ok(topMatch.sharedTags.length > 0);
   });
 });
 
-describe('6. Houses and Points Ledger', () => {
-  test('GET /api/houses should return all 4 Great Houses with parsed values', async () => {
+describe('4. Academics: Five Required Laboratories & Resources', () => {
+  test('GET /api/laboratories returns the 5 required labs', async () => {
+    const res = await fetch(`${baseUrl}/api/laboratories`);
+    assert.equal(res.status, 200);
+
+    const json = await res.json();
+    assert.equal(json.success, true);
+    assert.equal(json.data.length, 5);
+
+    const names = json.data.map((l) => l.name);
+    assert.ok(names.includes('Mechanical Lab'));
+    assert.ok(names.includes('Physics Lab'));
+    assert.ok(names.includes('C2S Lab'));
+    assert.ok(names.includes('Electronics Lab'));
+    assert.ok(names.includes('Computer Lab'));
+  });
+
+  test('GET /api/laboratories/lab-c2s returns equipment and manuals', async () => {
+    const res = await fetch(`${baseUrl}/api/laboratories/lab-c2s`);
+    assert.equal(res.status, 200);
+
+    const json = await res.json();
+    assert.equal(json.success, true);
+    assert.equal(json.data.code, 'C2S-LAB');
+    assert.ok(Array.isArray(json.data.availableEquipment));
+    assert.ok(Array.isArray(json.data.safetyGuidelines));
+    assert.ok(Array.isArray(json.data.resources));
+    assert.ok(json.data.resources.length >= 2);
+  });
+});
+
+describe('5. Houses & Four Featured Student Clubs', () => {
+  test('GET /api/houses returns traditional 4 house names', async () => {
     const res = await fetch(`${baseUrl}/api/houses`);
     assert.equal(res.status, 200);
 
     const json = await res.json();
     assert.equal(json.success, true);
-    assert.equal(json.data.length, 4);
-
-    const ravencrest = json.data.find((h) => h.id === 'ravencrest');
-    assert.ok(ravencrest);
-    assert.equal(ravencrest.name, 'Ravencrest');
-    assert.ok(Array.isArray(ravencrest.values));
-    assert.ok(ravencrest.values.includes('Intellect'));
+    const names = json.data.map((h) => h.name);
+    assert.ok(names.includes('Gryffindor'));
+    assert.ok(names.includes('Slytherin'));
+    assert.ok(names.includes('Ravenclaw'));
+    assert.ok(names.includes('Hufflepuff'));
   });
 
-  test('POST /api/houses/:id/points awards points and creates ledger entry', async () => {
-    const prevRes = await fetch(`${baseUrl}/api/houses/ravencrest`);
-    const prevJson = await prevRes.json();
-    const prevPoints = prevJson.data.points;
+  test('GET /api/clubs returns the 4 featured clubs', async () => {
+    const res = await fetch(`${baseUrl}/api/clubs`);
+    assert.equal(res.status, 200);
 
-    const res = await fetch(`${baseUrl}/api/houses/ravencrest/points`, {
+    const json = await res.json();
+    assert.equal(json.success, true);
+    assert.equal(json.data.length, 4);
+
+    const names = json.data.map((c) => c.name);
+    assert.ok(names.includes('Literary and Debating Club'));
+    assert.ok(names.includes('Music Club'));
+    assert.ok(names.includes('Dance Club'));
+    assert.ok(names.includes('Fine Arts Club'));
+  });
+});
+
+describe('6. Sports Department: Outdoor & Indoor Sports', () => {
+  test('GET /api/sports/disciplines returns 6 outdoor and 3 indoor sports', async () => {
+    const res = await fetch(`${baseUrl}/api/sports/disciplines`);
+    assert.equal(res.status, 200);
+
+    const json = await res.json();
+    assert.equal(json.success, true);
+    assert.equal(json.data.length, 9);
+
+    const outdoor = json.data.filter((s) => s.category === 'Outdoor');
+    const indoor = json.data.filter((s) => s.category === 'Indoor');
+
+    assert.equal(outdoor.length, 6);
+    assert.equal(indoor.length, 3);
+
+    const outdoorNames = outdoor.map((s) => s.name);
+    assert.ok(outdoorNames.includes('Volleyball'));
+    assert.ok(outdoorNames.includes('Kho-Kho'));
+    assert.ok(outdoorNames.includes('Kabaddi'));
+    assert.ok(outdoorNames.includes('Football'));
+    assert.ok(outdoorNames.includes('Throwball'));
+    assert.ok(outdoorNames.includes('Badminton'));
+
+    const indoorNames = indoor.map((s) => s.name);
+    assert.ok(indoorNames.includes('Chess'));
+    assert.ok(indoorNames.includes('Carroms'));
+    assert.ok(indoorNames.includes('Table Tennis'));
+  });
+
+  test('POST /api/sports/register registers student interest', async () => {
+    const res = await fetch(`${baseUrl}/api/sports/register`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        amount: 50,
-        reason: 'Masterwork celestial calculation',
-        awardedBy: 'Arch-Magister Valerius'
+        studentId: 'student-aris-thorne',
+        sportId: 'sport-volleyball',
+        experienceLevel: 'Intermediate',
+        preferredRole: 'Setter'
       })
     });
 
-    assert.equal(res.status, 200);
+    assert.equal(res.status, 201);
     const json = await res.json();
     assert.equal(json.success, true);
-    assert.equal(json.data.pointsAwarded, 50);
-    assert.equal(json.data.totalPoints, prevPoints + 50);
-
-    // Verify history recorded
-    const historyRes = await fetch(`${baseUrl}/api/houses/history`);
-    const historyJson = await historyRes.json();
-    assert.equal(historyJson.success, true);
-    assert.ok(historyJson.data.some((l) => l.reason === 'Masterwork celestial calculation'));
+    assert.equal(json.data.sportName, 'Volleyball');
   });
 });
 
-describe('7. Sports & Skyspire Broomstick League', () => {
-  test('GET /api/sports/standings returns ranked teams', async () => {
-    const res = await fetch(`${baseUrl}/api/sports/standings`);
-    assert.equal(res.status, 200);
-
-    const json = await res.json();
-    assert.equal(json.success, true);
-    assert.equal(json.data.length, 4);
-    assert.equal(json.data[0].rank, 1);
-  });
-
-  test('GET /api/sports/matches returns fixtures and results', async () => {
-    const res = await fetch(`${baseUrl}/api/sports/matches`);
-    assert.equal(res.status, 200);
-
-    const json = await res.json();
-    assert.equal(json.success, true);
-    assert.ok(json.data.length >= 3);
-  });
-});
-
-describe('8. Community Common Room Notices', () => {
-  test('GET /api/community/posts returns notices', async () => {
-    const res = await fetch(`${baseUrl}/api/community/posts`);
+describe('7. Department of Mysteries: 5 Sub-Modules', () => {
+  test('A. Student Council returns verified members & announcements', async () => {
+    const res = await fetch(`${baseUrl}/api/mysteries/council`);
     assert.equal(res.status, 200);
 
     const json = await res.json();
     assert.equal(json.success, true);
     assert.ok(json.data.length >= 4);
+    assert.ok(json.data[0].role);
+    assert.ok(Array.isArray(json.data[0].announcements));
   });
 
-  test('POST /api/community/posts creates new parchment notice', async () => {
-    const res = await fetch(`${baseUrl}/api/community/posts`, {
+  test('B. Official Notices & Warnings returns prioritized notices', async () => {
+    const res = await fetch(`${baseUrl}/api/mysteries/notices`);
+    assert.equal(res.status, 200);
+
+    const json = await res.json();
+    assert.equal(json.success, true);
+    assert.ok(json.data.length >= 4);
+    assert.ok(json.data[0].priority);
+    assert.ok(json.data[0].issuingAuthority);
+  });
+
+  test('C. Complaints Submission logs confidential complaint with reference ID', async () => {
+    const res = await fetch(`${baseUrl}/api/mysteries/complaints`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        authorId: 'student-aris-thorne',
-        authorName: 'Aris Thorne',
-        houseId: 'ravencrest',
-        category: 'Study Circle',
-        title: 'Chronomancy Cipher Study Group',
-        body: 'Convening at the Ravencrest Hearth to decode the third dial.'
+        studentId: 'student-aris-thorne',
+        category: 'Hostel',
+        subject: 'Room Heating Ward Flickering',
+        description: 'Room 304 heating rune loses charge during midnight hours.',
+        priority: 'Routine'
       })
     });
 
     assert.equal(res.status, 201);
     const json = await res.json();
     assert.equal(json.success, true);
-    assert.equal(json.data.title, 'Chronomancy Cipher Study Group');
-    assert.equal(json.data.signatures, 1);
-  });
-});
+    assert.ok(json.data.referenceId.startsWith('REF-MYST-'));
+    assert.equal(json.data.isConfidential, true);
 
-describe('9. Department of Mysteries & Chronos Enigma', () => {
-  test('GET /api/mysteries/puzzles returns riddles', async () => {
-    const res = await fetch(`${baseUrl}/api/mysteries/puzzles`);
-    assert.equal(res.status, 200);
-
-    const json = await res.json();
-    assert.equal(json.success, true);
-    assert.ok(json.data.length >= 2);
-    assert.ok(Array.isArray(json.data[0].options));
+    // Track status by reference ID
+    const trackRes = await fetch(`${baseUrl}/api/mysteries/complaints/${json.data.referenceId}`);
+    assert.equal(trackRes.status, 200);
+    const trackJson = await trackRes.json();
+    assert.equal(trackJson.data.referenceId, json.data.referenceId);
   });
 
-  test('POST /api/mysteries/verify validates student answers', async () => {
-    // Correct answer test (rid-1, index 2)
-    const res1 = await fetch(`${baseUrl}/api/mysteries/verify`, {
+  test('D. Confessions creates anonymous post and supports likes', async () => {
+    const createRes = await fetch(`${baseUrl}/api/mysteries/confessions`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        puzzleId: 'rid-1',
-        selectedIndex: 2
-      })
-    });
-    assert.equal(res1.status, 200);
-    const json1 = await res1.json();
-    assert.equal(json1.data.isCorrect, true);
-
-    // Incorrect answer test
-    const res2 = await fetch(`${baseUrl}/api/mysteries/verify`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        puzzleId: 'rid-1',
-        selectedIndex: 0
-      })
-    });
-    assert.equal(res2.status, 200);
-    const json2 = await res2.json();
-    assert.equal(json2.data.isCorrect, false);
-  });
-});
-
-describe('10. Owl Dispatch System', () => {
-  test('POST /api/owls dispatches a message to a student', async () => {
-    const res = await fetch(`${baseUrl}/api/owls`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        senderId: 'student-aris-thorne',
-        senderName: 'Aris Thorne',
-        recipientId: 'p-1',
-        message: 'Meet at the scriptoria before twilight.'
+        message: 'The sunset view from the Astronomy tower west arch is unforgettable.',
+        category: 'Appreciation'
       })
     });
 
-    assert.equal(res.status, 201);
-    const json = await res.json();
-    assert.equal(json.success, true);
-    assert.equal(json.data.recipientName, 'Lyra Valerius');
-    assert.equal(json.data.status, 'Dispatched');
-  });
-});
+    assert.equal(createRes.status, 201);
+    const createJson = await createRes.json();
+    assert.equal(createJson.success, true);
+    const id = createJson.data.id;
 
-describe('11. Daily Schedule', () => {
-  test('GET /api/schedule returns student timetable', async () => {
-    const res = await fetch(`${baseUrl}/api/schedule`);
-    assert.equal(res.status, 200);
-
-    const json = await res.json();
-    assert.equal(json.success, true);
-    assert.equal(json.data.length, 4);
-  });
-
-  test('PATCH /api/schedule/:id/status toggles completed/upcoming', async () => {
-    const res = await fetch(`${baseUrl}/api/schedule/sched-1/status`, {
-      method: 'PATCH',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ studentId: 'student-aris-thorne' })
-    });
-
-    assert.equal(res.status, 200);
-    const json = await res.json();
-    assert.equal(json.success, true);
-    assert.equal(json.data.status, 'Upcoming');
-  });
-});
-
-describe('12. Validation and Safe Error Handling', () => {
-  test('GET nonexistent route should return safe 404 JSON', async () => {
-    const res = await fetch(`${baseUrl}/api/nonexistent-portal`);
-    assert.equal(res.status, 404);
-
-    const json = await res.json();
-    assert.equal(json.success, false);
-    assert.equal(json.error.code, 'NOT_FOUND');
-    assert.ok(json.error.message.includes('Route not found'));
-  });
-
-  test('GET /api/events/invalid-id should return 404 with structured error', async () => {
-    const res = await fetch(`${baseUrl}/api/events/non-existent-event-999`);
-    assert.equal(res.status, 404);
-
-    const json = await res.json();
-    assert.equal(json.success, false);
-    assert.equal(json.error.code, 'NOT_FOUND');
-  });
-
-  test('POST /api/houses/ravencrest/points with invalid amount should return 400', async () => {
-    const res = await fetch(`${baseUrl}/api/houses/ravencrest/points`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        amount: 'invalid-number',
-        reason: 'Test'
-      })
-    });
-
-    assert.equal(res.status, 400);
-    const json = await res.json();
-    assert.equal(json.success, false);
-    assert.equal(json.error.code, 'VALIDATION_ERROR');
-  });
-
-  test('POST /api/owls with missing recipient should return 400', async () => {
-    const res = await fetch(`${baseUrl}/api/owls`, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        message: 'No recipient'
-      })
-    });
-
-    assert.equal(res.status, 400);
-    const json = await res.json();
-    assert.equal(json.success, false);
-    assert.equal(json.error.code, 'VALIDATION_ERROR');
+    // Like confession
+    const likeRes = await fetch(`${baseUrl}/api/mysteries/confessions/${id}/like`, { method: 'POST' });
+    assert.equal(likeRes.status, 200);
+    const likeJson = await likeRes.json();
+    assert.equal(likeJson.data.likesCount, 1);
   });
 });

@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import {
   BookOpen,
@@ -9,16 +9,71 @@ import {
   CheckCircle2,
   AlertTriangle,
   RotateCcw,
+  Search,
+  FileText,
+  Download,
+  ShieldCheck,
+  Cpu,
+  Wrench,
+  Radio,
+  Monitor,
+  Atom,
+  ChevronRight,
+  Info
 } from "lucide-react";
-import { potionIngredients } from "../../data/mockData";
+import { getLaboratories } from "../../services/api";
+import { laboratoriesData as fallbackLabs, potionIngredients } from "../../data/mockData";
 import MagicalButton from "../../components/ui/MagicalButton";
 import "./AcademicsPage.css";
 
+const LAB_ICONS = {
+  "lab-mech": Wrench,
+  "lab-physics": Atom,
+  "lab-c2s": Cpu,
+  "lab-electronics": Radio,
+  "lab-computer": Monitor,
+};
+
 export default function AcademicsPage() {
+  const [labs, setLabs] = useState(fallbackLabs);
+  const [selectedLabId, setSelectedLabId] = useState(fallbackLabs[0].id);
+  const [activeTab, setActiveTab] = useState("labs"); // "labs" | "cauldron"
+  const [resourceFilterCategory, setResourceFilterCategory] = useState("All");
+  const [resourceSearch, setResourceSearch] = useState("");
+  const [downloadToast, setDownloadToast] = useState("");
+
+  // Potion simulator state
   const [selectedIngredients, setSelectedIngredients] = useState([]);
   const [brewingResult, setBrewingResult] = useState(null);
   const [isBrewing, setIsBrewing] = useState(false);
 
+  useEffect(() => {
+    let mounted = true;
+    getLaboratories()
+      .then((data) => {
+        if (mounted && Array.isArray(data) && data.length > 0) {
+          setLabs(data);
+          setSelectedLabId(data[0].id);
+        }
+      })
+      .catch((err) => console.warn("Using fallback laboratories:", err));
+    return () => { mounted = false; };
+  }, []);
+
+  const activeLab = labs.find((l) => l.id === selectedLabId) || labs[0];
+
+  const filteredResources = (activeLab.resources || []).filter((res) => {
+    const matchesCat = resourceFilterCategory === "All" || res.category === resourceFilterCategory;
+    const matchesSearch = res.title.toLowerCase().includes(resourceSearch.toLowerCase());
+    return matchesCat && matchesSearch;
+  });
+
+  const handleDownload = (res) => {
+    setDownloadToast(`Enchanted scroll '${res.title}' downloaded to your personal codex.`);
+    setTimeout(() => setDownloadToast(""), 5000);
+  };
+
+  // Cauldron simulator logic
   const toggleIngredient = (ing) => {
     if (brewingResult) setBrewingResult(null);
     if (selectedIngredients.some((i) => i.id === ing.id)) {
@@ -77,7 +132,7 @@ export default function AcademicsPage() {
 
   return (
     <div className="academics-container anim-fade-in-up">
-      {/* Return Path & Header */}
+      {/* Return to Dashboard & Header */}
       <div>
         <Link
           to="/dashboard"
@@ -94,233 +149,332 @@ export default function AcademicsPage() {
           <ArrowLeft size={14} /> Return to Academy Hall
         </Link>
 
-        <div style={{ display: "flex", alignItems: "center", gap: "0.8rem", marginBottom: "0.4rem" }}>
-          <div
-            style={{
-              width: "42px",
-              height: "42px",
-              borderRadius: "var(--radius-sm)",
-              background: "rgba(49, 92, 74, 0.2)",
-              border: "1px solid var(--emerald-light)",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              color: "#79C2A4",
-            }}
-          >
-            <FlaskConical size={24} />
+        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: "1rem", marginBottom: "0.4rem" }}>
+          <div style={{ display: "flex", alignItems: "center", gap: "0.8rem" }}>
+            <div
+              style={{
+                width: "44px",
+                height: "44px",
+                borderRadius: "var(--radius-sm)",
+                background: "rgba(49, 92, 74, 0.2)",
+                border: "1px solid #79C2A4",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+                color: "#79C2A4",
+              }}
+            >
+              <BookOpen size={26} />
+            </div>
+            <div>
+              <h1 style={{ fontSize: "1.85rem", color: "var(--ivory)", fontFamily: "var(--font-display)" }}>
+                Academics & Magical Labs: Research Facilities & Manuals
+              </h1>
+              <p style={{ color: "var(--parchment-muted)", fontSize: "0.92rem" }}>
+                Five specialized campus laboratories, equipment inventories, experiment manuals & alchemical simulations.
+              </p>
+            </div>
           </div>
-          <div>
-            <h1 style={{ fontSize: "1.85rem", color: "var(--ivory)", fontFamily: "var(--font-display)" }}>
-              Academics & Magical Labs: The Alchemical Cauldron
-            </h1>
-            <p style={{ color: "var(--parchment-muted)", fontSize: "0.92rem" }}>
-              Grimoires, alchemical cauldrons & rune translation laboratories.
-            </p>
+
+          {/* Mode Switcher */}
+          <div className="academics-mode-switcher">
+            <button
+              onClick={() => setActiveTab("labs")}
+              className={`mode-btn ${activeTab === "labs" ? "active" : ""}`}
+            >
+              <Cpu size={16} /> Campus Labs (5)
+            </button>
+            <button
+              onClick={() => setActiveTab("cauldron")}
+              className={`mode-btn ${activeTab === "cauldron" ? "active" : ""}`}
+            >
+              <FlaskConical size={16} /> Alchemical Simulation
+            </button>
           </div>
         </div>
       </div>
 
-      {/* Two Column Grid: Potion Laboratory & Curricula */}
-      <div style={{ display: "grid", gridTemplateColumns: "1.3fr 1fr", gap: "2rem" }}>
-        {/* Left: Interactive Potion Lab Cauldron */}
-        <div className="lab-cauldron-view ornate-corners">
-          <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start", marginBottom: "1rem" }}>
-            <div>
-              <span className="badge-emerald" style={{ marginBottom: "0.4rem" }}>
-                Subterranean Dungeon Lab III
-              </span>
-              <h2 style={{ fontSize: "1.35rem", color: "var(--ivory)", fontFamily: "var(--font-display)" }}>
-                Experimental Brewing Station
-              </h2>
-            </div>
+      {/* Download Toast Notification */}
+      {downloadToast && (
+        <div className="download-toast-banner anim-fade-in-up">
+          <CheckCircle2 size={18} color="#79C2A4" />
+          <span>{downloadToast}</span>
+        </div>
+      )}
 
-            <button
-              onClick={resetCauldron}
-              style={{
-                fontSize: "0.75rem",
-                color: "var(--parchment-muted)",
-                display: "flex",
-                alignItems: "center",
-                gap: "0.3rem",
-                cursor: "pointer",
-              }}
-            >
-              <RotateCcw size={14} /> Clear Vessel
-            </button>
-          </div>
+      {activeTab === "labs" ? (
+        <div className="labs-layout-grid">
+          {/* Left Column: Vertical Laboratory Navigation */}
+          <div className="labs-nav-sidebar ornate-corners">
+            <h3 className="sidebar-title">ACADEMIC LABORATORIES</h3>
+            <div className="labs-tabs-list">
+              {labs.map((lab) => {
+                const Icon = LAB_ICONS[lab.id] || BookOpen;
+                const isSelected = selectedLabId === lab.id;
 
-          <p style={{ fontSize: "0.84rem", color: "var(--parchment)", marginBottom: "1rem" }}>
-            Select up to 3 reagents from the reagent shelf to balance potency against chemical stability.
-          </p>
-
-          {/* Cauldron Vessel */}
-          <div className="cauldron-vessel">
-            <div
-              className="cauldron-liquid"
-              style={{
-                backgroundColor: currentLiquidColor,
-                boxShadow: `0 0 25px ${currentLiquidColor}88, inset 0 0 15px rgba(255,255,255,0.4)`,
-              }}
-            />
-            {isBrewing ? (
-              <span style={{ position: "relative", zIndex: 2, fontFamily: "var(--font-display)", fontSize: "0.82rem", color: "#FFFFFF", fontWeight: 700 }}>
-                Brewing...
-              </span>
-            ) : (
-              <span style={{ position: "relative", zIndex: 2, fontFamily: "var(--font-literary)", fontSize: "0.95rem", color: "#FFFFFF" }}>
-                {selectedIngredients.length === 0 ? "Empty Bronze Vessel" : `${selectedIngredients.length}/3 Reagents`}
-              </span>
-            )}
-          </div>
-
-          {/* Reagents Shelf Selection */}
-          <div style={{ marginBottom: "1.2rem" }}>
-            <span style={{ fontSize: "0.75rem", color: "var(--antique-gold)", textTransform: "uppercase", letterSpacing: "0.06em", display: "block", marginBottom: "0.5rem" }}>
-              Reagent Cabinet
-            </span>
-            <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "0.6rem" }}>
-              {potionIngredients.map((ing) => {
-                const isSelected = selectedIngredients.some((i) => i.id === ing.id);
                 return (
                   <button
-                    key={ing.id}
-                    className={`ingredient-btn ${isSelected ? "selected" : ""}`}
-                    onClick={() => toggleIngredient(ing)}
-                    disabled={!isSelected && selectedIngredients.length >= 3}
+                    key={lab.id}
+                    onClick={() => {
+                      setSelectedLabId(lab.id);
+                      setResourceFilterCategory("All");
+                    }}
+                    className={`lab-nav-item ${isSelected ? "active" : ""}`}
                   >
-                    <span style={{ display: "flex", alignItems: "center", gap: "0.4rem" }}>
-                      <span style={{ width: "8px", height: "8px", borderRadius: "50%", background: ing.color }} />
-                      {ing.name}
-                    </span>
-                    <span style={{ fontSize: "0.68rem", color: "var(--parchment-muted)" }}>
-                      +{ing.potency} pot
-                    </span>
+                    <div className="lab-item-icon">
+                      <Icon size={20} />
+                    </div>
+                    <div className="lab-item-text">
+                      <span className="lab-code-badge">{lab.code}</span>
+                      <span className="lab-item-name">{lab.name}</span>
+                    </div>
+                    <ChevronRight size={16} className="chevron" />
                   </button>
                 );
               })}
             </div>
+
+            <div className="lab-location-hint">
+              <Info size={14} color="var(--antique-gold)" />
+              <span>All 5 laboratories are located within the central Academic Building complex.</span>
+            </div>
           </div>
 
-          {/* Brew Action & Results Feedback */}
-          <div style={{ display: "flex", flexDirection: "column", gap: "0.8rem" }}>
-            <MagicalButton
-              onClick={brewPotion}
-              variant="emerald"
-              size="md"
-              icon={Flame}
-              disabled={selectedIngredients.length === 0 || isBrewing}
-            >
-              Ignite Hearth & Brew Elixir
-            </MagicalButton>
+          {/* Right Column: Detailed Laboratory Dossier */}
+          {activeLab && (
+            <div className="lab-details-view ornate-corners">
+              {/* Lab Header */}
+              <div className="lab-header">
+                <div>
+                  <div style={{ display: "flex", alignItems: "center", gap: "0.6rem", marginBottom: "0.4rem" }}>
+                    <span className="badge-gold">{activeLab.code}</span>
+                    <span className="badge-emerald">Academic Building · Level 2</span>
+                  </div>
+                  <h2 style={{ fontSize: "1.7rem", color: "var(--ivory)", fontFamily: "var(--font-display)" }}>
+                    {activeLab.name}
+                  </h2>
+                </div>
 
-            {brewingResult && (
-              <div
-                style={{
-                  padding: "1rem",
-                  borderRadius: "var(--radius-sm)",
-                  background: "rgba(11, 16, 32, 0.7)",
-                  border: `1.5px solid ${brewingResult.color}`,
-                  marginTop: "0.6rem",
-                }}
-              >
-                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: "0.4rem" }}>
-                  <h4 style={{ fontFamily: "var(--font-display)", color: brewingResult.color, fontSize: "1.05rem" }}>
-                    {brewingResult.name}
-                  </h4>
-                  <span
-                    className={brewingResult.status === "Volatile" ? "badge-burgundy" : "badge-emerald"}
-                    style={{ fontSize: "0.65rem" }}
-                  >
-                    {brewingResult.status}
-                  </span>
+                <div className="faculty-badge">
+                  <span className="faculty-label">Faculty In-Charge:</span>
+                  <span className="faculty-name">{activeLab.facultyInCharge}</span>
                 </div>
-                <div style={{ fontSize: "0.8rem", color: "var(--ivory)", display: "flex", gap: "1rem" }}>
-                  <span>Potency Yield: <strong>{brewingResult.potency}</strong></span>
-                  <span>Harmonic Stability: <strong>{brewingResult.stability}</strong></span>
-                </div>
-                <p style={{ fontSize: "0.76rem", color: "var(--parchment-muted)", marginTop: "0.3rem" }}>
-                  {brewingResult.status === "Volatile"
-                    ? "Warning: Excess flame heat destabilized the mandrake fibers. Decant with caution."
-                    : "Optimal crystallization achieved! Suitable for archival submission in the Hospital Wing."}
-                </p>
               </div>
-            )}
+
+              <p className="lab-description">{activeLab.description}</p>
+
+              {/* Equipment & Safety 2-Column Split */}
+              <div className="lab-specs-grid">
+                {/* Available Equipment */}
+                <div className="spec-card">
+                  <div className="spec-card-title">
+                    <Wrench size={16} color="var(--antique-gold)" />
+                    <h4>Available Equipment & Facilities</h4>
+                  </div>
+                  <div className="equipment-list">
+                    {activeLab.availableEquipment?.map((item, idx) => (
+                      <div key={idx} className="equipment-item">
+                        <Sparkles size={13} color="var(--antique-gold-bright)" style={{ flexShrink: 0 }} />
+                        <span>{item}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Safety Guidelines */}
+                <div className="spec-card safety-card">
+                  <div className="spec-card-title">
+                    <ShieldCheck size={16} color="#79C2A4" />
+                    <h4>Safety Guidelines & Operating Protocols</h4>
+                  </div>
+                  <div className="safety-list">
+                    {activeLab.safetyGuidelines?.map((rule, idx) => (
+                      <div key={idx} className="safety-item">
+                        <AlertTriangle size={13} color="#E05A47" style={{ flexShrink: 0 }} />
+                        <span>{rule}</span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+
+              {/* Organized Learning Resources Library */}
+              <div className="resources-section">
+                <div className="resources-header">
+                  <div>
+                    <h3 style={{ fontFamily: "var(--font-display)", color: "var(--antique-gold-bright)", fontSize: "1.15rem" }}>
+                      Organized Learning Resources & Practical Manuals
+                    </h3>
+                    <p style={{ color: "var(--parchment-muted)", fontSize: "0.82rem" }}>
+                      Official course experiment guides, reference materials, and software tutorials.
+                    </p>
+                  </div>
+
+                  {/* Resource Category Filters */}
+                  <div className="resource-filter-pills">
+                    {["All", "Manuals", "Experiment Guides", "Reference Materials", "Tutorials"].map((cat) => (
+                      <button
+                        key={cat}
+                        onClick={() => setResourceFilterCategory(cat)}
+                        className={`res-pill ${resourceFilterCategory === cat ? "active" : ""}`}
+                      >
+                        {cat}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                {/* Search in resources */}
+                <div className="resource-search-box">
+                  <Search size={15} color="var(--parchment-muted)" />
+                  <input
+                    type="text"
+                    placeholder={`Search within ${activeLab.name} materials...`}
+                    value={resourceSearch}
+                    onChange={(e) => setResourceSearch(e.target.value)}
+                  />
+                </div>
+
+                {/* Resource Cards Grid */}
+                <div className="resources-cards-grid">
+                  {filteredResources.length === 0 ? (
+                    <div style={{ color: "var(--parchment-muted)", padding: "1.5rem", textAlign: "center", gridColumn: "1 / -1" }}>
+                      No learning resources found matching "{resourceSearch}".
+                    </div>
+                  ) : (
+                    filteredResources.map((res) => (
+                      <div key={res.id} className="resource-card">
+                        <div className="resource-card-top">
+                          <FileText size={20} color="var(--antique-gold)" />
+                          <span className="badge-gold" style={{ fontSize: "0.65rem" }}>
+                            {res.category}
+                          </span>
+                        </div>
+
+                        <h4 className="resource-title">{res.title}</h4>
+
+                        <div className="resource-footer">
+                          <span className="resource-size">{res.size} · PDF</span>
+                          <button
+                            onClick={() => handleDownload(res)}
+                            className="download-btn"
+                            aria-label={`Download ${res.title}`}
+                          >
+                            <Download size={14} /> Download
+                          </button>
+                        </div>
+                      </div>
+                    ))
+                  )}
+                </div>
+              </div>
+            </div>
+          )}
+        </div>
+      ) : (
+        /* Alchemical Simulation Station (Cauldron) */
+        <div className="lab-cauldron-view ornate-corners anim-fade-in-up">
+          <div style={{ textAlign: "center", marginBottom: "1.5rem" }}>
+            <span className="badge-emerald" style={{ marginBottom: "0.5rem" }}>Experimental Research Station</span>
+            <h2 style={{ fontSize: "1.6rem", color: "var(--ivory)", fontFamily: "var(--font-display)" }}>
+              The Alchemical Simulation Cauldron
+            </h2>
+            <p style={{ color: "var(--parchment-muted)", fontSize: "0.88rem", maxWidth: "600px", margin: "0 auto" }}>
+              Combine up to three energetic reagent reagents to test stoichiometric reaction stability and brew specialized laboratory elixirs.
+            </p>
+          </div>
+
+          <div className="cauldron-sim-grid">
+            {/* Left: Reagents Shelf */}
+            <div className="reagents-shelf">
+              <h4 style={{ fontFamily: "var(--font-display)", color: "var(--antique-gold)", fontSize: "0.95rem", marginBottom: "0.8rem" }}>
+                Select Up to 3 Laboratory Reagents:
+              </h4>
+
+              <div className="ingredients-grid">
+                {potionIngredients.map((ing) => {
+                  const isSelected = selectedIngredients.some((i) => i.id === ing.id);
+                  return (
+                    <button
+                      key={ing.id}
+                      onClick={() => toggleIngredient(ing)}
+                      className={`ingredient-btn ${isSelected ? "selected" : ""}`}
+                      disabled={!isSelected && selectedIngredients.length >= 3}
+                    >
+                      <div style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
+                        <span style={{ width: "10px", height: "10px", borderRadius: "50%", background: ing.color }} />
+                        <span>{ing.name}</span>
+                      </div>
+                      <span style={{ fontSize: "0.72rem", color: "var(--parchment-muted)" }}>
+                        Potency +{ing.potency}
+                      </span>
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+
+            {/* Right: The Cauldron Vessel & Hearth */}
+            <div className="cauldron-vessel-container">
+              <div className="cauldron-vessel">
+                <div
+                  className="cauldron-liquid"
+                  style={{
+                    backgroundColor: currentLiquidColor,
+                    boxShadow: `0 0 25px ${currentLiquidColor}`,
+                  }}
+                />
+              </div>
+
+              {/* Flame Beneath */}
+              <div style={{ display: "flex", justifyContent: "center", gap: "0.2rem", color: "#D48C45", marginBottom: "1rem" }}>
+                <Flame size={20} className="anim-pulse" />
+                <Flame size={26} className="anim-pulse" style={{ animationDelay: "0.2s" }} />
+                <Flame size={20} className="anim-pulse" style={{ animationDelay: "0.4s" }} />
+              </div>
+
+              <div style={{ display: "flex", gap: "0.6rem", justifyContent: "center" }}>
+                <MagicalButton
+                  onClick={brewPotion}
+                  variant="primary"
+                  size="md"
+                  disabled={selectedIngredients.length === 0 || isBrewing}
+                  icon={FlaskConical}
+                >
+                  {isBrewing ? "Catalyzing Reaction..." : "Catalyze Elixir"}
+                </MagicalButton>
+
+                <MagicalButton
+                  onClick={resetCauldron}
+                  variant="ghost"
+                  size="md"
+                  icon={RotateCcw}
+                >
+                  Reset Cauldron
+                </MagicalButton>
+              </div>
+
+              {/* Brewing Outcome Card */}
+              {brewingResult && (
+                <div className="brewing-result-card anim-fade-in-up">
+                  <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: "0.5rem" }}>
+                    <h4 style={{ color: "var(--ivory)", fontFamily: "var(--font-display)", fontSize: "1.1rem" }}>
+                      {brewingResult.name}
+                    </h4>
+                    <span className={brewingResult.status === "Volatile" ? "badge-burgundy" : "badge-emerald"}>
+                      {brewingResult.status}
+                    </span>
+                  </div>
+                  <div style={{ display: "flex", gap: "1rem", fontSize: "0.82rem", color: "var(--parchment)" }}>
+                    <span>Potency: <strong>{brewingResult.potency} pts</strong></span>
+                    <span>Thermal Stability: <strong>{brewingResult.stability} pts</strong></span>
+                  </div>
+                </div>
+              )}
+            </div>
           </div>
         </div>
-
-        {/* Right: Academic Syllabus & Grimoire List */}
-        <div className="magical-card ornate-corners">
-          <div style={{ display: "flex", alignItems: "center", gap: "0.6rem", marginBottom: "1.2rem" }}>
-            <BookOpen size={18} color="var(--antique-gold)" />
-            <h3 style={{ fontSize: "1.2rem", color: "var(--ivory)", fontFamily: "var(--font-display)" }}>
-              Year V Advanced Course Syllabus
-            </h3>
-          </div>
-
-          <div style={{ display: "flex", flexDirection: "column", gap: "1rem" }}>
-            {[
-              {
-                code: "TRANS-501",
-                title: "Advanced Inanimate Transfiguration",
-                prof: "Prof. Morgana Vance",
-                desc: "Molecular morphing of inanimate metals into organic crystalline matrices.",
-              },
-              {
-                code: "RUNE-404",
-                title: "Decryption of Eldorian Tablets",
-                prof: "Arch-Magister Valerius",
-                desc: "Syntactic analysis of third-age astronomical glyphs carved in obsidian.",
-              },
-              {
-                code: "ALCH-520",
-                title: "Distillation of Twilight Essences",
-                prof: "Mistress Belladonna",
-                desc: "Nocturnal reagent processing under waxing lunar illumination.",
-              },
-              {
-                code: "ASTR-308",
-                title: "Planetary Ley-Line Dynamics",
-                prof: "Master Elowen Frost",
-                desc: "Gravitational distortion of spell trajectories during astral conjunctions.",
-              },
-            ].map((course) => (
-              <div
-                key={course.code}
-                style={{
-                  padding: "0.85rem",
-                  borderRadius: "var(--radius-sm)",
-                  background: "rgba(11, 16, 32, 0.5)",
-                  border: "1px solid rgba(214, 180, 106, 0.12)",
-                }}
-              >
-                <div style={{ display: "flex", justifyContent: "space-between", marginBottom: "0.25rem" }}>
-                  <span style={{ fontFamily: "var(--font-display)", fontWeight: 700, fontSize: "0.88rem", color: "var(--ivory)" }}>
-                    {course.title}
-                  </span>
-                  <span className="badge-gold" style={{ fontSize: "0.62rem" }}>
-                    {course.code}
-                  </span>
-                </div>
-                <div style={{ fontSize: "0.75rem", color: "var(--antique-gold)", marginBottom: "0.3rem" }}>
-                  {course.prof}
-                </div>
-                <p style={{ fontSize: "0.78rem", color: "var(--parchment-muted)", margin: 0 }}>
-                  {course.desc}
-                </p>
-              </div>
-            ))}
-          </div>
-        </div>
-      </div>
-
-      <style>{`
-        @media (max-width: 960px) {
-          .academics-container > div:nth-child(2) {
-            grid-template-columns: 1fr !important;
-          }
-        }
-      `}</style>
+      )}
     </div>
   );
 }

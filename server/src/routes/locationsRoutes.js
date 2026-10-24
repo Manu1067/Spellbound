@@ -5,6 +5,7 @@ const router = Router();
 
 router.get('/', locationsController.getLocations);
 router.get('/pathways', locationsController.getPathways);
+router.get('/directions', locationsController.getDirections);
 router.get('/:id', locationsController.getLocationById);
 
 export default router;

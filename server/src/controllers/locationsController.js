@@ -37,3 +37,20 @@ export const getPathways = (req, res, next) => {
     next(err);
   }
 };
+
+export const getDirections = (req, res, next) => {
+  try {
+    const { from, to } = req.query;
+    if (!from || !to) {
+      return sendError(res, "Both 'from' and 'to' location IDs are required for directions", 'VALIDATION_ERROR', 400);
+    }
+
+    const route = locationsService.calculateShortestPath(from, to);
+    return sendSuccess(res, route);
+  } catch (err) {
+    if (err.message.includes('not found') || err.message.includes('No connected pathway')) {
+      return sendError(res, err.message, 'NOT_FOUND', 404);
+    }
+    next(err);
+  }
+};

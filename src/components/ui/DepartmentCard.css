@@ -1,0 +1,145 @@
+/* Arched Department Card Styles — Matches Spellbound Reference Image */
+
+.arched-dept-card-link {
+  text-decoration: none;
+  display: block;
+  outline: none;
+  color: inherit;
+  transition: transform var(--transition-normal);
+}
+
+.arched-dept-card-link:focus-visible .arched-dept-card {
+  outline: 2px solid var(--antique-gold);
+  outline-offset: 4px;
+}
+
+.arched-dept-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  position: relative;
+  cursor: pointer;
+  padding: 0.25rem;
+  transition: transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.arched-dept-card:hover {
+  transform: translateY(-6px);
+}
+
+/* Arch Frame */
+.card-arch-frame {
+  position: relative;
+  width: 100%;
+  aspect-ratio: 1 / 1.15;
+  border-radius: 48px 48px 6px 6px;
+  overflow: hidden;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.65), 0 0 12px rgba(214, 180, 106, 0.15);
+  border: 1.5px solid rgba(214, 180, 106, 0.45);
+  background: #0B1020;
+  transition: border-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+.arched-dept-card:hover .card-arch-frame {
+  border-color: rgba(244, 211, 139, 0.9);
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.8), 0 0 24px rgba(214, 180, 106, 0.45);
+}
+
+/* Top Crest Jewel */
+.card-top-crest {
+  position: absolute;
+  top: 4px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 4;
+  width: 18px;
+  height: 18px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.crest-jewel {
+  width: 7px;
+  height: 7px;
+  transform: rotate(45deg);
+  border: 1px solid var(--ivory);
+  box-shadow: 0 0 8px rgba(255, 232, 158, 0.8);
+}
+
+/* Image Wrapper */
+.card-img-wrapper {
+  position: relative;
+  width: 100%;
+  height: 100%;
+}
+
+.card-illustration {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  transition: transform 0.6s cubic-bezier(0.25, 1, 0.5, 1);
+}
+
+.arched-dept-card:hover .card-illustration {
+  transform: scale(1.06);
+}
+
+/* Inner Vignette for depth */
+.card-inner-vignette {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(circle at 50% 35%, transparent 45%, rgba(11, 16, 32, 0.75) 100%),
+              linear-gradient(to top, rgba(11, 16, 32, 0.8) 0%, transparent 40%);
+  pointer-events: none;
+}
+
+/* Gilded Overlay Border */
+.card-gilded-border {
+  position: absolute;
+  inset: 2px;
+  border-radius: 46px 46px 4px 4px;
+  border: 1px solid rgba(214, 180, 106, 0.25);
+  pointer-events: none;
+}
+
+/* Content Area */
+.card-content-area {
+  margin-top: 0.65rem;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.2rem;
+  width: 100%;
+}
+
+.card-dept-title {
+  font-family: var(--font-display);
+  font-size: 0.78rem;
+  font-weight: 600;
+  color: var(--ivory);
+  letter-spacing: 0.03em;
+  margin: 0;
+  line-height: 1.25;
+  text-shadow: 0 2px 6px rgba(0, 0, 0, 0.85);
+  transition: color 0.25s ease;
+}
+
+.arched-dept-card:hover .card-dept-title {
+  color: var(--antique-gold-bright);
+}
+
+.card-arrow-indicator {
+  color: var(--antique-gold);
+  font-size: 0.8rem;
+  opacity: 0.8;
+  transition: transform 0.25s ease, opacity 0.25s ease;
+}
+
+.arched-dept-card:hover .card-arrow-indicator {
+  transform: translateX(4px);
+  opacity: 1;
+  color: var(--antique-gold-bright);
+}
