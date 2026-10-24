@@ -1156,7 +1156,9 @@ export const communityPosts = [
     category: 'Study Circle',
     title: 'Ancient Runes & C2S Verilog Review Study Circle',
     body: 'Meeting tonight in the Academic Building East Alcove at 19:30. Bring your styluses and laptop stations. Herbal tea provided.',
-    signature_count: 12
+    signature_count: 12,
+    likes_count: 18,
+    dislikes_count: 1
   },
   {
     id: 'note-2',
@@ -1166,7 +1168,9 @@ export const communityPosts = [
     category: 'Sports Gathering',
     title: 'Inter-House Volleyball & Kho-Kho Practice Trials',
     body: 'Open tryouts for the Autumn Sports Fest on Saturday at 16:00 on the West Courts. All skill levels warmly welcomed!',
-    signature_count: 24
+    signature_count: 24,
+    likes_count: 32,
+    dislikes_count: 2
   },
   {
     id: 'note-3',
@@ -1176,7 +1180,9 @@ export const communityPosts = [
     category: 'Collaboration',
     title: 'Sustainable Water Recycling System Project Squad',
     body: 'Looking for two electronics/mechanical adepts to automate the valve telemetry on our campus garden filtration unit.',
-    signature_count: 9
+    signature_count: 9,
+    likes_count: 14,
+    dislikes_count: 0
   },
   {
     id: 'note-4',
@@ -1186,7 +1192,9 @@ export const communityPosts = [
     category: 'Alchemical Trade',
     title: 'Exchanging Purified Copper Reagents for FPGA Dev Kits',
     body: 'Have 5 drams of spectroscopic reagent. Looking to test dual-clock FIFO modules in the C2S Lab with fellow designers.',
-    signature_count: 8
+    signature_count: 8,
+    likes_count: 11,
+    dislikes_count: 1
   }
 ];
 

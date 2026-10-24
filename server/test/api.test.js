@@ -283,3 +283,70 @@ describe('7. Department of Mysteries: 5 Sub-Modules', () => {
     assert.equal(likeJson.data.likesCount, 1);
   });
 });
+
+describe('8. Wizarding Social Network: Inscribing & Reacting (Likes & Dislikes)', () => {
+  let createdPostId;
+
+  test('POST /api/community/posts creates new notice with auto-like', async () => {
+    const res = await fetch(`${baseUrl}/api/community/posts`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        title: 'Quantum Arithmancy Revision Session',
+        body: 'Convening at the Academic Building Room 402 tomorrow at 18:00.',
+        category: 'Study Circle',
+        authorId: 'student-aris-thorne',
+        authorName: 'Aris Thorne'
+      })
+    });
+
+    assert.equal(res.status, 201);
+    const json = await res.json();
+    assert.equal(json.success, true);
+    assert.equal(json.data.title, 'Quantum Arithmancy Revision Session');
+    assert.equal(json.data.likes, 1);
+    assert.equal(json.data.dislikes, 0);
+    createdPostId = json.data.id;
+  });
+
+  test('POST /api/community/posts/:id/react supports liking and disliking choices', async () => {
+    // 1. Another student reacts with 'like'
+    const likeRes = await fetch(`${baseUrl}/api/community/posts/${createdPostId}/react`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        studentId: 'p-1',
+        reactionType: 'like'
+      })
+    });
+    assert.equal(likeRes.status, 200);
+    const likeJson = await likeRes.json();
+    assert.equal(likeJson.data.userReaction, 'like');
+    assert.equal(likeJson.data.likes, 2);
+
+    // 2. Same student switches reaction to 'dislike'
+    const dislikeRes = await fetch(`${baseUrl}/api/community/posts/${createdPostId}/react`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        studentId: 'p-1',
+        reactionType: 'dislike'
+      })
+    });
+    assert.equal(dislikeRes.status, 200);
+    const dislikeJson = await dislikeRes.json();
+    assert.equal(dislikeJson.data.userReaction, 'dislike');
+    assert.equal(dislikeJson.data.likes, 1); // Decremented from 2 to 1
+    assert.equal(dislikeJson.data.dislikes, 1); // Incremented from 0 to 1
+
+    // 3. GET /api/community/posts returns updated reaction numbers
+    const getRes = await fetch(`${baseUrl}/api/community/posts?studentId=p-1`);
+    assert.equal(getRes.status, 200);
+    const getJson = await getRes.json();
+    const found = getJson.data.find((p) => p.id === createdPostId);
+    assert.ok(found);
+    assert.equal(found.likes, 1);
+    assert.equal(found.dislikes, 1);
+    assert.equal(found.userReaction, 'dislike');
+  });
+});

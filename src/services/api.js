@@ -314,7 +314,10 @@ export async function getCommunityPosts(category) {
       title: "Ancient Runes & C2S Verilog Review Study Circle",
       body: "Meeting tonight in the Academic Building East Alcove at 19:30. Bring your styluses and laptop stations. Herbal tea provided.",
       signatures: 12,
+      likes: 18,
+      dislikes: 1,
       isSigned: false,
+      userReaction: "like",
       createdAt: "1 hour ago"
     },
     {
@@ -325,8 +328,39 @@ export async function getCommunityPosts(category) {
       title: "Inter-House Volleyball & Kho-Kho Practice Trials",
       body: "Open tryouts for the Autumn Sports Fest on Saturday at 16:00 on the West Courts. All skill levels warmly welcomed!",
       signatures: 24,
+      likes: 32,
+      dislikes: 2,
       isSigned: true,
+      userReaction: null,
       createdAt: "3 hours ago"
+    },
+    {
+      id: "note-3",
+      author: "Thaddeus Thorne",
+      house: "Hufflepuff",
+      category: "Academic Collaboration",
+      title: "Sustainable Water Recycling System Project Squad",
+      body: "Looking for two electronics/mechanical adepts to automate valve telemetry on our campus garden filtration unit.",
+      signatures: 9,
+      likes: 14,
+      dislikes: 0,
+      isSigned: false,
+      userReaction: null,
+      createdAt: "5 hours ago"
+    },
+    {
+      id: "note-4",
+      author: "Isolde Ravenshadow",
+      house: "Slytherin",
+      category: "Academic Collaboration",
+      title: "Exchanging Purified Copper Reagents for FPGA Dev Kits",
+      body: "Have 5 drams of spectroscopic reagent. Looking to test dual-clock FIFO modules in the C2S Lab with fellow designers.",
+      signatures: 8,
+      likes: 11,
+      dislikes: 1,
+      isSigned: false,
+      userReaction: null,
+      createdAt: "Yesterday"
     }
   ]);
 }
@@ -348,9 +382,27 @@ export async function createCommunityPost(title, body, category) {
     body,
     category,
     author: mockData.currentUser.name,
+    house: mockData.currentUser.house,
     signatures: 1,
+    likes: 1,
+    dislikes: 0,
     isSigned: true,
+    userReaction: "like",
     createdAt: "Just now"
+  }));
+}
+
+export async function reactToCommunityPost(postId, reactionType) {
+  return apiFetch(`/community/posts/${postId}/react`, {
+    method: 'POST',
+    body: JSON.stringify({
+      studentId: mockData.currentUser.id,
+      reactionType
+    })
+  }).catch(() => ({
+    postId,
+    reactionType,
+    success: true
   }));
 }
 

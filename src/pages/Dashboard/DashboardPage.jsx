@@ -313,29 +313,32 @@ export default function DashboardPage() {
               </div>
 
               <div style={{ display: "flex", flexDirection: "column", gap: "0.8rem" }}>
-                {likeMindedMatches.map((m) => (
-                  <div key={m.student.id} className="peer-match-item">
-                    <div className="peer-avatar">
-                      <img src={m.student.avatarUrl} alt={m.student.name} />
+                {likeMindedMatches.map((m) => {
+                  if (!m || !m.student) return null;
+                  return (
+                    <div key={m.student.id} className="peer-match-item">
+                      <div className="peer-avatar">
+                        <img src={m.student.avatarUrl || "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&w=250&q=80"} alt={m.student.name} />
+                      </div>
+                      <div style={{ flex: 1 }}>
+                        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+                          <span style={{ fontWeight: 600, color: "var(--ivory)", fontSize: "0.92rem" }}>
+                            {m.student.name}
+                          </span>
+                          <span className="badge-gold" style={{ fontSize: "0.65rem" }}>
+                            {m.matchPercentage || 85}% Match
+                          </span>
+                        </div>
+                        <div style={{ fontSize: "0.74rem", color: "var(--antique-gold)" }}>
+                          {m.student.branch} · {m.student.house}
+                        </div>
+                        <div style={{ fontSize: "0.72rem", color: "var(--parchment-muted)", marginTop: "0.2rem" }}>
+                          Shared: {m.sharedTags?.slice(0, 3).map((t) => t.label).join(", ") || "Mutual Academy Interests"}
+                        </div>
+                      </div>
                     </div>
-                    <div style={{ flex: 1 }}>
-                      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
-                        <span style={{ fontWeight: 600, color: "var(--ivory)", fontSize: "0.92rem" }}>
-                          {m.student.name}
-                        </span>
-                        <span className="badge-gold" style={{ fontSize: "0.65rem" }}>
-                          {m.matchPercentage}% Match
-                        </span>
-                      </div>
-                      <div style={{ fontSize: "0.74rem", color: "var(--antique-gold)" }}>
-                        {m.student.branch} · {m.student.house}
-                      </div>
-                      <div style={{ fontSize: "0.72rem", color: "var(--parchment-muted)", marginTop: "0.2rem" }}>
-                        Shared: {m.sharedTags?.slice(0, 3).map((t) => t.label).join(", ")}
-                      </div>
-                    </div>
-                  </div>
-                ))}
+                  );
+                })}
               </div>
             </div>
           )}
@@ -489,19 +492,22 @@ export default function DashboardPage() {
               </div>
 
               <div style={{ display: "flex", flexDirection: "column", gap: "0.8rem" }}>
-                {urgentNotices.map((n) => (
-                  <div key={n.id} style={{ padding: "0.6rem 0.8rem", background: "rgba(11, 16, 32, 0.6)", borderRadius: "var(--radius-sm)", borderLeft: "3px solid #E05A47" }}>
-                    <span style={{ fontSize: "0.7rem", color: "#E05A47", fontWeight: "bold" }}>
-                      {n.priority} · {n.issuingAuthority}
-                    </span>
-                    <h5 style={{ color: "var(--ivory)", fontSize: "0.86rem", margin: "0.2rem 0" }}>
-                      {n.title}
-                    </h5>
-                    <p style={{ color: "var(--parchment-muted)", fontSize: "0.78rem", margin: 0 }}>
-                      {n.body.slice(0, 95)}...
-                    </p>
-                  </div>
-                ))}
+                {urgentNotices.map((n) => {
+                  const noticeText = n.message || n.body || "";
+                  return (
+                    <div key={n.id} style={{ padding: "0.6rem 0.8rem", background: "rgba(11, 16, 32, 0.6)", borderRadius: "var(--radius-sm)", borderLeft: "3px solid #E05A47" }}>
+                      <span style={{ fontSize: "0.7rem", color: "#E05A47", fontWeight: "bold" }}>
+                        {n.priority} · {n.issuingAuthority}
+                      </span>
+                      <h5 style={{ color: "var(--ivory)", fontSize: "0.86rem", margin: "0.2rem 0" }}>
+                        {n.title}
+                      </h5>
+                      <p style={{ color: "var(--parchment-muted)", fontSize: "0.78rem", margin: 0 }}>
+                        {noticeText.length > 95 ? `${noticeText.slice(0, 95)}...` : noticeText}
+                      </p>
+                    </div>
+                  );
+                })}
               </div>
             </div>
           )}

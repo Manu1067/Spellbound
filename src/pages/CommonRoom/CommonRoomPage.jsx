@@ -5,31 +5,51 @@ import {
   ArrowLeft,
   Pin,
   Plus,
-  Heart,
-  MessageSquare,
+  ThumbsUp,
+  ThumbsDown,
   Sparkles,
   Users,
   X,
   Search,
   CheckCircle2,
-  Share2
+  Share2,
+  Send,
+  MessageSquare,
+  Compass
 } from "lucide-react";
-import { getCommunityPosts, createCommunityPost, signCommunityPost } from "../../services/api";
+import { getCommunityPosts, createCommunityPost, reactToCommunityPost } from "../../services/api";
 import { currentUser } from "../../data/mockData";
 import MagicalButton from "../../components/ui/MagicalButton";
 import "./CommonRoomPage.css";
 
-const CATEGORIES = ["All", "Study Circle", "Sports Gathering", "Academic Collaboration", "Lost Artifact"];
+const CATEGORIES = [
+  "All",
+  "Study Circle",
+  "Sports Gathering",
+  "Academic Collaboration",
+  "Project Partnering",
+  "Lost Artifact",
+  "General Fellowship"
+];
 
 export default function CommonRoomPage() {
   const [posts, setPosts] = useState([]);
   const [activeCategory, setActiveCategory] = useState("All");
   const [searchQuery, setSearchQuery] = useState("");
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [newTitle, setNewTitle] = useState("");
-  const [newBody, setNewBody] = useState("");
-  const [newCategory, setNewCategory] = useState("Study Circle");
-  const [isSubmitting, setIsSubmitting] = useState(false);
+  
+  // Quick Post Composer state
+  const [quickTitle, setQuickTitle] = useState("");
+  const [quickBody, setQuickBody] = useState("");
+  const [quickCategory, setQuickCategory] = useState("Study Circle");
+  const [isQuickSubmitting, setIsQuickSubmitting] = useState(false);
+
+  // Modal Composer state
+  const [modalTitle, setModalTitle] = useState("");
+  const [modalBody, setModalBody] = useState("");
+  const [modalCategory, setModalCategory] = useState("Academic Collaboration");
+  const [isModalSubmitting, setIsModalSubmitting] = useState(false);
+
   const [toastMessage, setToastMessage] = useState("");
 
   useEffect(() => {
@@ -42,53 +62,99 @@ export default function CommonRoomPage() {
     return () => { mounted = false; };
   }, [activeCategory]);
 
-  const toggleSign = async (id) => {
-    try {
-      await signCommunityPost(id);
-      setPosts((prev) =>
-        prev.map((p) => {
-          if (p.id === id) {
-            const nextSigned = !p.isSigned;
-            return {
-              ...p,
-              isSigned: nextSigned,
-              signatures: nextSigned ? p.signatures + 1 : Math.max(0, p.signatures - 1),
-            };
+  // Handle Like or Dislike Reaction
+  const handleReaction = async (postId, reactionType) => {
+    // 1. Optimistic UI update
+    setPosts((prev) =>
+      prev.map((p) => {
+        if (p.id !== postId) return p;
+
+        let newLikes = p.likes || 0;
+        let newDislikes = p.dislikes || 0;
+        let newUserReaction = p.userReaction;
+
+        if (p.userReaction === reactionType) {
+          // Toggle off
+          if (reactionType === "like") newLikes = Math.max(0, newLikes - 1);
+          if (reactionType === "dislike") newDislikes = Math.max(0, newDislikes - 1);
+          newUserReaction = null;
+        } else {
+          // Switching or new
+          if (reactionType === "like") {
+            newLikes += 1;
+            if (p.userReaction === "dislike") newDislikes = Math.max(0, newDislikes - 1);
+            newUserReaction = "like";
+          } else {
+            newDislikes += 1;
+            if (p.userReaction === "like") newLikes = Math.max(0, newLikes - 1);
+            newUserReaction = "dislike";
           }
-          return p;
-        })
-      );
+        }
+
+        return {
+          ...p,
+          likes: newLikes,
+          dislikes: newDislikes,
+          userReaction: newUserReaction,
+        };
+      })
+    );
+
+    // 2. Persist to API
+    try {
+      await reactToCommunityPost(postId, reactionType);
     } catch (err) {
-      console.error("Sign error:", err);
+      console.error("Reaction error:", err);
     }
   };
 
-  const handlePostNotice = async (e) => {
+  // Submit Quick Post
+  const handleQuickPost = async (e) => {
     e.preventDefault();
-    if (!newTitle.trim() || !newBody.trim()) return;
+    if (!quickTitle.trim() || !quickBody.trim()) return;
 
-    setIsSubmitting(true);
+    setIsQuickSubmitting(true);
     try {
-      const created = await createCommunityPost(newTitle, newBody, newCategory);
+      const created = await createCommunityPost(quickTitle.trim(), quickBody.trim(), quickCategory);
       setPosts([created, ...posts]);
-      setIsModalOpen(false);
-      setNewTitle("");
-      setNewBody("");
-      setToastMessage("Your parchment notice has been pinned to the Hearth Notice Board!");
+      setQuickTitle("");
+      setQuickBody("");
+      setToastMessage("✦ Your parchment notice has been pinned to the Hearth Notice Board! Scholars can now react.");
       setTimeout(() => setToastMessage(""), 5000);
     } catch (err) {
       console.error("Post error:", err);
     } finally {
-      setIsSubmitting(false);
+      setIsQuickSubmitting(false);
+    }
+  };
+
+  // Submit Modal Post
+  const handleModalPost = async (e) => {
+    e.preventDefault();
+    if (!modalTitle.trim() || !modalBody.trim()) return;
+
+    setIsModalSubmitting(true);
+    try {
+      const created = await createCommunityPost(modalTitle.trim(), modalBody.trim(), modalCategory);
+      setPosts([created, ...posts]);
+      setIsModalOpen(false);
+      setModalTitle("");
+      setModalBody("");
+      setToastMessage("✦ Your parchment notice has been pinned to the Hearth Notice Board! Scholars can now react.");
+      setTimeout(() => setToastMessage(""), 5000);
+    } catch (err) {
+      console.error("Post error:", err);
+    } finally {
+      setIsModalSubmitting(false);
     }
   };
 
   const filteredPosts = posts.filter((p) => {
     const matchesCat = activeCategory === "All" || p.category === activeCategory;
     const matchesQuery =
-      p.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      p.body.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      p.author.toLowerCase().includes(searchQuery.toLowerCase());
+      (p.title || "").toLowerCase().includes(searchQuery.toLowerCase()) ||
+      (p.body || "").toLowerCase().includes(searchQuery.toLowerCase()) ||
+      (p.author || "").toLowerCase().includes(searchQuery.toLowerCase());
     return matchesCat && matchesQuery;
   });
 
@@ -130,10 +196,10 @@ export default function CommonRoomPage() {
             </div>
             <div>
               <h1 style={{ fontSize: "1.85rem", color: "var(--ivory)", fontFamily: "var(--font-display)" }}>
-                Wizarding Social Network: The Hearthside Notice Board
+                Wizarding Social Network: Hearthside Fellowship & Discussions
               </h1>
               <p style={{ color: "var(--parchment-muted)", fontSize: "0.92rem" }}>
-                Parchment notices, peer study circles, sports squad formations & academy fellowship.
+                Inscribe notices, form study circles, seek teammates, and react to fellow scholars with likes and dislikes.
               </p>
             </div>
           </div>
@@ -144,7 +210,7 @@ export default function CommonRoomPage() {
             size="md"
             icon={Plus}
           >
-            Inscribe a Notice
+            Inscribe Parchment Modal
           </MagicalButton>
         </div>
       </div>
@@ -157,13 +223,78 @@ export default function CommonRoomPage() {
         </div>
       )}
 
+      {/* Prominent Quick Inscription Composer (Direct Social Networking) */}
+      <div className="quick-composer-card ornate-corners anim-fade-in-up">
+        <div className="composer-header">
+          <div style={{ display: "flex", alignItems: "center", gap: "0.5rem" }}>
+            <Sparkles size={16} color="var(--antique-gold-bright)" />
+            <h3 style={{ fontFamily: "var(--font-display)", color: "var(--antique-gold-bright)", fontSize: "1.05rem" }}>
+              Inscribe a Parchment Notice to Connect with Scholars
+            </h3>
+          </div>
+          <span className="badge-gold">
+            Posting as {currentUser.name} ({currentUser.house})
+          </span>
+        </div>
+
+        <form onSubmit={handleQuickPost} className="quick-composer-form">
+          <div className="composer-inputs-row">
+            <div className="composer-field" style={{ flex: 2 }}>
+              <input
+                type="text"
+                placeholder="Notice Subject (e.g., C2S Lab Verilog Review Circle / Seeking Badminton Doubles Partner)..."
+                value={quickTitle}
+                onChange={(e) => setQuickTitle(e.target.value)}
+                required
+              />
+            </div>
+
+            <div className="composer-field" style={{ flex: 1, minWidth: "180px" }}>
+              <select
+                value={quickCategory}
+                onChange={(e) => setQuickCategory(e.target.value)}
+              >
+                {CATEGORIES.filter((c) => c !== "All").map((cat) => (
+                  <option key={cat} value={cat}>{cat}</option>
+                ))}
+              </select>
+            </div>
+          </div>
+
+          <div className="composer-field">
+            <textarea
+              rows={3}
+              placeholder="Inscribe your parchment message with quill and enchanted ink. Detail meeting times, locations, project requirements, or ideas..."
+              value={quickBody}
+              onChange={(e) => setQuickBody(e.target.value)}
+              required
+            />
+          </div>
+
+          <div className="composer-actions-bar">
+            <span style={{ fontSize: "0.78rem", color: "var(--parchment-muted)" }}>
+              ✦ Pinned scrolls appear instantly across the Academy and accept peer reactions.
+            </span>
+            <MagicalButton
+              type="submit"
+              variant="primary"
+              size="md"
+              disabled={isQuickSubmitting || !quickTitle.trim() || !quickBody.trim()}
+              icon={Send}
+            >
+              {isQuickSubmitting ? "Pinning Scroll..." : "Post Notice to Hearth Board"}
+            </MagicalButton>
+          </div>
+        </form>
+      </div>
+
       {/* Filter and Search Bar */}
       <div className="common-filters-bar">
         <div className="common-search-box">
           <Search size={15} color="var(--parchment-muted)" />
           <input
             type="text"
-            placeholder="Search parchment notices by topic, author, or keyword..."
+            placeholder="Search parchment notices by topic, scholar name, or keywords..."
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
           />
@@ -186,42 +317,83 @@ export default function CommonRoomPage() {
       <div className="notices-board-grid">
         {filteredPosts.length === 0 ? (
           <div style={{ color: "var(--parchment-muted)", textAlign: "center", padding: "3rem", gridColumn: "1 / -1" }}>
-            No hearth notices pinned under this category. Be the first to inscribe one!
+            No hearth notices found matching your criteria. Use the composer above to inscribe the first parchment!
           </div>
         ) : (
-          filteredPosts.map((post) => (
-            <div key={post.id} className="parchment-notice-card ornate-corners">
-              <div className="notice-pin-header">
-                <div style={{ display: "flex", alignItems: "center", gap: "0.4rem" }}>
-                  <Pin size={15} color="var(--antique-gold)" />
-                  <span className="badge-gold" style={{ fontSize: "0.68rem" }}>{post.category}</span>
+          filteredPosts.map((post) => {
+            const likesCount = Number(post.likes) || 0;
+            const dislikesCount = Number(post.dislikes) || 0;
+            const totalReactions = likesCount + dislikesCount;
+            const approvalRatio = totalReactions > 0 ? Math.round((likesCount / totalReactions) * 100) : 100;
+
+            const isLiked = post.userReaction === "like";
+            const isDisliked = post.userReaction === "dislike";
+
+            return (
+              <div key={post.id} className="parchment-notice-card ornate-corners">
+                <div className="notice-pin-header">
+                  <div style={{ display: "flex", alignItems: "center", gap: "0.4rem" }}>
+                    <Pin size={15} color="var(--antique-gold)" />
+                    <span className="badge-gold" style={{ fontSize: "0.68rem" }}>{post.category}</span>
+                  </div>
+                  <span className="notice-timestamp">{post.createdAt || "Today"}</span>
                 </div>
-                <span className="notice-timestamp">{post.createdAt || post.date || "Today"}</span>
-              </div>
 
-              <h3 className="notice-title">{post.title}</h3>
-              <p className="notice-body">{post.body}</p>
+                <h3 className="notice-title">{post.title}</h3>
+                <p className="notice-body">{post.body}</p>
 
-              <div className="notice-footer">
-                <div className="notice-author">
-                  <span className="author-name">{post.author}</span>
-                  <span className="author-house">({post.house || "Academy Adept"})</span>
+                <div className="notice-footer">
+                  <div className="notice-author">
+                    <span className="author-name">{post.author}</span>
+                    <span className="author-house">({post.house || "Academy Scholar"})</span>
+                  </div>
+
+                  {/* Like & Dislike Reaction Controls */}
+                  <div className="reactions-container">
+                    {/* Like Button */}
+                    <button
+                      onClick={() => handleReaction(post.id, "like")}
+                      className={`reaction-btn like-btn ${isLiked ? "active" : ""}`}
+                      title={isLiked ? "Undo Like" : "Like this notice"}
+                      aria-label="Like notice"
+                    >
+                      <ThumbsUp size={14} fill={isLiked ? "#79C2A4" : "none"} />
+                      <span>{likesCount}</span>
+                    </button>
+
+                    {/* Dislike Button */}
+                    <button
+                      onClick={() => handleReaction(post.id, "dislike")}
+                      className={`reaction-btn dislike-btn ${isDisliked ? "active" : ""}`}
+                      title={isDisliked ? "Undo Dislike" : "Dislike this notice"}
+                      aria-label="Dislike notice"
+                    >
+                      <ThumbsDown size={14} fill={isDisliked ? "#E05A47" : "none"} />
+                      <span>{dislikesCount}</span>
+                    </button>
+
+                    {/* Resonance Bar Tooltip */}
+                    <div className="resonance-indicator" title={`${approvalRatio}% Positive Resonance`}>
+                      <div className="resonance-bar-track">
+                        <div
+                          className="resonance-bar-fill"
+                          style={{
+                            width: `${approvalRatio}%`,
+                            backgroundColor: approvalRatio >= 70 ? "#79C2A4" : "#D48C45"
+                          }}
+                        />
+                      </div>
+                      <span className="resonance-text">{approvalRatio}%</span>
+                    </div>
+                  </div>
                 </div>
-
-                <button
-                  onClick={() => toggleSign(post.id)}
-                  className={`sign-notice-btn ${post.isSigned ? "signed" : ""}`}
-                >
-                  <Heart size={14} fill={post.isSigned ? "var(--burgundy-bright)" : "none"} />
-                  <span>{post.signatures || 0} Endorsements</span>
-                </button>
               </div>
-            </div>
-          ))
+            );
+          })
         )}
       </div>
 
-      {/* Inscribe Notice Modal */}
+      {/* Full Modal Inscription */}
       {isModalOpen && (
         <div className="modal-backdrop" onClick={() => setIsModalOpen(false)}>
           <div className="inscribe-modal ornate-corners" onClick={(e) => e.stopPropagation()}>
@@ -229,7 +401,7 @@ export default function CommonRoomPage() {
               <div style={{ display: "flex", alignItems: "center", gap: "0.6rem" }}>
                 <Flame size={20} color="#D48C45" />
                 <h3 style={{ fontFamily: "var(--font-display)", color: "var(--ivory)", fontSize: "1.25rem" }}>
-                  Pin a Parchment to the Hearth Board
+                  Inscribe a Parchment Notice
                 </h3>
               </div>
               <button onClick={() => setIsModalOpen(false)} className="modal-close-btn">
@@ -237,10 +409,10 @@ export default function CommonRoomPage() {
               </button>
             </div>
 
-            <form onSubmit={handlePostNotice} className="inscribe-form">
+            <form onSubmit={handleModalPost} className="inscribe-form">
               <div className="form-group">
                 <label>Notice Category:</label>
-                <select value={newCategory} onChange={(e) => setNewCategory(e.target.value)}>
+                <select value={modalCategory} onChange={(e) => setModalCategory(e.target.value)}>
                   {CATEGORIES.filter((c) => c !== "All").map((c) => (
                     <option key={c} value={c}>{c}</option>
                   ))}
@@ -248,23 +420,23 @@ export default function CommonRoomPage() {
               </div>
 
               <div className="form-group">
-                <label>Subject / Title:</label>
+                <label>Subject / Topic Title:</label>
                 <input
                   type="text"
                   placeholder="e.g., C2S Lab Verilog Review Circle..."
-                  value={newTitle}
-                  onChange={(e) => setNewTitle(e.target.value)}
+                  value={modalTitle}
+                  onChange={(e) => setModalTitle(e.target.value)}
                   required
                 />
               </div>
 
               <div className="form-group">
-                <label>Parchment Inscription:</label>
+                <label>Parchment Inscription Body:</label>
                 <textarea
                   rows={4}
                   placeholder="Detail your study circle, sports practice, or collaborative announcement..."
-                  value={newBody}
-                  onChange={(e) => setNewBody(e.target.value)}
+                  value={modalBody}
+                  onChange={(e) => setModalBody(e.target.value)}
                   required
                 />
               </div>
@@ -281,10 +453,10 @@ export default function CommonRoomPage() {
                   type="submit"
                   variant="primary"
                   size="md"
-                  disabled={isSubmitting}
+                  disabled={isModalSubmitting}
                   icon={Pin}
                 >
-                  {isSubmitting ? "Pinning Notice..." : "Pin Notice to Board"}
+                  {isModalSubmitting ? "Pinning Notice..." : "Pin Notice to Board"}
                 </MagicalButton>
               </div>
             </form>

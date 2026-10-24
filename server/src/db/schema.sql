@@ -234,6 +234,8 @@ CREATE TABLE IF NOT EXISTS community_posts (
   title TEXT NOT NULL,
   body TEXT NOT NULL,
   signature_count INTEGER DEFAULT 0,
+  likes_count INTEGER DEFAULT 0,
+  dislikes_count INTEGER DEFAULT 0,
   created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
   updated_at DATETIME DEFAULT CURRENT_TIMESTAMP
 );
@@ -244,6 +246,16 @@ CREATE TABLE IF NOT EXISTS community_signatures (
   post_id TEXT NOT NULL REFERENCES community_posts(id) ON DELETE CASCADE,
   student_id TEXT NOT NULL REFERENCES students(id) ON DELETE CASCADE,
   signed_at DATETIME DEFAULT CURRENT_TIMESTAMP,
+  UNIQUE(post_id, student_id)
+);
+
+-- 18B. COMMUNITY POST REACTIONS (LIKES & DISLIKES)
+CREATE TABLE IF NOT EXISTS community_reactions (
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  post_id TEXT NOT NULL REFERENCES community_posts(id) ON DELETE CASCADE,
+  student_id TEXT NOT NULL REFERENCES students(id) ON DELETE CASCADE,
+  reaction_type TEXT NOT NULL CHECK(reaction_type IN ('like', 'dislike')),
+  created_at DATETIME DEFAULT CURRENT_TIMESTAMP,
   UNIQUE(post_id, student_id)
 );
 

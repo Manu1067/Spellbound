@@ -5,6 +5,7 @@ const router = Router();
 
 router.get('/posts', communityController.getPosts);
 router.post('/posts', communityController.createPost);
+router.post('/posts/:id/react', communityController.reactToPost);
 router.post('/posts/:id/sign', communityController.signPost);
 
 export default router;

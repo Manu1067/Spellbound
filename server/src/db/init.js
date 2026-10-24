@@ -25,6 +25,7 @@ export const initializeDatabase = ({ reset = false } = {}) => {
       DROP TABLE IF EXISTS confessions;
       DROP TABLE IF EXISTS complaints;
       DROP TABLE IF EXISTS student_council;
+      DROP TABLE IF EXISTS community_reactions;
       DROP TABLE IF EXISTS community_signatures;
       DROP TABLE IF EXISTS community_posts;
       DROP TABLE IF EXISTS sports_registrations;
@@ -246,15 +247,24 @@ export const initializeDatabase = ({ reset = false } = {}) => {
     // 16. Community Posts
     const insertPost = db.prepare(`
       INSERT OR IGNORE INTO community_posts (
-        id, author_id, author_name, house_id, category, title, body, signature_count
-      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+        id, author_id, author_name, house_id, category, title, body, signature_count, likes_count, dislikes_count
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     `);
     for (const cp of seedData.communityPosts) {
       insertPost.run(
         cp.id, cp.author_id, cp.author_name, cp.house_id,
-        cp.category, cp.title, cp.body, cp.signature_count
+        cp.category, cp.title, cp.body, cp.signature_count,
+        cp.likes_count || 0, cp.dislikes_count || 0
       );
     }
+
+    // 16B. Initial Community Post Reactions
+    const insertReaction = db.prepare(`
+      INSERT OR IGNORE INTO community_reactions (post_id, student_id, reaction_type)
+      VALUES (?, ?, ?)
+    `);
+    insertReaction.run('note-1', 'student-aris-thorne', 'like');
+    insertReaction.run('note-2', 'student-aris-thorne', 'like');
 
     // 17. Student Council
     const insertCouncil = db.prepare(`

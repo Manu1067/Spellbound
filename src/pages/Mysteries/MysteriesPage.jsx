@@ -618,7 +618,7 @@ export default function MysteriesPage() {
                 </div>
 
                 <h3 className="notice-title">{n.title}</h3>
-                <p className="notice-body">{n.body}</p>
+                <p className="notice-body">{n.message || n.body}</p>
 
                 <div className="notice-footer-meta">
                   <span><strong>Authorized by:</strong> {n.issuingAuthority}</span>

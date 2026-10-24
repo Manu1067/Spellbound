@@ -37,6 +37,25 @@ export const createPost = (req, res, next) => {
   }
 };
 
+export const reactToPost = (req, res, next) => {
+  try {
+    const { id } = req.params;
+    const { studentId, reactionType } = req.body;
+
+    if (!reactionType || !['like', 'dislike'].includes(reactionType)) {
+      return sendError(res, 'reactionType must be "like" or "dislike"', 'VALIDATION_ERROR', 400);
+    }
+
+    const result = communityService.reactToPost(id, studentId, reactionType);
+    return sendSuccess(res, result);
+  } catch (err) {
+    if (err.message === 'Post not found') {
+      return sendError(res, err.message, 'NOT_FOUND', 404);
+    }
+    next(err);
+  }
+};
+
 export const signPost = (req, res, next) => {
   try {
     const { id } = req.params;

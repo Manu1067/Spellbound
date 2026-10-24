@@ -22,7 +22,7 @@ export default function ParticleField({ count = 28, className = "" }) {
         inset: 0,
         pointerEvents: "none",
         overflow: "hidden",
-        zIndex: 2,
+        zIndex: 0,
       }}
       aria-hidden="true"
     >
