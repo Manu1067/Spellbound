@@ -221,11 +221,29 @@
   position: absolute;
   inset: 0;
   z-index: 0;
-  background-image: url('/assets/spellbound-hero-main.jpg');
+  background-image: url('/assets/SpellBound_hero.png');
   background-size: cover;
   background-position: center 25%;
   background-repeat: no-repeat;
   filter: brightness(0.96);
+}
+
+.brand-logo-img {
+  width: 32px;
+  height: 32px;
+  object-fit: cover;
+  border-radius: 6px;
+  border: 1px solid rgba(214, 180, 106, 0.4);
+  box-shadow: 0 0 8px rgba(214, 180, 106, 0.3);
+}
+
+.footer-logo-img {
+  width: 38px;
+  height: 38px;
+  object-fit: cover;
+  border-radius: 8px;
+  border: 1px solid rgba(214, 180, 106, 0.4);
+  box-shadow: 0 0 10px rgba(214, 180, 106, 0.25);
 }
 
 /* Soft Radial Gradient ensuring left text is crystal clear */

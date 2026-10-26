@@ -65,7 +65,18 @@ export default function MobileNav({ isOpen, onClose }) {
             }}
           >
             <div style={{ display: "flex", alignItems: "center", gap: "0.6rem" }}>
-              <Emblem size={34} />
+              <img
+                src="/assets/Spellbound_logo.jpeg"
+                alt="Spellbound Academy"
+                style={{
+                  width: "32px",
+                  height: "32px",
+                  objectFit: "cover",
+                  borderRadius: "6px",
+                  border: "1px solid rgba(214, 180, 106, 0.4)",
+                  boxShadow: "0 0 8px rgba(214, 180, 106, 0.25)",
+                }}
+              />
               <span
                 style={{
                   fontFamily: "var(--font-display)",

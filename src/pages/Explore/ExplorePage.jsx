@@ -33,9 +33,39 @@ const LOCATION_ICONS = {
   "loc-cafeteria": Coffee,
 };
 
+const BUILDING_IMAGES = {
+  "loc-academic": "/assets/accessible_List/Academic_building.png",
+  "loc-hostel-girls": "/assets/accessible_List/GirlsHostel.png",
+  "loc-hostel-boys": "/assets/accessible_List/BoysHostel.png",
+  "loc-mess": "/assets/accessible_List/Mess.png",
+  "loc-cafeteria": "/assets/accessible_List/cafeteria.png",
+};
+
+const BUILDING_COORDS = {
+  "loc-academic": { x: 50, y: 46 },
+  "loc-hostel-girls": { x: 22, y: 23 },
+  "loc-hostel-boys": { x: 80, y: 29 },
+  "loc-mess": { x: 51, y: 69 },
+  "loc-cafeteria": { x: 19, y: 60 },
+};
+
 export default function ExplorePage() {
-  const [locations, setLocations] = useState(fallbackLocations);
-  const [selectedLocation, setSelectedLocation] = useState(fallbackLocations[0]);
+  const [locations, setLocations] = useState(
+    fallbackLocations.map((l) => ({
+      ...l,
+      coords: BUILDING_COORDS[l.id] || l.coords,
+      image: l.image || BUILDING_IMAGES[l.id],
+    }))
+  );
+  const [selectedLocation, setSelectedLocation] = useState(
+    fallbackLocations[0]
+      ? {
+          ...fallbackLocations[0],
+          coords: BUILDING_COORDS[fallbackLocations[0].id] || fallbackLocations[0].coords,
+          image: fallbackLocations[0].image || BUILDING_IMAGES[fallbackLocations[0].id],
+        }
+      : null
+  );
   const [searchQuery, setSearchQuery] = useState("");
   const [activeZone, setActiveZone] = useState("All");
   const [viewMode, setViewMode] = useState("map"); // "map" | "list"
@@ -52,8 +82,13 @@ export default function ExplorePage() {
     getCampusLocations()
       .then((data) => {
         if (mounted && Array.isArray(data) && data.length > 0) {
-          setLocations(data);
-          setSelectedLocation(data[0]);
+          const merged = data.map((l) => ({
+            ...l,
+            coords: BUILDING_COORDS[l.id] || l.coords,
+            image: l.image || BUILDING_IMAGES[l.id],
+          }));
+          setLocations(merged);
+          setSelectedLocation(merged[0]);
         }
       })
       .catch((err) => console.warn("Using fallback locations:", err));
@@ -335,14 +370,11 @@ export default function ExplorePage() {
 
             {/* Interactive SVG Parchment Map */}
             <div className="map-svg-container">
-              <svg viewBox="0 0 1000 600" className="parchment-map-svg">
+              <svg viewBox="0 0 1000 1000" className="parchment-map-svg">
                 <defs>
-                  <radialGradient id="mapVignette" cx="50%" cy="50%" r="50%">
-                    <stop offset="60%" stopColor="#251C15" stopOpacity="0" />
-                    <stop offset="100%" stopColor="#0B0806" stopOpacity="0.85" />
-                  </radialGradient>
                   <linearGradient id="pathGold" x1="0%" y1="0%" x2="100%" y2="100%">
-                    <stop offset="0%" stopColor="#D6B46A" />
+                    <stop offset="0%" stopColor="#FBF4DD" />
+                    <stop offset="50%" stopColor="#D6B46A" />
                     <stop offset="100%" stopColor="#7E6023" />
                   </linearGradient>
                   <filter id="goldGlow" x="-20%" y="-20%" width="140%" height="140%">
@@ -351,25 +383,15 @@ export default function ExplorePage() {
                   </filter>
                 </defs>
 
-                {/* Parchment Base Texture */}
-                <rect width="1000" height="600" fill="#1C1611" />
-                <rect width="1000" height="600" fill="url(#mapVignette)" />
-
-                {/* Grid & Contour Lines */}
-                <path d="M50 150 Q200 80 400 120 T800 90 T950 180" stroke="#36291E" strokeWidth="1.5" fill="none" opacity="0.6" />
-                <path d="M50 220 Q250 160 500 200 T850 160 T950 250" stroke="#36291E" strokeWidth="1.5" fill="none" opacity="0.6" />
-                <path d="M50 360 Q300 320 600 340 T950 400" stroke="#36291E" strokeWidth="1.5" fill="none" opacity="0.6" />
-
-                {/* Campus Water Body (Lake) */}
-                <path
-                  d="M50 480 Q250 450 500 500 T950 510 L950 600 L50 600 Z"
-                  fill="#121A28"
-                  stroke="rgba(214, 180, 106, 0.25)"
-                  strokeWidth="1.5"
+                {/* Illustrated Campus Parchment Map Base */}
+                <image
+                  href="/assets/accessible_List/campus_map_parchment.png"
+                  x="0"
+                  y="0"
+                  width="1000"
+                  height="1000"
+                  preserveAspectRatio="none"
                 />
-                <text x="400" y="560" fill="rgba(214, 180, 106, 0.35)" fontFamily="Cinzel" fontSize="14" letterSpacing="5">
-                  THE SOUTH EMBANKMENT RESERVOIR
-                </text>
 
                 {/* Pathways connecting locations */}
                 {campusPathways.map((pathway) => {
@@ -378,33 +400,35 @@ export default function ExplorePage() {
                   if (!fromLoc || !toLoc) return null;
 
                   const x1 = (fromLoc.coords.x / 100) * 1000;
-                  const y1 = (fromLoc.coords.y / 100) * 600;
+                  const y1 = (fromLoc.coords.y / 100) * 1000;
                   const x2 = (toLoc.coords.x / 100) * 1000;
-                  const y2 = (toLoc.coords.y / 100) * 600;
+                  const y2 = (toLoc.coords.y / 100) * 1000;
                   const isInActiveRoute = isPathwayInRoute(pathway.fromId, pathway.toId);
 
                   return (
                     <g key={pathway.id}>
-                      {/* Default pathway line */}
+                      {/* Pathway line */}
                       <line
                         x1={x1}
                         y1={y1}
                         x2={x2}
                         y2={y2}
-                        stroke={isInActiveRoute ? "#FFD700" : "url(#pathGold)"}
-                        strokeWidth={isInActiveRoute ? 4 : 2}
+                        stroke={isInActiveRoute ? "#FFD700" : "rgba(214, 180, 106, 0.45)"}
+                        strokeWidth={isInActiveRoute ? 4.5 : 2}
                         strokeDasharray={isInActiveRoute ? "none" : "6 6"}
-                        opacity={isInActiveRoute ? 1 : 0.45}
+                        opacity={isInActiveRoute ? 1 : 0.55}
                         filter={isInActiveRoute ? "url(#goldGlow)" : "none"}
                       />
                       {/* Pathway distance label */}
                       <text
                         x={(x1 + x2) / 2}
                         y={(y1 + y2) / 2 - 6}
-                        fill={isInActiveRoute ? "#FFD700" : "rgba(214, 180, 106, 0.6)"}
-                        fontSize="9"
+                        fill={isInActiveRoute ? "#FFD700" : "rgba(251, 244, 221, 0.9)"}
+                        fontSize="10"
                         fontFamily="var(--font-body)"
+                        fontWeight="700"
                         textAnchor="middle"
+                        style={{ textShadow: "0 1px 4px rgba(0,0,0,0.95)" }}
                       >
                         {pathway.distanceMeters}m
                       </text>
@@ -412,21 +436,10 @@ export default function ExplorePage() {
                   );
                 })}
 
-                {/* Academic Courtyard Quadrangle outline */}
-                <rect x="420" y="200" width="160" height="110" stroke="rgba(214, 180, 106, 0.3)" strokeWidth="1.5" fill="none" />
-                <circle cx="500" cy="255" r="45" stroke="rgba(214, 180, 106, 0.2)" strokeWidth="1" strokeDasharray="3 3" fill="none" />
-
-                {/* Compass Rose */}
-                <g transform="translate(900, 100)">
-                  <circle cx="0" cy="0" r="38" stroke="rgba(214, 180, 106, 0.3)" strokeWidth="1" fill="none" />
-                  <path d="M0 -36 L5 -7 L36 0 L5 7 L0 36 L-5 7 L-36 0 L-5 -7 Z" fill="#D6B46A" opacity="0.75" />
-                  <text x="-4" y="-40" fill="#D6B46A" fontSize="11" fontFamily="Cinzel" fontWeight="bold">N</text>
-                </g>
-
                 {/* Interactive Hotspot Pins for all 5 Campus Locations */}
                 {locations.map((loc) => {
                   const px = (loc.coords.x / 100) * 1000;
-                  const py = (loc.coords.y / 100) * 600;
+                  const py = (loc.coords.y / 100) * 1000;
                   const isSelected = selectedLocation?.id === loc.id;
                   const isInRoute = routeResult?.path?.some((p) => p.id === loc.id);
 
@@ -443,10 +456,10 @@ export default function ExplorePage() {
                         <circle
                           cx="0"
                           cy="0"
-                          r="26"
+                          r="28"
                           stroke={isInRoute ? "#FFD700" : "#F4D38B"}
-                          strokeWidth="2"
-                          fill="rgba(214, 180, 106, 0.25)"
+                          strokeWidth="2.5"
+                          fill="rgba(214, 180, 106, 0.28)"
                           className="anim-window-pulse"
                         />
                       )}
@@ -455,18 +468,19 @@ export default function ExplorePage() {
                       <circle
                         cx="0"
                         cy="0"
-                        r="16"
+                        r="18"
                         fill={isSelected ? "#D6B46A" : isInRoute ? "#8B6F2B" : "#1A233A"}
                         stroke="#F4D38B"
                         strokeWidth="2"
+                        filter="drop-shadow(0 2px 6px rgba(0,0,0,0.85))"
                       />
 
                       {/* Icon initial */}
                       <text
                         x="0"
-                        y="4"
+                        y="5"
                         fill={isSelected ? "#0B1020" : "#F4D38B"}
-                        fontSize="11"
+                        fontSize="12"
                         fontFamily="Cinzel"
                         fontWeight="bold"
                         textAnchor="middle"
@@ -477,13 +491,13 @@ export default function ExplorePage() {
                       {/* Floating Name Label */}
                       <text
                         x="0"
-                        y="-22"
-                        fill="#F6F0E4"
-                        fontSize="12"
+                        y="-24"
+                        fill="#FFFFFF"
+                        fontSize="13"
                         fontFamily="Cinzel"
                         fontWeight="700"
                         textAnchor="middle"
-                        style={{ textShadow: "0 2px 6px rgba(0,0,0,0.95)" }}
+                        style={{ textShadow: "0 2px 8px rgba(0,0,0,0.95), 0 0 6px #000000" }}
                       >
                         {loc.name}
                       </text>
@@ -491,11 +505,13 @@ export default function ExplorePage() {
                       {/* Zone tag underneath */}
                       <text
                         x="0"
-                        y="30"
-                        fill="rgba(214, 180, 106, 0.85)"
-                        fontSize="9"
+                        y="34"
+                        fill="rgba(251, 244, 221, 0.95)"
+                        fontSize="10"
                         fontFamily="var(--font-body)"
+                        fontWeight="600"
                         textAnchor="middle"
+                        style={{ textShadow: "0 2px 6px rgba(0,0,0,0.95)" }}
                       >
                         [{loc.zone}]
                       </text>
@@ -538,6 +554,15 @@ export default function ExplorePage() {
                 >
                   {selectedLocation.dangerLevel || "Authorized"}
                 </span>
+              </div>
+
+              {/* Dedicated Campus Building Photo */}
+              <div className="drawer-building-image-wrap">
+                <img
+                  src={selectedLocation.image || BUILDING_IMAGES[selectedLocation.id]}
+                  alt={selectedLocation.name}
+                  className="drawer-building-image"
+                />
               </div>
 
               <p style={{ color: "var(--parchment)", fontSize: "0.92rem", lineHeight: 1.6, marginBottom: "1.5rem" }}>
@@ -610,6 +635,15 @@ export default function ExplorePage() {
                   >
                     {loc.dangerLevel}
                   </span>
+                </div>
+
+                {/* Building Image */}
+                <div className="accessible-card-image-wrap">
+                  <img
+                    src={loc.image || BUILDING_IMAGES[loc.id]}
+                    alt={loc.name}
+                    className="accessible-card-image"
+                  />
                 </div>
 
                 <p style={{ color: "var(--parchment)", fontSize: "0.9rem", lineHeight: 1.6, margin: "1rem 0" }}>

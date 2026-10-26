@@ -177,41 +177,35 @@ export default function CommonRoomPage() {
           <ArrowLeft size={14} /> Return to Academy Hall
         </Link>
 
-        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: "1rem", marginBottom: "0.4rem" }}>
-          <div style={{ display: "flex", alignItems: "center", gap: "0.8rem" }}>
-            <div
-              style={{
-                width: "44px",
-                height: "44px",
-                borderRadius: "var(--radius-sm)",
-                background: "rgba(212, 140, 69, 0.15)",
-                border: "1px solid #D48C45",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                color: "#D48C45",
-              }}
-            >
-              <Flame size={26} />
+        {/* Cinematic Wizarding Social Network Hero Banner */}
+        <div className="dept-hero-banner ornate-corners">
+          <img
+            src="/assets/departments/wizarding_social_network_hero.png"
+            alt="Wizarding Social Network & Common Room"
+            className="dept-hero-image"
+          />
+          <div className="dept-hero-gradient" />
+          <div className="dept-hero-content">
+            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: "0.8rem", marginBottom: "0.5rem" }}>
+              <span className="badge-gold">
+                Hearthside Fellowship & Community Board
+              </span>
+              <MagicalButton
+                onClick={() => setIsModalOpen(true)}
+                variant="primary"
+                size="sm"
+                icon={Plus}
+              >
+                Inscribe Parchment Notice
+              </MagicalButton>
             </div>
-            <div>
-              <h1 style={{ fontSize: "1.85rem", color: "var(--ivory)", fontFamily: "var(--font-display)" }}>
-                Wizarding Social Network: Hearthside Fellowship & Discussions
-              </h1>
-              <p style={{ color: "var(--parchment-muted)", fontSize: "0.92rem" }}>
-                Inscribe notices, form study circles, seek teammates, and react to fellow scholars with likes and dislikes.
-              </p>
-            </div>
+            <h1 className="dept-hero-title">
+              Wizarding Social Network: Hearthside Fellowship & Discussions
+            </h1>
+            <p className="dept-hero-subtitle">
+              Inscribe notices, form study circles, seek project partners, and react to fellow scholars with likes and reactions.
+            </p>
           </div>
-
-          <MagicalButton
-            onClick={() => setIsModalOpen(true)}
-            variant="primary"
-            size="md"
-            icon={Plus}
-          >
-            Inscribe Parchment Modal
-          </MagicalButton>
         </div>
       </div>
 

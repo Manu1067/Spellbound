@@ -29,6 +29,20 @@ const CLUB_ICONS = {
   "club-fine-arts": Palette,
 };
 
+const HOUSE_EMBLEMS = {
+  gryffindor: "/assets/Four_Houses_emblems/Gryffindor Lion Heraldic Crest.png",
+  slytherin: "/assets/Four_Houses_emblems/Slytherin Serpent Crest Emblem.png",
+  ravenclaw: "/assets/Four_Houses_emblems/Ravenclaw Eagle Crest Emblem.png",
+  hufflepuff: "/assets/Four_Houses_emblems/Ornate Hufflepuff Badger Crest.png",
+};
+
+const CLUB_IMAGES = {
+  "club-lit-debate": "/assets/Clubs/Debate_club.png",
+  "club-music": "/assets/Clubs/MusicClub.png",
+  "club-dance": "/assets/Clubs/Dance_club.png",
+  "club-fine-arts": "/assets/Clubs/Finearts_club.png",
+};
+
 const GEM_METRICS = {
   gryffindor: { fill: "#8E2B43", glow: "#C94565", gem: "Spinel Rubies" },
   slytherin: { fill: "#1F4734", glow: "#3DAE7A", gem: "Deep Emeralds" },
@@ -37,8 +51,12 @@ const GEM_METRICS = {
 };
 
 export default function HousesEventsPage() {
-  const [houses, setHouses] = useState(initialHouses);
-  const [clubs, setClubs] = useState(initialClubs);
+  const [houses, setHouses] = useState(
+    initialHouses.map((h) => ({ ...h, emblem: h.emblem || HOUSE_EMBLEMS[h.id.toLowerCase()] }))
+  );
+  const [clubs, setClubs] = useState(
+    initialClubs.map((c) => ({ ...c, image: c.image || CLUB_IMAGES[c.id] }))
+  );
   const [events, setEvents] = useState(initialEvents);
 
   // Points award state
@@ -55,13 +73,17 @@ export default function HousesEventsPage() {
     let mounted = true;
     getHouses()
       .then((data) => {
-        if (mounted && Array.isArray(data) && data.length > 0) setHouses(data);
+        if (mounted && Array.isArray(data) && data.length > 0) {
+          setHouses(data.map((h) => ({ ...h, emblem: h.emblem || HOUSE_EMBLEMS[h.id.toLowerCase()] })));
+        }
       })
       .catch((err) => console.warn("Using fallback houses:", err));
 
     getFeaturedClubs()
       .then((data) => {
-        if (mounted && Array.isArray(data) && data.length > 0) setClubs(data);
+        if (mounted && Array.isArray(data) && data.length > 0) {
+          setClubs(data.map((c) => ({ ...c, image: c.image || CLUB_IMAGES[c.id] })));
+        }
       })
       .catch((err) => console.warn("Using fallback clubs:", err));
 
@@ -123,7 +145,7 @@ export default function HousesEventsPage() {
 
   return (
     <div className="houses-container anim-fade-in-up">
-      {/* Return to Dashboard & Header */}
+      {/* Return to Dashboard */}
       <div>
         <Link
           to="/dashboard"
@@ -140,28 +162,23 @@ export default function HousesEventsPage() {
           <ArrowLeft size={14} /> Return to Academy Hall
         </Link>
 
-        <div style={{ display: "flex", alignItems: "center", gap: "0.8rem", marginBottom: "0.4rem" }}>
-          <div
-            style={{
-              width: "44px",
-              height: "44px",
-              borderRadius: "var(--radius-sm)",
-              background: "rgba(214, 180, 106, 0.15)",
-              border: "1px solid var(--antique-gold)",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              color: "var(--antique-gold)",
-            }}
-          >
-            <Shield size={26} />
-          </div>
-          <div>
-            <h1 style={{ fontSize: "1.85rem", color: "var(--ivory)", fontFamily: "var(--font-display)" }}>
+        {/* Cinematic Houses & Events Hero Banner */}
+        <div className="dept-hero-banner ornate-corners">
+          <img
+            src="/assets/departments/houses_events_hero.png"
+            alt="The Great Hall, Four Houses & Events"
+            className="dept-hero-image"
+          />
+          <div className="dept-hero-gradient" />
+          <div className="dept-hero-content">
+            <span className="badge-burgundy" style={{ marginBottom: "0.5rem" }}>
+              Great Hall & Campus Guilds
+            </span>
+            <h1 className="dept-hero-title">
               Houses & Events: The Four Houses & Student Clubs
             </h1>
-            <p style={{ color: "var(--parchment-muted)", fontSize: "0.92rem" }}>
-              House Cup hourglasses, official student clubs & upcoming campus festivals.
+            <p className="dept-hero-subtitle">
+              Live House Cup hourglasses, official student societies, and upcoming campus ceremonies & festivals.
             </p>
           </div>
         </div>
@@ -203,6 +220,15 @@ export default function HousesEventsPage() {
 
             return (
               <div key={house.id} className="hourglass-column">
+                {/* House Crest Emblem */}
+                <div className="house-crest-wrap">
+                  <img
+                    src={house.emblem || HOUSE_EMBLEMS[house.id.toLowerCase()]}
+                    alt={`${house.name} Crest`}
+                    className="house-crest-img"
+                  />
+                </div>
+
                 <div style={{ textAlign: "center" }}>
                   <div style={{ fontFamily: "var(--font-display)", fontWeight: 700, fontSize: "1.15rem", color: "var(--ivory)" }}>
                     {house.name}
@@ -306,6 +332,16 @@ export default function HousesEventsPage() {
             const Icon = CLUB_ICONS[club.id] || Sparkles;
             return (
               <div key={club.id} className="club-card ornate-corners">
+                {/* Club Artwork */}
+                <div className="club-card-image-wrap">
+                  <img
+                    src={club.image || CLUB_IMAGES[club.id]}
+                    alt={club.name}
+                    className="club-card-image"
+                    loading="lazy"
+                  />
+                </div>
+
                 <div className="club-card-top">
                   <div className="club-icon-box">
                     <Icon size={22} />

@@ -67,7 +67,19 @@ export default function Sidebar({ isCollapsed, onToggleCollapse, isMobileOpen, o
               textDecoration: "none",
             }}
           >
-            <Emblem size={isCollapsed ? 36 : 40} spin={false} />
+            <img
+              src="/assets/Spellbound_logo.jpeg"
+              alt="Spellbound Academy"
+              style={{
+                width: isCollapsed ? "36px" : "40px",
+                height: isCollapsed ? "36px" : "40px",
+                objectFit: "cover",
+                borderRadius: "8px",
+                border: "1px solid rgba(214, 180, 106, 0.4)",
+                boxShadow: "0 0 10px rgba(214, 180, 106, 0.25)",
+                flexShrink: 0,
+              }}
+            />
             {!isCollapsed && (
               <div>
                 <span

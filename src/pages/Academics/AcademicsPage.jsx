@@ -34,8 +34,18 @@ const LAB_ICONS = {
   "lab-computer": Monitor,
 };
 
+const LAB_IMAGES = {
+  "lab-mech": "/assets/labs/mechanical_lab_card_hero.png",
+  "lab-physics": "/assets/labs/physics_lab_card_hero.png",
+  "lab-c2s": "/assets/labs/CS2_lab_card_hero.png",
+  "lab-electronics": "/assets/labs/Electronics_lab_card_hero.png",
+  "lab-computer": "/assets/labs/Computer_lab_hero.png",
+};
+
 export default function AcademicsPage() {
-  const [labs, setLabs] = useState(fallbackLabs);
+  const [labs, setLabs] = useState(
+    fallbackLabs.map((l) => ({ ...l, image: l.image || LAB_IMAGES[l.id] }))
+  );
   const [selectedLabId, setSelectedLabId] = useState(fallbackLabs[0].id);
   const [activeTab, setActiveTab] = useState("labs"); // "labs" | "cauldron"
   const [resourceFilterCategory, setResourceFilterCategory] = useState("All");
@@ -52,7 +62,7 @@ export default function AcademicsPage() {
     getLaboratories()
       .then((data) => {
         if (mounted && Array.isArray(data) && data.length > 0) {
-          setLabs(data);
+          setLabs(data.map((l) => ({ ...l, image: l.image || LAB_IMAGES[l.id] })));
           setSelectedLabId(data[0].id);
         }
       })
@@ -149,47 +159,41 @@ export default function AcademicsPage() {
           <ArrowLeft size={14} /> Return to Academy Hall
         </Link>
 
-        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: "1rem", marginBottom: "0.4rem" }}>
-          <div style={{ display: "flex", alignItems: "center", gap: "0.8rem" }}>
-            <div
-              style={{
-                width: "44px",
-                height: "44px",
-                borderRadius: "var(--radius-sm)",
-                background: "rgba(49, 92, 74, 0.2)",
-                border: "1px solid #79C2A4",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                color: "#79C2A4",
-              }}
-            >
-              <BookOpen size={26} />
+        {/* Cinematic Academics Department Hero Banner */}
+        <div className="dept-hero-banner ornate-corners">
+          <img
+            src="/assets/labs/Computer_lab_hero.png"
+            alt="Spellbound Academic Laboratories & Research Chambers"
+            className="dept-hero-image"
+          />
+          <div className="dept-hero-gradient" />
+          <div className="dept-hero-content">
+            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: "0.8rem", marginBottom: "0.5rem" }}>
+              <span className="badge-gold">
+                Academic Faculty & Research Chambers
+              </span>
+              {/* Mode Switcher */}
+              <div className="academics-mode-switcher">
+                <button
+                  onClick={() => setActiveTab("labs")}
+                  className={`mode-btn ${activeTab === "labs" ? "active" : ""}`}
+                >
+                  <Cpu size={15} /> Campus Labs (5)
+                </button>
+                <button
+                  onClick={() => setActiveTab("cauldron")}
+                  className={`mode-btn ${activeTab === "cauldron" ? "active" : ""}`}
+                >
+                  <FlaskConical size={15} /> Alchemical Simulation
+                </button>
+              </div>
             </div>
-            <div>
-              <h1 style={{ fontSize: "1.85rem", color: "var(--ivory)", fontFamily: "var(--font-display)" }}>
-                Academics & Magical Labs: Research Facilities & Manuals
-              </h1>
-              <p style={{ color: "var(--parchment-muted)", fontSize: "0.92rem" }}>
-                Five specialized campus laboratories, equipment inventories, experiment manuals & alchemical simulations.
-              </p>
-            </div>
-          </div>
-
-          {/* Mode Switcher */}
-          <div className="academics-mode-switcher">
-            <button
-              onClick={() => setActiveTab("labs")}
-              className={`mode-btn ${activeTab === "labs" ? "active" : ""}`}
-            >
-              <Cpu size={16} /> Campus Labs (5)
-            </button>
-            <button
-              onClick={() => setActiveTab("cauldron")}
-              className={`mode-btn ${activeTab === "cauldron" ? "active" : ""}`}
-            >
-              <FlaskConical size={16} /> Alchemical Simulation
-            </button>
+            <h1 className="dept-hero-title">
+              Academics & Magical Labs: Research Facilities & Manuals
+            </h1>
+            <p className="dept-hero-subtitle">
+              Five specialized campus laboratories, equipment inventories, experiment manuals & alchemical simulations.
+            </p>
           </div>
         </div>
       </div>
@@ -243,16 +247,29 @@ export default function AcademicsPage() {
           {/* Right Column: Detailed Laboratory Dossier */}
           {activeLab && (
             <div className="lab-details-view ornate-corners">
+              {/* Active Lab Visual Hero Banner */}
+              <div className="active-lab-banner">
+                <img
+                  src={activeLab.image || LAB_IMAGES[activeLab.id]}
+                  alt={activeLab.name}
+                  className="active-lab-image"
+                />
+                <div className="active-lab-gradient" />
+                <div className="active-lab-badge-row">
+                  <span className="badge-gold">{activeLab.code}</span>
+                  <span className="badge-emerald">Academic Building · Level 2</span>
+                </div>
+              </div>
+
               {/* Lab Header */}
               <div className="lab-header">
                 <div>
-                  <div style={{ display: "flex", alignItems: "center", gap: "0.6rem", marginBottom: "0.4rem" }}>
-                    <span className="badge-gold">{activeLab.code}</span>
-                    <span className="badge-emerald">Academic Building · Level 2</span>
-                  </div>
                   <h2 style={{ fontSize: "1.7rem", color: "var(--ivory)", fontFamily: "var(--font-display)" }}>
                     {activeLab.name}
                   </h2>
+                  <p style={{ color: "var(--antique-gold)", fontSize: "0.86rem", marginTop: "0.2rem" }}>
+                    Specialized Facility & Computational Research Center
+                  </p>
                 </div>
 
                 <div className="faculty-badge">

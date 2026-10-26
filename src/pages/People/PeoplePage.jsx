@@ -136,42 +136,35 @@ export default function PeoplePage() {
           <ArrowLeft size={14} /> Return to Academy Hall
         </Link>
 
-        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: "1rem", marginBottom: "0.4rem" }}>
-          <div style={{ display: "flex", alignItems: "center", gap: "0.8rem" }}>
-            <div
-              style={{
-                width: "44px",
-                height: "44px",
-                borderRadius: "var(--radius-sm)",
-                background: "rgba(121, 194, 164, 0.15)",
-                border: "1px solid #79C2A4",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                color: "#79C2A4",
-              }}
-            >
-              <Users size={26} />
+        {/* Cinematic People & Wizarding Connections Hero Banner */}
+        <div className="dept-hero-banner ornate-corners">
+          <img
+            src="/assets/departments/people_wizarding_world_hero.png"
+            alt="People of the Wizarding World"
+            className="dept-hero-image"
+          />
+          <div className="dept-hero-gradient" />
+          <div className="dept-hero-content">
+            <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: "0.8rem", marginBottom: "0.5rem" }}>
+              <span className="badge-emerald">
+                Scholarly Directory & Peer Affinity
+              </span>
+              <MagicalButton
+                onClick={handleToggleLikeMinded}
+                variant={isLikeMindedMode ? "primary" : "secondary"}
+                size="sm"
+                icon={HeartHandshake}
+              >
+                {isLikeMindedMode ? "View Full Directory" : "✦ Find Like-Minded Students"}
+              </MagicalButton>
             </div>
-            <div>
-              <h1 style={{ fontSize: "1.85rem", color: "var(--ivory)", fontFamily: "var(--font-display)" }}>
-                People of the Wizarding World: Student Directory & Affinity
-              </h1>
-              <p style={{ color: "var(--parchment-muted)", fontSize: "0.92rem" }}>
-                Discover fellow scholars, filter by academic branch, languages, and hobbies, and connect with like-minded peers.
-              </p>
-            </div>
+            <h1 className="dept-hero-title">
+              People of the Wizarding World: Student Directory & Affinity
+            </h1>
+            <p className="dept-hero-subtitle">
+              Discover fellow scholars, filter by academic branch, languages, and hobbies, and dispatch owl posts to peers.
+            </p>
           </div>
-
-          {/* Find Like-Minded Students Action Button */}
-          <MagicalButton
-            onClick={handleToggleLikeMinded}
-            variant={isLikeMindedMode ? "primary" : "secondary"}
-            size="md"
-            icon={HeartHandshake}
-          >
-            {isLikeMindedMode ? "View Full Directory" : "✦ Find Like-Minded Students"}
-          </MagicalButton>
         </div>
       </div>
 

@@ -239,11 +239,56 @@
 
 .parchment-map-svg {
   width: 100%;
-  height: 480px;
+  aspect-ratio: 1 / 1;
+  height: auto;
+  max-height: 640px;
   background-color: #1A140F;
   border-radius: var(--radius-md);
-  border: 1px solid rgba(214, 180, 106, 0.3);
+  border: 1px solid rgba(214, 180, 106, 0.4);
   display: block;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.6);
+}
+
+.drawer-building-image-wrap {
+  width: 100%;
+  height: 180px;
+  overflow: hidden;
+  border-radius: var(--radius-md);
+  border: 1px solid rgba(214, 180, 106, 0.35);
+  margin-bottom: 1.2rem;
+  box-shadow: 0 4px 14px rgba(0, 0, 0, 0.5);
+}
+
+.drawer-building-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.4s ease;
+}
+
+.drawer-building-image-wrap:hover .drawer-building-image {
+  transform: scale(1.04);
+}
+
+.accessible-card-image-wrap {
+  width: 100%;
+  height: 160px;
+  overflow: hidden;
+  border-radius: var(--radius-sm);
+  border: 1px solid rgba(214, 180, 106, 0.25);
+  margin: 0.8rem 0;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+}
+
+.accessible-card-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 0.4s ease;
+}
+
+.accessible-location-card:hover .accessible-card-image {
+  transform: scale(1.05);
 }
 
 .map-poi-pin {

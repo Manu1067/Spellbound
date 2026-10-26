@@ -38,6 +38,18 @@ const SPORT_ICONS = {
   "sport-table-tennis": RotateCcw,
 };
 
+const SPORT_IMAGES = {
+  "sport-volleyball": "/assets/sports/vollyBall.png",
+  "sport-kho-kho": "/assets/sports/Kho_Kho.png",
+  "sport-kabaddi": "/assets/sports/kabbadi.png",
+  "sport-football": "/assets/sports/football.png",
+  "sport-throwball": "/assets/sports/ThrowBall.png",
+  "sport-badminton": "/assets/sports/batmiton.png",
+  "sport-chess": "/assets/sports/chess.png",
+  "sport-carroms": "/assets/sports/carrom.png",
+  "sport-table-tennis": "/assets/sports/TableTennis.png",
+};
+
 const UPCOMING_FIXTURES = [
   { id: "f-1", sport: "Football", category: "Outdoor", home: "Gryffindor Strikers", away: "Slytherin Vipers FC", date: "Friday · 16:30", venue: "Skyspire Football Field" },
   { id: "f-2", sport: "Volleyball", category: "Outdoor", home: "Ravenclaw Eagles", away: "Hufflepuff Badgers", date: "Saturday · 10:00", venue: "West Outdoor Courts" },
@@ -48,7 +60,9 @@ const UPCOMING_FIXTURES = [
 
 export default function SportsPage() {
   const [activeCategory, setActiveCategory] = useState("All"); // "All" | "Outdoor" | "Indoor"
-  const [disciplines, setDisciplines] = useState(fallbackDisciplines);
+  const [disciplines, setDisciplines] = useState(
+    fallbackDisciplines.map((s) => ({ ...s, image: s.image || SPORT_IMAGES[s.id] }))
+  );
   const [standings, setStandings] = useState([]);
   const [selectedSportForDetails, setSelectedSportForDetails] = useState(null);
 
@@ -68,7 +82,9 @@ export default function SportsPage() {
     let mounted = true;
     getSportsDisciplines(activeCategory)
       .then((data) => {
-        if (mounted && Array.isArray(data)) setDisciplines(data);
+        if (mounted && Array.isArray(data)) {
+          setDisciplines(data.map((s) => ({ ...s, image: s.image || SPORT_IMAGES[s.id] })));
+        }
       })
       .catch((err) => console.warn("Using fallback sports:", err));
 
@@ -138,34 +154,27 @@ export default function SportsPage() {
           <ArrowLeft size={14} /> Return to Academy Hall
         </Link>
 
-        <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", flexWrap: "wrap", gap: "1rem", marginBottom: "0.4rem" }}>
-          <div style={{ display: "flex", alignItems: "center", gap: "0.8rem" }}>
-            <div
-              style={{
-                width: "44px",
-                height: "44px",
-                borderRadius: "var(--radius-sm)",
-                background: "rgba(226, 136, 161, 0.15)",
-                border: "1px solid #E288A1",
-                display: "flex",
-                alignItems: "center",
-                justifyContent: "center",
-                color: "#E288A1",
-              }}
-            >
-              <Trophy size={26} />
-            </div>
-            <div>
-              <h1 style={{ fontSize: "1.85rem", color: "var(--ivory)", fontFamily: "var(--font-display)" }}>
-                Sports Department: Outdoor & Indoor Athletics
-              </h1>
-              <p style={{ color: "var(--parchment-muted)", fontSize: "0.92rem" }}>
-                Inter-house leagues, court reservations, official tournament fixtures & squad registrations.
-              </p>
-            </div>
-          </div>
+      {/* Cinematic Sports Department Hero Banner */}
+      <div className="dept-hero-banner ornate-corners">
+        <img
+          src="/assets/sports_hero.png"
+          alt="Spellbound Athletics & Sports Arena"
+          className="dept-hero-image"
+        />
+        <div className="dept-hero-gradient" />
+        <div className="dept-hero-content">
+          <span className="badge-emerald" style={{ marginBottom: "0.5rem" }}>
+            Athletic Directorate & Tournaments
+          </span>
+          <h1 className="dept-hero-title">
+            Sports Department: Outdoor & Indoor Athletics
+          </h1>
+          <p className="dept-hero-subtitle">
+            Inter-house leagues, court reservations, official tournament fixtures & squad registrations.
+          </p>
         </div>
       </div>
+    </div>
 
       {/* Success Toast */}
       {toastMessage && (
@@ -208,20 +217,28 @@ export default function SportsPage() {
 
           return (
             <div key={sport.id} className="sport-discipline-card ornate-corners">
-              <div className="sport-card-top">
-                <div className={`sport-icon-box ${isOutdoor ? "outdoor" : "indoor"}`}>
-                  <IconComp size={22} />
-                </div>
-                <span className={isOutdoor ? "badge-emerald" : "badge-gold"}>
+              {/* Individual Sport Card Artwork */}
+              <div className="sport-card-image-wrap">
+                <img
+                  src={sport.image || SPORT_IMAGES[sport.id]}
+                  alt={sport.name}
+                  className="sport-card-image"
+                />
+                <span className={`sport-category-tag ${isOutdoor ? "outdoor" : "indoor"}`}>
                   {sport.category}
                 </span>
               </div>
 
-              <h3 style={{ fontSize: "1.3rem", color: "var(--ivory)", fontFamily: "var(--font-display)", margin: "0.6rem 0 0.3rem" }}>
-                {sport.name}
-              </h3>
+              <div className="sport-card-top">
+                <div className={`sport-icon-box ${isOutdoor ? "outdoor" : "indoor"}`}>
+                  <IconComp size={20} />
+                </div>
+                <h3 style={{ fontSize: "1.25rem", color: "var(--ivory)", fontFamily: "var(--font-display)", margin: 0 }}>
+                  {sport.name}
+                </h3>
+              </div>
 
-              <p style={{ color: "var(--parchment)", fontSize: "0.86rem", lineHeight: 1.5, marginBottom: "1rem" }}>
+              <p style={{ color: "var(--parchment)", fontSize: "0.86rem", lineHeight: 1.5, margin: "0.6rem 0 1rem" }}>
                 {sport.description}
               </p>
 

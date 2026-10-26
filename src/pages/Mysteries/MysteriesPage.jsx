@@ -187,28 +187,23 @@ export default function MysteriesPage() {
           <ArrowLeft size={14} /> Return to Academy Hall
         </Link>
 
-        <div style={{ display: "flex", alignItems: "center", gap: "0.8rem", marginBottom: "0.4rem" }}>
-          <div
-            style={{
-              width: "44px",
-              height: "44px",
-              borderRadius: "var(--radius-sm)",
-              background: "rgba(109, 51, 69, 0.25)",
-              border: "1px solid #8E445B",
-              display: "flex",
-              alignItems: "center",
-              justifyContent: "center",
-              color: "#E288A1",
-            }}
-          >
-            <Sparkles size={26} />
-          </div>
-          <div>
-            <h1 style={{ fontSize: "1.85rem", color: "var(--ivory)", fontFamily: "var(--font-display)" }}>
+        {/* Cinematic Department of Mysteries Hero Banner */}
+        <div className="dept-hero-banner ornate-corners">
+          <img
+            src="/assets/departments/department_of_mysteries_hero.png"
+            alt="Department of Mysteries"
+            className="dept-hero-image"
+          />
+          <div className="dept-hero-gradient" />
+          <div className="dept-hero-content">
+            <span className="badge-burgundy" style={{ marginBottom: "0.5rem" }}>
+              Enigma Directorate & Secret Records
+            </span>
+            <h1 className="dept-hero-title">
               Department of Mysteries: Central Communications Hub
             </h1>
-            <p style={{ color: "var(--parchment-muted)", fontSize: "0.92rem" }}>
-              Student Council, campus events, confidential complaints, anonymous confessions & official warnings.
+            <p className="dept-hero-subtitle">
+              Student Council directories, confidential complaint tracking, anonymous confessions & official arch-magister decrees.
             </p>
           </div>
         </div>

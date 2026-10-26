@@ -33,7 +33,7 @@ export const sevenDepartments = [
     accentColor: "#D6B46A",
     bannerSnippet: "Parchment maps, golden pathways & compass guidance",
     tag: "Campus Cartography",
-    image: "/assets/departments/dept-explore.jpg"
+    image: "/assets/accessible_List/campus_map_parchment.png"
   },
   {
     id: "people",
@@ -44,7 +44,7 @@ export const sevenDepartments = [
     accentColor: "#79C2A4",
     bannerSnippet: "Gilded portraits, peer discovery & owl dispatches",
     tag: "Student Directory",
-    image: "/assets/departments/dept-people.jpg"
+    image: "/assets/departments/people_wizarding_world_hero.png"
   },
   {
     id: "sports",
@@ -55,7 +55,7 @@ export const sevenDepartments = [
     accentColor: "#E288A1",
     bannerSnippet: "Outdoor & indoor leagues, fixtures & trial registrations",
     tag: "Athletics & Games",
-    image: "/assets/departments/dept-sports.jpg"
+    image: "/assets/sports_hero.png"
   },
   {
     id: "academics",
@@ -66,7 +66,7 @@ export const sevenDepartments = [
     accentColor: "#4E8A71",
     bannerSnippet: "Lab equipment, practical experiment manuals & potion lab",
     tag: "Curriculum & Labs",
-    image: "/assets/departments/dept-academics.jpg"
+    image: "/assets/labs/Computer_lab_hero.png"
   },
   {
     id: "common-room",
@@ -77,7 +77,7 @@ export const sevenDepartments = [
     accentColor: "#D48C45",
     bannerSnippet: "Hearthside fellowship, quill notices & study circles",
     tag: "Community Hearth",
-    image: "/assets/departments/dept-social.jpg"
+    image: "/assets/departments/wizarding_social_network_hero.png"
   },
   {
     id: "houses-events",
@@ -88,7 +88,7 @@ export const sevenDepartments = [
     accentColor: "#AA8438",
     bannerSnippet: "Four Houses, four student clubs & House Cup hourglasses",
     tag: "House Cup & Clubs",
-    image: "/assets/departments/dept-houses.jpg"
+    image: "/assets/departments/houses_events_hero.png"
   },
   {
     id: "mysteries",
@@ -99,7 +99,7 @@ export const sevenDepartments = [
     accentColor: "#9B4D64",
     bannerSnippet: "Student Council, complaints, confessions & notices",
     tag: "Central Hub",
-    image: "/assets/departments/dept-mysteries.jpg"
+    image: "/assets/departments/department_of_mysteries_hero.png"
   }
 ];
 
@@ -114,7 +114,8 @@ export const housesData = [
     accentColor: "#E9D9B7",
     animal: "Golden Lion",
     gem: "Spinel Ruby",
-    headOfHouse: "Mistress Minerva Sterling"
+    headOfHouse: "Mistress Minerva Sterling",
+    emblem: "/assets/Four_Houses_emblems/Gryffindor Lion Heraldic Crest.png"
   },
   {
     id: "slytherin",
@@ -126,7 +127,8 @@ export const housesData = [
     accentColor: "#C0C0C0",
     animal: "Emerald Serpent",
     gem: "Deep Emerald",
-    headOfHouse: "Professor Corvin Sallow"
+    headOfHouse: "Professor Corvin Sallow",
+    emblem: "/assets/Four_Houses_emblems/Slytherin Serpent Crest Emblem.png"
   },
   {
     id: "ravenclaw",
@@ -138,7 +140,8 @@ export const housesData = [
     accentColor: "#D6B46A",
     animal: "Starlit Eagle",
     gem: "Sapphire Dust",
-    headOfHouse: "Arch-Magister Valerius"
+    headOfHouse: "Arch-Magister Valerius",
+    emblem: "/assets/Four_Houses_emblems/Ravenclaw Eagle Crest Emblem.png"
   },
   {
     id: "hufflepuff",
@@ -150,7 +153,8 @@ export const housesData = [
     accentColor: "#F6F0E4",
     animal: "Golden Badger",
     gem: "Citrine Amber",
-    headOfHouse: "Elder Rosemary Vance"
+    headOfHouse: "Elder Rosemary Vance",
+    emblem: "/assets/Four_Houses_emblems/Ornate Hufflepuff Badger Crest.png"
   }
 ];
 
@@ -167,7 +171,8 @@ export const studentClubs = [
       "Philosophical Dialectics on Spell Ethics",
       "Manuscript Editing & Literary Journal Review"
     ],
-    iconName: "BookOpen"
+    iconName: "BookOpen",
+    image: "/assets/Clubs/Debate_club.png"
   },
   {
     id: "club-music",
@@ -181,7 +186,8 @@ export const studentClubs = [
       "Contemporary Academy Band Showcase",
       "Acoustic Wave Modulation Workshops"
     ],
-    iconName: "Music"
+    iconName: "Music",
+    image: "/assets/Clubs/MusicClub.png"
   },
   {
     id: "club-dance",
@@ -195,7 +201,8 @@ export const studentClubs = [
       "Aerial Repulsion Flow Dance",
       "Inter-House Choreography Showcase"
     ],
-    iconName: "Sparkles"
+    iconName: "Sparkles",
+    image: "/assets/Clubs/Dance_club.png"
   },
   {
     id: "club-fine-arts",
@@ -209,7 +216,8 @@ export const studentClubs = [
       "Nocturnal Constellation Canvas Painting",
       "Botanical Field Sketching Expeditions"
     ],
-    iconName: "Palette"
+    iconName: "Palette",
+    image: "/assets/Clubs/Finearts_club.png"
   }
 ];
 
@@ -226,7 +234,8 @@ export const campusLocations = [
       "High-Speed Wi-Fi & Enchanted Study Lounges"
     ],
     dangerLevel: "Peaceful / Academic",
-    coords: { x: 50, y: 42 }
+    coords: { x: 50, y: 46 },
+    image: "/assets/accessible_List/Academic_building.png"
   },
   {
     id: "loc-hostel-girls",
@@ -240,7 +249,8 @@ export const campusLocations = [
       "24/7 Proctor Desk & Medical Response Call"
     ],
     dangerLevel: "Restricted Access (Authorized Only)",
-    coords: { x: 25, y: 28 }
+    coords: { x: 22, y: 23 },
+    image: "/assets/accessible_List/GirlsHostel.png"
   },
   {
     id: "loc-hostel-boys",
@@ -254,7 +264,8 @@ export const campusLocations = [
       "Direct Pathway to Skyspire Sports Pitch"
     ],
     dangerLevel: "Restricted Access (Authorized Only)",
-    coords: { x: 75, y: 28 }
+    coords: { x: 80, y: 29 },
+    image: "/assets/accessible_List/BoysHostel.png"
   },
   {
     id: "loc-mess",
@@ -268,7 +279,8 @@ export const campusLocations = [
       "Fresh Herb Salad & Fruit Bar"
     ],
     dangerLevel: "Peaceful / Social",
-    coords: { x: 50, y: 72 }
+    coords: { x: 51, y: 69 },
+    image: "/assets/accessible_List/Mess.png"
   },
   {
     id: "loc-cafeteria",
@@ -282,7 +294,8 @@ export const campusLocations = [
       "Acoustic Open Mic & Notice Board"
     ],
     dangerLevel: "Peaceful / Refreshment",
-    coords: { x: 32, y: 62 }
+    coords: { x: 19, y: 60 },
+    image: "/assets/accessible_List/cafeteria.png"
   }
 ];
 
@@ -304,6 +317,7 @@ export const laboratoriesData = [
     code: "MECH-LAB",
     description: "Hands-on engineering workshop featuring material testing machines, CNC lathes, thermodynamic flow benches, and aerodynamic wind tunnel apparatus.",
     facultyInCharge: "Prof. Viktor Stone",
+    image: "/assets/labs/mechanical_lab_card_hero.png",
     availableEquipment: [
       "Universal Testing Machine (UTM 100kN)",
       "Subsonic Closed-Circuit Wind Tunnel",
@@ -328,6 +342,7 @@ export const laboratoriesData = [
     code: "PHYS-LAB",
     description: "Precision experimental space for laser interferometry, optical spectrometer calibration, quantum hall effect apparatus, and electromagnetism experiments.",
     facultyInCharge: "Dr. Katherine Vance",
+    image: "/assets/labs/physics_lab_card_hero.png",
     availableEquipment: [
       "Helium-Neon Optical Laser Bench & Michelson Interferometers",
       "High-Resolution Diffraction Spectrometers",
@@ -352,6 +367,7 @@ export const laboratoriesData = [
     code: "C2S-LAB",
     description: "Chips to Startup (C2S) specialized laboratory dedicated to VLSI design, semiconductor circuit emulation, ASIC prototyping, and hardware-software co-design.",
     facultyInCharge: "Dr. Arvind Sharma",
+    image: "/assets/labs/CS2_lab_card_hero.png",
     availableEquipment: [
       "Xilinx UltraScale+ FPGA Development Stations",
       "Synopsys & Cadence Electronic Design Automation (EDA) Suite",
@@ -376,6 +392,7 @@ export const laboratoriesData = [
     code: "ELEC-LAB",
     description: "Comprehensive analog and digital circuitry laboratory with dual-trace oscilloscopes, function generators, microcontrollers, and communication trainers.",
     facultyInCharge: "Prof. Corina Wells",
+    image: "/assets/labs/Electronics_lab_card_hero.png",
     availableEquipment: [
       "Arbitrary Waveform Generators (0–50MHz)",
       "Digital Storage Oscilloscopes (DSO 100MHz)",
@@ -399,6 +416,7 @@ export const laboratoriesData = [
     code: "COMP-LAB",
     description: "High-performance computing cluster with GPU-accelerated workstations, gigabit networking, virtualization sandboxes, and modern software development tools.",
     facultyInCharge: "Master Aris Thorne (Instructor Lead)",
+    image: "/assets/labs/Computer_lab_hero.png",
     availableEquipment: [
       "60x Dell Precision Workstations (64GB RAM, RTX 4080 GPUs)",
       "Dedicated High-Performance Linux Compute Cluster (Slurm scheduler)",
@@ -543,17 +561,17 @@ export const studentDirectory = [
 
 export const sportsDisciplinesData = [
   // 6 Outdoor Sports
-  { id: "sport-volleyball", name: "Volleyball", category: "Outdoor", teamSize: "6 Players", venue: "West Outdoor Courts", iconName: "Activity", description: "Tactical setting, spikes, and perimeter defense on regulation sand and hard courts." },
-  { id: "sport-kho-kho", name: "Kho-Kho", category: "Outdoor", teamSize: "9 Chasers / 3 Runners", venue: "Central Athletics Oval", iconName: "Zap", description: "High-speed traditional tag sport demanding agility, quick direction shifts, and chasing stamina." },
-  { id: "sport-kabaddi", name: "Kabaddi", category: "Outdoor", teamSize: "7 Players", venue: "South Pavilion Mat Arena", iconName: "Shield", description: "Intense contact raid-and-tackle sport testing continuous breath cant, agility, and defensive union." },
-  { id: "sport-football", name: "Football", category: "Outdoor", teamSize: "11 Players", venue: "Skyspire Emerald Football Field", iconName: "Circle", description: "The premier outdoor field sport of wing sprints, tactical passing, and scoring goals." },
-  { id: "sport-throwball", name: "Throwball", category: "Outdoor", teamSize: "7 Players", venue: "East Multi-Purpose Court", iconName: "Flame", description: "Fast-reflex overhead catch-and-throw sport played across high-tension nets." },
-  { id: "sport-badminton", name: "Badminton", category: "Outdoor", teamSize: "Singles / Doubles", venue: "Pavilion Wind-Shielded Courts", iconName: "Feather", description: "High-speed racquet rallies, smashes, and delicate drops across the net." },
+  { id: "sport-volleyball", name: "Volleyball", category: "Outdoor", teamSize: "6 Players", venue: "West Outdoor Courts", iconName: "Activity", description: "Tactical setting, spikes, and perimeter defense on regulation sand and hard courts.", image: "/assets/sports/vollyBall.png" },
+  { id: "sport-kho-kho", name: "Kho-Kho", category: "Outdoor", teamSize: "9 Chasers / 3 Runners", venue: "Central Athletics Oval", iconName: "Zap", description: "High-speed traditional tag sport demanding agility, quick direction shifts, and chasing stamina.", image: "/assets/sports/Kho_Kho.png" },
+  { id: "sport-kabaddi", name: "Kabaddi", category: "Outdoor", teamSize: "7 Players", venue: "South Pavilion Mat Arena", iconName: "Shield", description: "Intense contact raid-and-tackle sport testing continuous breath cant, agility, and defensive union.", image: "/assets/sports/kabbadi.png" },
+  { id: "sport-football", name: "Football", category: "Outdoor", teamSize: "11 Players", venue: "Skyspire Emerald Football Field", iconName: "Circle", description: "The premier outdoor field sport of wing sprints, tactical passing, and scoring goals.", image: "/assets/sports/football.png" },
+  { id: "sport-throwball", name: "Throwball", category: "Outdoor", teamSize: "7 Players", venue: "East Multi-Purpose Court", iconName: "Flame", description: "Fast-reflex overhead catch-and-throw sport played across high-tension nets.", image: "/assets/sports/ThrowBall.png" },
+  { id: "sport-badminton", name: "Badminton", category: "Outdoor", teamSize: "Singles / Doubles", venue: "Pavilion Wind-Shielded Courts", iconName: "Feather", description: "High-speed racquet rallies, smashes, and delicate drops across the net.", image: "/assets/sports/batmiton.png" },
 
   // 3 Indoor Sports
-  { id: "sport-chess", name: "Chess", category: "Indoor", teamSize: "1 vs 1", venue: "Library Mind Games Hall", iconName: "Award", description: "The supreme game of foresight, strategic maneuvering, positional pawn structures, and checkmate." },
-  { id: "sport-carroms", name: "Carroms", category: "Indoor", teamSize: "Singles / Doubles", venue: "Common Recreation Lounge", iconName: "Target", description: "Classic tabletop striker game testing rebound geometry, smooth finger flicking, and pocketing the red queen." },
-  { id: "sport-table-tennis", name: "Table Tennis", category: "Indoor", teamSize: "Singles / Doubles", venue: "Indoor Sports Hall B", iconName: "RotateCcw", description: "Lightning reflex paddle exchanges, top-spin loops, and rapid-fire table rallies." }
+  { id: "sport-chess", name: "Chess", category: "Indoor", teamSize: "1 vs 1", venue: "Library Mind Games Hall", iconName: "Award", description: "The supreme game of foresight, strategic maneuvering, positional pawn structures, and checkmate.", image: "/assets/sports/chess.png" },
+  { id: "sport-carroms", name: "Carroms", category: "Indoor", teamSize: "Singles / Doubles", venue: "Common Recreation Lounge", iconName: "Target", description: "Classic tabletop striker game testing rebound geometry, smooth finger flicking, and pocketing the red queen.", image: "/assets/sports/carrom.png" },
+  { id: "sport-table-tennis", name: "Table Tennis", category: "Indoor", teamSize: "Singles / Doubles", venue: "Indoor Sports Hall B", iconName: "RotateCcw", description: "Lightning reflex paddle exchanges, top-spin loops, and rapid-fire table rallies.", image: "/assets/sports/TableTennis.png" }
 ];
 
 export const studentCouncilData = [

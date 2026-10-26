@@ -52,7 +52,7 @@ export default function LandingPage() {
           {/* Left: Brand Logo & Wordmark */}
           <Link to="/" className="navbar-brand" aria-label="Spellbound Home">
             <div className="brand-emblem-wrap">
-              <Emblem size={28} />
+              <img src="/assets/Spellbound_logo.jpeg" alt="Spellbound Logo" className="brand-logo-img" />
             </div>
             <span className="brand-wordmark">SPELLBOUND</span>
           </Link>
@@ -235,7 +235,7 @@ export default function LandingPage() {
       <footer id="spellbound-about" className="spellbound-footer">
         <div className="footer-inner">
           <div className="footer-brand-row">
-            <Emblem size={32} />
+            <img src="/assets/Spellbound_logo.jpeg" alt="Spellbound Academy Logo" className="footer-logo-img" />
             <span className="footer-brand-name">SPELLBOUND ACADEMY</span>
           </div>
 
